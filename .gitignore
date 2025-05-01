@@ -50,3 +50,11 @@ yarn-error.log*
 .pnpm-debug.log*
 
 tmp/
+
+## Xcode user settings
+xcuserdata/
+
+## iOS app packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
