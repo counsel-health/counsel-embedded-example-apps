@@ -53,9 +53,9 @@ export const getAllOrders = (): Order[] => [
 // ================================================
 export const getUser = (): User => {
   return {
-    id: "dbf3fc28-e741-4a8b-8df4-7e059eb4825a",
-    name: "Alex Johnson",
-    email: "alex.johnson@example.com",
+    id: "1",
+    name: "John Doe",
+    email: "john.doe@example.com",
     phone: "(555) 123-4567",
     memberSince: "January 2023",
     plan: "Premium Wellness",
