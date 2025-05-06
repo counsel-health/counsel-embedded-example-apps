@@ -18,10 +18,10 @@ npm run dev
 
 ## Production
 
-To build and run the server:
+Ideally, run this server with Docker.
 ```bash
-npm run build
-npm start
+cd ../.. # Go to the root directory of the project
+docker compose up
 ```
 
 The server will be available at http://localhost:4003

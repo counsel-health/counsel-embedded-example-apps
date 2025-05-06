@@ -1,18 +1,26 @@
-"use client";
-
 import type React from "react";
 import Header from "@/components/Header";
+import { getCounselSignedAppUrl } from "@/lib/server";
+import { getUser } from "@/lib/mocks";
+import ChatPage from "@/components/ChatPage";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = getUser();
+  const signedAppUrl = await getCounselSignedAppUrl(user.id);
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <Header />
       {/* Main Content */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        {/* Always render the ChatPage in the main content so that it doesn't get torn down by the browser on navigation */}
+        <ChatPage signedAppUrl={signedAppUrl} />
+        {children}
+      </main>
     </div>
   );
 }

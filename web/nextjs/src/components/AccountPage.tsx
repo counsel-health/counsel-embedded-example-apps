@@ -1,9 +1,17 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@/types/user";
+import { signOut } from "@/actions/signOut";
+import { useCallback } from "react";
 
 export function AccountPage({ user }: { user: User }) {
+  const handleSignOut = useCallback(() => {
+    signOut();
+  }, []);
+
   return (
     <div className="space-y-6 pb-16">
       <div>
@@ -50,7 +58,11 @@ export function AccountPage({ user }: { user: User }) {
 
               <div className="pt-4">
                 <Button>Edit Profile</Button>
-                <Button variant="outline" className="ml-2">
+                <Button
+                  variant="outline"
+                  className="ml-2"
+                  onClick={handleSignOut}
+                >
                   Sign Out
                 </Button>
               </div>

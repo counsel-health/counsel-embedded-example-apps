@@ -3,9 +3,14 @@
 import { usePathname } from "next/navigation";
 import { useMobile } from "@/hooks/useMobile";
 import { useState } from "react";
-import { Home, ShoppingBag, User, Menu, X, MessageCircle } from "lucide-react";
+import { Home, ShoppingBag, User, Menu, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -76,22 +81,16 @@ export default function Header() {
         {/* Mobile Header */}
         {isMobile && (
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTitle />
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
-              <div className="flex flex-col h-full">
+              <div className="flex flex-col h-full px-6">
                 <div className="flex items-center justify-between py-4">
                   <h2 className="text-lg font-semibold text-primary">Menu</h2>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
                 </div>
                 <nav className="flex-1">
                   <ul className="space-y-2">
@@ -99,11 +98,12 @@ export default function Header() {
                       <li key={item.href}>
                         <Link
                           href={item.href}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                          className={cn(
+                            "flex items-center gap-3 px-2 py-3 rounded-lg transition-colors",
                             pathname === item.href
-                              ? "bg-brand-50 text-secondary"
+                              ? "bg-brand-200 text-gray-100"
                               : "text-gray-600 hover:bg-gray-100"
-                          }`}
+                          )}
                           onClick={() => setIsOpen(false)}
                         >
                           {item.icon}
