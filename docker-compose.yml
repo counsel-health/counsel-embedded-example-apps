@@ -1,0 +1,12 @@
+services:
+  server:
+    env_file:
+      - ./.env.local
+    build:
+      context: ./server/nodejs
+      dockerfile: Dockerfile
+    ports:
+      - '4003:4003'
+    environment: 
+      - NODE_ENV=production
+
