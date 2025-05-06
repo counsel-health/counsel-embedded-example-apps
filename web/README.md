@@ -1,3 +1,3 @@
 # Web app(s)
 
-- Coming soon
+- [Next.js](./nextjs)
