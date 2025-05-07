@@ -13,10 +13,10 @@ export default async function DashboardLayout({
   const signedAppUrl = await getCounselSignedAppUrl(user.id);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen w-screen overflow-hidden">
       <Header />
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 h-full min-h-0">
         {/* Always render the ChatPage in the main content so that it doesn't get torn down by the browser on navigation */}
         <ChatPage signedAppUrl={signedAppUrl} />
         {children}

@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
  */
 export default function ChatPage({ signedAppUrl }: { signedAppUrl: string }) {
   const pathname = usePathname();
-  const isChatPage = pathname.startsWith("/chat");
+  const isChatPage = pathname.startsWith("/dashboard/chat");
   const hideIframe = !isChatPage;
 
   return (
