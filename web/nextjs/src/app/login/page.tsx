@@ -2,13 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useFormStatus } from "react-dom";
 import { handleLogin } from "@/actions/handleLogin";
@@ -20,10 +14,7 @@ export default function LoginPage() {
 
   // Submit form on Enter key
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (
-      (e.ctrlKey || e.metaKey) &&
-      (e.key === "Enter" || e.key === "NumpadEnter")
-    ) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === "Enter" || e.key === "NumpadEnter")) {
       e.preventDefault();
       e.currentTarget.form?.requestSubmit();
     }
@@ -57,9 +48,7 @@ export default function LoginPage() {
                   className="border-[#e6e2cf] focus:border-[#a8d5ba] focus:ring-[#a8d5ba]"
                 />
               </div>
-              {state?.message && (
-                <p className="text-red-500 text-sm">{state.message}</p>
-              )}
+              {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
             </div>
             <Button
               className="w-full mt-6 bg-brand-400 hover:bg-brand-500"

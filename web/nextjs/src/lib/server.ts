@@ -27,9 +27,7 @@ export async function getCounselSignedAppUrl(userId: string) {
   });
 
   if (!response.ok) {
-    throw new Error(
-      `Failed to get signed app url: ${response.status} ${response.statusText}`
-    );
+    throw new Error(`Failed to get signed app url: ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();
@@ -49,9 +47,7 @@ export async function createCounselUser(userId: string) {
   });
 
   if (!response.ok) {
-    throw new Error(
-      `Failed to create counsel user: ${response.status} ${response.statusText}`
-    );
+    throw new Error(`Failed to create counsel user: ${response.status} ${response.statusText}`);
   }
   console.log("Counsel user created", await response.json());
 }

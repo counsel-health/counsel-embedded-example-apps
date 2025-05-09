@@ -1,0 +1,46 @@
+name: Web App CI
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'web/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web/nextjs
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+          cache: "npm"
+          cache-dependency-path: "web/**/package-lock.json"
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create env file
+        run: |
+          touch .env
+          echo IRON_SESSION_PASSWORD=${IRON_SESSION_PASSWORD} >> .env
+          echo ACCESS_CODE=${ACCESS_CODE} >> .env
+          cat .env
+        env: 
+          IRON_SESSION_PASSWORD: ${{ secrets.IRON_SESSION_PASSWORD }}
+          ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
+
+      - name: Lint
+        run: npm run lint
+      
+      # Handles type checking too
+      - name: Build
+        run: npm run build

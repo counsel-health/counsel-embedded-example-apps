@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Pill, FlaskRoundIcon as Flask, ArrowUpRight } from "lucide-react";
@@ -21,9 +15,7 @@ export function OrderPage({ orders }: { orders: Order[] }) {
     <div className="space-y-6 pb-16">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Your Orders</h1>
-        <p className="text-muted-foreground mt-2">
-          View your medications and lab tests
-        </p>
+        <p className="text-muted-foreground mt-2">View your medications and lab tests</p>
       </div>
 
       <Tabs defaultValue="all">
@@ -56,17 +48,14 @@ export function OrderPage({ orders }: { orders: Order[] }) {
                       </div>
                       <div>
                         <h3 className="font-medium">{order.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Order ID: {order.id}
-                        </p>
+                        <p className="text-sm text-muted-foreground">Order ID: {order.id}</p>
                         <p className="text-sm">{order.date}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <Badge
                         variant={
-                          order.status === "delivered" ||
-                          order.status === "completed"
+                          order.status === "delivered" || order.status === "completed"
                             ? "secondary"
                             : "outline"
                         }
@@ -90,9 +79,7 @@ export function OrderPage({ orders }: { orders: Order[] }) {
           <Card>
             <CardHeader>
               <CardTitle>Medications</CardTitle>
-              <CardDescription>
-                Your prescription and over-the-counter medications
-              </CardDescription>
+              <CardDescription>Your prescription and over-the-counter medications</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -107,18 +94,12 @@ export function OrderPage({ orders }: { orders: Order[] }) {
                       </div>
                       <div>
                         <h3 className="font-medium">{med.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Order ID: {med.id}
-                        </p>
+                        <p className="text-sm text-muted-foreground">Order ID: {med.id}</p>
                         <p className="text-sm">{med.date}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <Badge
-                        variant={
-                          med.status === "delivered" ? "secondary" : "outline"
-                        }
-                      >
+                      <Badge variant={med.status === "delivered" ? "secondary" : "outline"}>
                         {med.status}
                       </Badge>
                     </div>
@@ -133,9 +114,7 @@ export function OrderPage({ orders }: { orders: Order[] }) {
           <Card>
             <CardHeader>
               <CardTitle>Lab Tests</CardTitle>
-              <CardDescription>
-                Your diagnostic and screening tests
-              </CardDescription>
+              <CardDescription>Your diagnostic and screening tests</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -150,18 +129,12 @@ export function OrderPage({ orders }: { orders: Order[] }) {
                       </div>
                       <div>
                         <h3 className="font-medium">{lab.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Order ID: {lab.id}
-                        </p>
+                        <p className="text-sm text-muted-foreground">Order ID: {lab.id}</p>
                         <p className="text-sm">{lab.date}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <Badge
-                        variant={
-                          lab.status === "completed" ? "secondary" : "outline"
-                        }
-                      >
+                      <Badge variant={lab.status === "completed" ? "secondary" : "outline"}>
                         {lab.status}
                       </Badge>
                       {lab.status === "completed" && (

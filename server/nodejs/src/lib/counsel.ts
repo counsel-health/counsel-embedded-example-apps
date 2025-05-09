@@ -4,8 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { User } from "../db/schemas/user";
 import { parseName } from "./name";
 import { fetchWithRetry } from "./http";
-const CounselApiHost =
-  env.COUNSEL_API_HOST ?? "https://dev-api.counselhealth.com";
+const CounselApiHost = env.COUNSEL_API_HOST ?? "https://dev-api.counselhealth.com";
 
 const getRequestUrl = (path: string) => `${CounselApiHost}${path}`;
 
@@ -29,15 +28,12 @@ const UserResponse = z.object({
 
 export async function getCounselSignedAppUrl(userId: string) {
   console.log("Getting signed app url for user", userId);
-  const response = await fetchWithRetry(
-    getRequestUrl(`/v1/user/${userId}/signedAppUrl`),
-    {
-      method: "POST",
-      headers: getRequestHeaders(),
-      // Empty body is required by Counsel
-      body: JSON.stringify({}),
-    }
-  );
+  const response = await fetchWithRetry(getRequestUrl(`/v1/user/${userId}/signedAppUrl`), {
+    method: "POST",
+    headers: getRequestHeaders(),
+    // Empty body is required by Counsel
+    body: JSON.stringify({}),
+  });
   if (!response.ok) {
     const error = await response.json();
     throw new Error(
