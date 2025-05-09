@@ -3,7 +3,7 @@ import { env } from "../envConfig";
 import { v4 as uuidv4 } from "uuid";
 import { User } from "../db/schemas/user";
 import { parseName } from "./name";
-
+import { fetchWithRetry } from "./http";
 const CounselApiHost =
   env.COUNSEL_API_HOST ?? "https://dev-api.counselhealth.com";
 
@@ -29,7 +29,7 @@ const UserResponse = z.object({
 
 export async function getCounselSignedAppUrl(userId: string) {
   console.log("Getting signed app url for user", userId);
-  const response = await fetch(
+  const response = await fetchWithRetry(
     getRequestUrl(`/v1/user/${userId}/signedAppUrl`),
     {
       method: "POST",
@@ -51,7 +51,7 @@ export async function getCounselSignedAppUrl(userId: string) {
 }
 
 export async function createCounselUser(user: User) {
-  const response = await fetch(getRequestUrl(`/v1/user`), {
+  const response = await fetchWithRetry(getRequestUrl(`/v1/user`), {
     method: "POST",
     headers: getRequestHeaders(),
     body: JSON.stringify(convertUserToCounselUser(user)),

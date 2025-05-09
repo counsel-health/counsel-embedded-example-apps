@@ -3,13 +3,15 @@ import Header from "@/components/Header";
 import { getCounselSignedAppUrl } from "@/lib/server";
 import { getUser } from "@/lib/mocks";
 import ChatPage from "@/components/ChatPage";
+import { getSession } from "@/lib/session";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = getUser();
+  const session = await getSession();
+  const user = getUser(session.userId);
   const signedAppUrl = await getCounselSignedAppUrl(user.id);
 
   return (

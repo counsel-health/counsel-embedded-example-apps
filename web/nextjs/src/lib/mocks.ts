@@ -51,9 +51,11 @@ export const getAllOrders = (): Order[] => [
 // ================================================
 // User
 // ================================================
-export const getUser = (): User => {
+
+// The ID is not a mock, it's created each time
+export const getUser = (id: string): User => {
   return {
-    id: "1",
+    id,
     name: "John Doe",
     email: "john.doe@example.com",
     phone: "(555) 123-4567",
