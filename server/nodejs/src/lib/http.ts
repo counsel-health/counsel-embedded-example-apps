@@ -1,14 +1,11 @@
 import { IncomingMessage } from "node:http";
-import { ZodSchema } from "zod";
 
 /**
  * @description Get the body of an incoming request
  * @param request - The incoming request
  * @returns A promise that resolves to the body of the request
  */
-export function getBody(
-  request: IncomingMessage
-): Promise<Record<string, unknown> | null> {
+export function getBody(request: IncomingMessage): Promise<Record<string, unknown> | null> {
   return new Promise((resolve) => {
     const bodyParts: Buffer[] = [];
     let body: string;

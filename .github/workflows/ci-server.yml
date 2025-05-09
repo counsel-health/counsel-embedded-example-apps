@@ -1,0 +1,43 @@
+name: Server CI
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'server/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server/nodejs
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.x"
+          cache: "npm"
+          cache-dependency-path: "server/nodejs/**/package-lock.json"
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create env file
+        run: |
+          touch .env
+          echo COUNSEL_API_KEY=${COUNSEL_API_KEY} >> .env
+          cat .env
+        env: 
+          COUNSEL_API_KEY: ${{ secrets.COUNSEL_API_KEY }}
+
+      - name: Lint
+        run: npm run lint
+      
+      - name: Build
+        run: npm run build

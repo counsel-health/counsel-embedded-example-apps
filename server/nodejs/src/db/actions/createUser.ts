@@ -32,12 +32,6 @@ export async function createUser(db: DatabaseSync, userId: string) {
     INSERT INTO users (id, counsel_user_id, name, email, info) VALUES (?, ?, ?, ?, ?);
   `
   );
-  stmt.run(
-    userId,
-    user.id,
-    newUser.name,
-    newUser.email,
-    JSON.stringify(newUser.info)
-  );
+  stmt.run(userId, user.id, newUser.name, newUser.email, JSON.stringify(newUser.info));
   console.log("Created user in DB", userId);
 }
