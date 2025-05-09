@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 import "./src/envConfig";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "standalone",
 };
 
 export default nextConfig;
