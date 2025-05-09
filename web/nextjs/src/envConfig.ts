@@ -6,6 +6,7 @@ export const ServerEnvSchema = z.object({
   ACCESS_CODE: z.string().length(6),
   // The server HOST, defaults to localhost:4003 if not set
   SERVER_HOST: z.string().default("http://localhost:4003"),
+  SERVER_BEARER_TOKEN: z.string(),
 });
 
 export const serverEnv = ServerEnvSchema.parse(process.env);

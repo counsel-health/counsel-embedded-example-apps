@@ -1,6 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import { User, UserSchema } from "../schemas/user";
-import { createCounselUser } from "../../lib/counsel";
+import { createCounselUser } from "@/lib/counsel";
 
 const demoUser = (id: string) => ({
   id,

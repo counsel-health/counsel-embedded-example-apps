@@ -1,7 +1,7 @@
 import { z } from "zod";
 import dotenv from "dotenv";
 
-dotenv.config({ path: ".env.local" });
+dotenv.config({ path: [".env.local", ".env"] });
 
 const envConfig = z.object({
   PORT: z
@@ -9,7 +9,8 @@ const envConfig = z.object({
     .transform((val) => parseInt(val))
     .default("4003"),
   COUNSEL_API_KEY: z.string(),
-  COUNSEL_API_HOST: z.string().optional(),
+  COUNSEL_API_HOST: z.string().default("https://dev-api.counselhealth.com"),
+  SERVER_BEARER_TOKEN: z.string().min(32),
 });
 
 export const env = envConfig.parse(process.env);

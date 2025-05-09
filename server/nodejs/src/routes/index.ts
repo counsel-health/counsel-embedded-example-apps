@@ -1,10 +1,13 @@
-import { IncomingMessage, ServerResponse } from "node:http";
+import { Router } from "express";
+import RootRouter from "./root";
+import ChatRouter from "./chat/chatRoutes";
+import HealthCheckRouter from "./health";
+import { authenticateBearerToken } from "@/lib/authentication";
 
-export default function index(_req: IncomingMessage, res: ServerResponse) {
-  res.statusCode = 200;
-  res.end(
-    JSON.stringify({
-      message: "Welcome to the Example Counsel Node.js server!",
-    })
-  );
-}
+const router: Router = Router();
+
+router.use("/", RootRouter);
+router.use("/chat", [authenticateBearerToken], ChatRouter);
+router.use("/health", HealthCheckRouter);
+
+export const MainRouter: Router = router;

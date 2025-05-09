@@ -1,32 +1,50 @@
-import { IncomingMessage } from "node:http";
+import { Request } from "express";
+import { z } from "zod";
+
+export class HttpError extends Error {
+  /**
+   * @description The HTTP status code
+   */
+  status: number;
+  /**
+   * @description Additional details about the error
+   */
+  details?: Record<string, unknown>;
+
+  constructor(message: string, status: number, details?: Record<string, unknown>) {
+    super(message);
+    this.status = status;
+    this.details = details;
+  }
+}
+
+export function isHttpError(error: Error): error is HttpError {
+  return (
+    "status" in error &&
+    typeof error.status === "number" &&
+    error.status > 200 &&
+    error.status < 600
+  );
+}
 
 /**
  * @description Get the body of an incoming request
  * @param request - The incoming request
+ * @param schema - The schema to validate the body against
  * @returns A promise that resolves to the body of the request
  */
-export function getBody(request: IncomingMessage): Promise<Record<string, unknown> | null> {
-  return new Promise((resolve) => {
-    const bodyParts: Buffer[] = [];
-    let body: string;
-    request
-      .on("data", (chunk) => {
-        bodyParts.push(chunk);
-      })
-      .on("end", () => {
-        body = Buffer.concat(bodyParts).toString();
-        if (!body) {
-          resolve(null);
-          return;
-        }
-        try {
-          resolve(JSON.parse(body));
-        } catch (error) {
-          console.error("Error parsing body", error);
-          resolve(null);
-        }
-      });
-  });
+export async function parseBody<S extends z.ZodSchema>(
+  request: Request,
+  schema: S
+): Promise<z.infer<S>> {
+  if (!request.body) {
+    throw new HttpError("Missing request body", 400);
+  }
+  const result = schema.safeParse(request.body);
+  if (!result.success) {
+    throw new HttpError("Invalid request body", 400, result.error.format());
+  }
+  return result.data;
 }
 
 export async function fetchWithRetry(
