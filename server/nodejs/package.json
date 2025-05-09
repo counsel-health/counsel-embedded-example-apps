@@ -10,9 +10,11 @@
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
     "dev": "tsx watch src/index.ts",
-    "ci": "npm install --production && npm run build"
+    "ci": "npm install --production && npm run build",
+    "healthcheck": "sh ./healthcheck.sh"
   },
   "devDependencies": {
+    "@types/express": "^5.0.1",
     "@types/node": "^22.15.12",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
@@ -25,7 +27,10 @@
   },
   "node": "23.11.0",
   "dependencies": {
+    "body-parser": "^2.2.0",
     "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
     "uuid": "^11.1.0",
     "zod": "^3.24.4"
   }

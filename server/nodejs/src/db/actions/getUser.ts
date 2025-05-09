@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getDb } from "../db";
+import { getDb } from "@/db/db";
 
 const UserDBSchema = z.object({
   id: z.string(),

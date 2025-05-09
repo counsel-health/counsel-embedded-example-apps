@@ -1,53 +1,84 @@
 import { serverEnv } from "@/envConfig";
+import { fetchWithRetry } from "./http";
 
-export const getRevalidateTag = (userId: string) => `signedAppUrl-${userId}`;
+//================================================================================
+// Counsel Demo Server API Calls
+//================================================================================
 
-// Set to false to disable caching of the signed app url.
-const ENABLE_CACHE = true;
-
+/**
+ * @description Get the signed app url for a user
+ *
+ * NOTE: this is not cached, it will be re-fetched each time from the Demo Server.
+ * It could be cached in NextJS if you want since a signed in user can use the same login
+ */
 export async function getCounselSignedAppUrl(userId: string) {
   console.log("Getting signed app url for user", userId);
-  const response = await fetch(`${serverEnv.SERVER_HOST}/chat/signedAppUrl`, {
-    method: "POST",
+  const resp = await fetchFromCounselServer<{ url: string }>("chat/signedAppUrl", "POST", {
+    userId,
+  });
+  return resp.url;
+}
+
+/**
+ * @description Create a new user in the demo server
+ * The user info is mocked out in the demo server and we just create new users based on the userId each time.
+ * In your app you would likely want to pass the full user object to your API + Counsel API.
+ * In the future, once our demo app has a full sign up flow with user info, we'll swap this to pass the full user object.
+ */
+export async function createCounselUser(userId: string) {
+  return await fetchFromCounselServer<void>("chat/user", "POST", {
+    userId,
+  });
+}
+
+//================================================================================
+// Helper Functions
+//================================================================================
+
+function getAuthorizationHeader() {
+  return {
+    Authorization: `Bearer ${serverEnv.SERVER_BEARER_TOKEN}`,
+  };
+}
+
+async function safeParseJson<T>(response: Response): Promise<T | null> {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+async function fetchFromCounselServer<T>(
+  path: `${string}/${string}`,
+  method: "POST",
+  body: unknown
+): Promise<T> {
+  const url = `${serverEnv.SERVER_HOST}/${path}`;
+  console.log("Fetching from counsel server", url);
+  const response = await fetchWithRetry(url, {
+    method,
     headers: {
       "Content-Type": "application/json",
+      ...getAuthorizationHeader(),
     },
-    body: JSON.stringify({
-      userId,
-    }),
-    cache: ENABLE_CACHE ? "force-cache" : "no-store",
-    next: ENABLE_CACHE
-      ? {
-          // 24 hours - Technically you can instead this to cache for even longer but you have to invalidate the cache if you sign the user out.
-          revalidate: 60 * 60 * 24,
-          // This is a unique tag for the signed app url that we use to invalidate the cache when the user signs out.
-          tags: [getRevalidateTag(userId)],
-        }
-      : undefined,
+    body: JSON.stringify(body),
+    // Turn off next.js caching
+    cache: "no-store",
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to get signed app url: ${response.status} ${response.statusText}`);
+    const error = await safeParseJson(response);
+    console.error("Failed to fetch from counsel server", error, {
+      responseStatus: response.status,
+      responseStatusText: response.statusText,
+    });
+    throw new Error(
+      `Failed to fetch from counsel server: ${response.status} ${response.statusText}`
+    );
   }
 
   const data = await response.json();
-  console.log("Signed app url", data.url);
-  return data.url;
-}
-
-export async function createCounselUser(userId: string) {
-  const response = await fetch(`${serverEnv.SERVER_HOST}/chat/user`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      userId,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to create counsel user: ${response.status} ${response.statusText}`);
-  }
-  console.log("Counsel user created", await response.json());
+  console.log("Fetched from counsel server", data);
+  return data;
 }

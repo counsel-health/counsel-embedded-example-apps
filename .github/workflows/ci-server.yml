@@ -31,13 +31,18 @@ jobs:
       - name: Create env file
         run: |
           touch .env
-          echo COUNSEL_API_KEY=${COUNSEL_API_KEY} >> .env
+          echo COUNSEL_API_KEY=${COUNSEL_API_KEY} >> .env 
+          echo SERVER_BEARER_TOKEN=${SERVER_BEARER_TOKEN} >> .env
           cat .env
         env: 
           COUNSEL_API_KEY: ${{ secrets.COUNSEL_API_KEY }}
+          SERVER_BEARER_TOKEN: ${{ secrets.SERVER_BEARER_TOKEN }}
 
       - name: Lint
         run: npm run lint
       
       - name: Build
         run: npm run build
+
+      - name: Healthcheck
+        run: npm run healthcheck

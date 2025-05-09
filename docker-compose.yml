@@ -14,14 +14,14 @@ services:
     networks:
       - shared
 
-  # The server is the backend of the application
-  # It is not exposed to the public internet and has no auth
   server:
     env_file:
       - ./.env.local
     build:
       context: ./server/nodejs
       dockerfile: Dockerfile
+    ports:
+      - '4003:4003'
     environment: 
       - NODE_ENV=production
       - PORT=4003

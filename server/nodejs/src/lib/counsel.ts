@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { env } from "../envConfig";
+import { env } from "@/envConfig";
 import { v4 as uuidv4 } from "uuid";
-import { User } from "../db/schemas/user";
-import { parseName } from "./name";
-import { fetchWithRetry } from "./http";
-const CounselApiHost = env.COUNSEL_API_HOST ?? "https://dev-api.counselhealth.com";
+import { User } from "@/db/schemas/user";
+import { parseName } from "@/lib/name";
+import { fetchWithRetry } from "@/lib/http";
+
+const CounselApiHost = env.COUNSEL_API_HOST;
 
 const getRequestUrl = (path: string) => `${CounselApiHost}${path}`;
 
