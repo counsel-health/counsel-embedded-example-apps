@@ -1,4 +1,4 @@
-const ServerApiHost = "http://localhost:4003";
+import { serverEnv } from "@/envConfig";
 
 export const getRevalidateTag = (userId: string) => `signedAppUrl-${userId}`;
 
@@ -7,7 +7,7 @@ const ENABLE_CACHE = true;
 
 export async function getCounselSignedAppUrl(userId: string) {
   console.log("Getting signed app url for user", userId);
-  const response = await fetch(`${ServerApiHost}/chat/signedAppUrl`, {
+  const response = await fetch(`${serverEnv.SERVER_HOST}/chat/signedAppUrl`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -36,7 +36,7 @@ export async function getCounselSignedAppUrl(userId: string) {
 }
 
 export async function createCounselUser(userId: string) {
-  const response = await fetch(`${ServerApiHost}/chat/user`, {
+  const response = await fetch(`${serverEnv.SERVER_HOST}/chat/user`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
