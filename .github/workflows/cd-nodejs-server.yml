@@ -1,0 +1,75 @@
+# This workflow is used to deploy the server to Google Cloud Run
+# Inspired by: https://github.com/google-github-actions/example-workflows/blob/main/workflows/deploy-cloudrun/cloudrun-docker.yml
+name: Node.js Server CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/nodejs/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  GAR_LOCATION: ${{vars.REGION}} # GAR = Google Artifact Registry
+  REGION: ${{vars.REGION}}
+  PROJECT_ID: ${{ vars.PROJECT_ID }}
+  REPOSITORY: ${{ vars.REPOSITORY }}
+  SERVICE: 'embedded-demo-nodejs-server'
+  GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}
+  COUNSEL_API_KEY: ${{ secrets.COUNSEL_API_KEY }}
+  SERVER_BEARER_TOKEN: ${{ secrets.SERVER_BEARER_TOKEN }}
+
+jobs:
+  deploy:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server/nodejs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+    # Instructions: https://github.com/google-github-actions/auth?tab=readme-ov-file#direct-wif
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}'
+          token_format: 'access_token'
+
+      - name: Login to Google Artifact Registry (GAR)
+        uses: docker/login-action@v3
+        with:
+         registry: ${{ env.REGION }}-docker.pkg.dev
+         username: _json_key
+         password: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}
+
+      - name: Build and Push Container
+        run: |-
+          docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./
+          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}"
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE }}
+          region: ${{ env.REGION }}
+          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
+          env_vars: |
+            NODE_ENV=production
+            COUNSEL_API_KEY=${{ env.COUNSEL_API_KEY }}
+            SERVER_BEARER_TOKEN=${{ env.SERVER_BEARER_TOKEN }}
+          flags: |
+            --port=4003
+            --allow-unauthenticated
+            
+
+      - name: Show Output
+        run: echo ${{ steps.deploy.outputs.url }}
