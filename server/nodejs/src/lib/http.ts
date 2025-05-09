@@ -40,7 +40,7 @@ export async function fetchWithRetry(
 ) {
   for (const _ of Array(retries).keys()) {
     try {
-      return fetch(url, options);
+      return await fetch(url, options);
     } catch (error) {
       console.warn(`Request to ${url} failed, retrying in ${delay}ms`, error);
       await new Promise((resolve) => setTimeout(resolve, delay));

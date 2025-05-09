@@ -36,3 +36,22 @@ export async function getCounselSignedAppUrl(userId: string) {
   console.log("Signed app url", data.url);
   return data.url;
 }
+
+export async function createCounselUser(userId: string) {
+  const response = await fetch(`${ServerApiHost}/chat/user`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to create counsel user: ${response.status} ${response.statusText}`
+    );
+  }
+  console.log("Counsel user created", await response.json());
+}
