@@ -14,6 +14,9 @@ pnpm dev
 
 Open [http://localhost:3001](http://localhost:3001) to see the demo app.
 
+Or see the live demo at [https://embedded-demo.counselhealth.com](https://embedded-demo.counselhealth.com).
+Reach out to a member of the Counsel Health team to get an access code.
+
 
 ## Important Notes
 
@@ -33,6 +36,24 @@ Ideally the Counsel iFrame is mounted into the DOM once and never removed.
 This is to prevent the iFrame from being torn down by the browser on navigation.
 The demo app achieves this in NextJS by mounting the [ChatPage](./src/components/ChatPage.tsx) component in the layout and not the page.
 It then shows and hides the iframe based on the current route.
+
+## Deploying to Cloud Run
+
+The web app is deployed to Cloud Run using the `cd-nextjs-web.yml` workflow in the `.github/workflows` directory.
+The workflow builds the Docker image and pushes it to Google Artifact Registry.
+It then deploys the container image to Cloud Run.
+
+Route53 hosts the subdomain at `embedded-demo.counselhealth.com` and routes requests to the Cloud Run service.
+
+### To deploy manually, you can use the following commands:
+
+```bash
+gcloud auth configure-docker us-east1-docker.pkg.dev
+docker build -t "us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nextjs-web:latest" --platform linux/amd64 ./
+docker push "us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nextjs-web:latest"
+
+gcloud run deploy embedded-demo-nextjs-web --image=us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nextjs-web:latest --project=${PROJECT_ID} --region=us-east1 --allow-unauthenticated --port=3001 --set-env-vars SERVER_BEARER_TOKEN=${SERVER_BEARER_TOKEN},IRON_SESSION_PASSWORD=${IRON_SESSION_PASSWORD},ACCESS_CODE=${ACCESS_CODE},SERVER_HOST=${SERVER_HOST}
+```
 
 
 
