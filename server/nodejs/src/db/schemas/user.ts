@@ -24,5 +24,9 @@ export const UserSchema = z.object({
   info: UserInfoSchema,
 });
 
+export const UserDBSchema = UserSchema.extend({
+  counsel_user_id: z.string(),
+});
+
 export type User = z.infer<typeof UserSchema>;
 export type UserInfo = z.infer<typeof UserInfoSchema>;
