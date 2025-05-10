@@ -6,4 +6,6 @@ In this repository, you'll find the following sample applications:
 - [Server](./server/) = demo server that integrates with the Counsel API
 - [Web](./web/) = demo web app(s) that embed the Counsel iFrame
 
-Reach out to support@counselhealth.com for any questions or feedback!
+
+Live demo at [https://embedded-demo.counselhealth.com](https://embedded-demo.counselhealth.com).
+Reach out to get an access code. We're here to help at support@counselhealth.com!

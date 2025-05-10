@@ -1,5 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { createCounselUser } from "@/lib/counsel";
+import { getDb } from "../db";
+import { UserDBSchema } from "../schemas/user";
 
 const demoUser = (id: string) => ({
   id,
@@ -23,7 +25,8 @@ const demoUser = (id: string) => ({
   },
 });
 
-export async function createUser(db: DatabaseSync, userId: string) {
+export async function createUser(userId: string, dbProvider?: DatabaseSync) {
+  const db = dbProvider ?? (await getDb());
   const newUser = demoUser(userId);
   const user = await createCounselUser(newUser);
   const stmt = db.prepare(
@@ -33,4 +36,11 @@ export async function createUser(db: DatabaseSync, userId: string) {
   );
   stmt.run(userId, user.id, newUser.name, newUser.email, JSON.stringify(newUser.info));
   console.log("Created user in DB", userId);
+  return UserDBSchema.parse({
+    id: userId,
+    counsel_user_id: user.id,
+    name: newUser.name,
+    email: newUser.email,
+    info: newUser.info,
+  });
 }
