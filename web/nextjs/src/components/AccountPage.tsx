@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@/types/user";
 import { signOut } from "@/actions/signOut";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 export function AccountPage({ user }: { user: User }) {
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
   const handleSignOut = useCallback(() => {
+    setIsSigningOut(true);
     signOut();
   }, []);
 
@@ -53,7 +56,12 @@ export function AccountPage({ user }: { user: User }) {
 
               <div className="pt-4">
                 <Button>Edit Profile</Button>
-                <Button variant="outline" className="ml-2" onClick={handleSignOut}>
+                <Button
+                  variant="outline"
+                  className="ml-2"
+                  onClick={handleSignOut}
+                  loading={isSigningOut}
+                >
                   Sign Out
                 </Button>
               </div>

@@ -5,17 +5,29 @@ import { fetchWithRetry } from "./http";
 // Counsel Demo Server API Calls
 //================================================================================
 
+const CACHE_TAG_CHAT_SIGNED_APP_URL = "chat-signed-app-url";
+
+export const getChatSignedAppUrlCacheKey = (userId: string) =>
+  `${CACHE_TAG_CHAT_SIGNED_APP_URL}-${userId}`;
+
 /**
  * @description Get the signed app url for a user
  *
- * NOTE: this is not cached, it will be re-fetched each time from the Demo Server.
- * It could be cached in NextJS if you want since a signed in user can use the same login
+ * Cached in NextJS so that a signed in user can use the same login across multiple pages, sessions or navigations.
  */
 export async function getCounselSignedAppUrl(userId: string) {
   console.log("Getting signed app url for user", userId);
-  const resp = await fetchFromCounselServer<{ url: string }>("chat/signedAppUrl", "POST", {
-    userId,
-  });
+  const resp = await fetchFromCounselServer<{ url: string }>(
+    "chat/signedAppUrl",
+    "POST",
+    {
+      userId,
+    },
+    {
+      tags: [getChatSignedAppUrlCacheKey(userId)],
+      revalidate: 3600, // 1 hour
+    }
+  );
   return resp.url;
 }
 
@@ -52,7 +64,11 @@ async function safeParseJson<T>(response: Response): Promise<T | null> {
 async function fetchFromCounselServer<T>(
   path: `${string}/${string}`,
   method: "POST",
-  body: unknown
+  body: unknown,
+  cache?: {
+    tags: string[];
+    revalidate?: number;
+  }
 ): Promise<T> {
   const url = `${serverEnv.SERVER_HOST}/${path}`;
   console.log("Fetching from counsel server", url);
@@ -63,8 +79,8 @@ async function fetchFromCounselServer<T>(
       ...getAuthorizationHeader(),
     },
     body: JSON.stringify(body),
-    // Turn off next.js caching
-    cache: "no-store",
+    cache: cache ? "default" : "no-store",
+    next: cache ? { revalidate: cache.revalidate, tags: cache.tags } : undefined,
   });
 
   if (!response.ok) {
