@@ -83,7 +83,6 @@ jobs:
           flags: |
             --port=3001
             --allow-unauthenticated
-            # Bump more if we see slowness
             --cpu=2
             --memory=1Gi
             --max-instances=3
