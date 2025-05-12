@@ -8,8 +8,16 @@ import { useFormStatus } from "react-dom";
 import { handleLogin } from "@/actions/handleLogin";
 import { useActionState } from "react";
 
-export default function LoginPage() {
+function SubmitButton() {
   const { pending } = useFormStatus();
+  return (
+    <Button className="w-full mt-6 bg-brand-400 hover:bg-brand-500" type="submit" loading={pending}>
+      Login
+    </Button>
+  );
+}
+
+export default function LoginPage() {
   const [state, formAction] = useActionState(handleLogin, null);
 
   // Submit form on Enter key
@@ -50,13 +58,7 @@ export default function LoginPage() {
               </div>
               {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
             </div>
-            <Button
-              className="w-full mt-6 bg-brand-400 hover:bg-brand-500"
-              type="submit"
-              disabled={pending}
-            >
-              Login
-            </Button>
+            <SubmitButton />
           </form>
         </CardContent>
       </Card>

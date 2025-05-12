@@ -8,6 +8,9 @@ export default function CounselAppClient({ signedAppUrl, className }: CounselApp
     <iframe
       src={signedAppUrl}
       className={className}
+      onError={(error) => {
+        console.error("Failed to load Counsel app", error);
+      }}
       // If you want to sandbox our iFrame, please add the following:
       // sandbox="allow-storage-access-by-user-activation allow-same-origin allow-scripts allow-forms"
     />
