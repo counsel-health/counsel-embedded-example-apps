@@ -12,7 +12,6 @@ export type CounselAppProps = {
  */
 export const CounselApp = dynamic<CounselAppProps>(
   () => {
-    console.log("importing CounselAppClient");
     return import("./CounselAppClient");
   },
 
