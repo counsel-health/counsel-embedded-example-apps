@@ -19,6 +19,13 @@ struct AccountView: View {
                 Button(action: {
                     token = nil // clear token
                     presentAccessCodeModal = true
+                    Task {
+                        do {
+                            try await API.User.signOutChat()
+                        } catch {
+                            // noop
+                        }
+                    }
                 }) {
                     Text("Sign out")
                         .frame(maxWidth: .infinity)
