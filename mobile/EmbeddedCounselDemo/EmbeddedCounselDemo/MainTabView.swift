@@ -8,16 +8,27 @@
 import SwiftUI
 
 struct MainTabView: View {
+    
+    @State private var presentAccessCodeModal: Bool = true
+    
     var body: some View {
-        TabView {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house")
-                }
-            MenuView()
-                .tabItem {
-                    Label("Menu", systemImage: "list.bullet")
-                }
+        ZStack {
+            TabView {
+                HomeView(presentAccessCodeModal: $presentAccessCodeModal)
+                    .tabItem {
+                        Label("Home", systemImage: "house")
+                    }
+                ChatView()
+                    .tabItem {
+                        Label("Chat", systemImage: "bubble.left.and.text.bubble.right")
+                    }
+            }
+            
+            if presentAccessCodeModal {
+                AccessCodeView(isPresented: $presentAccessCodeModal)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.white)
+            }
         }
     }
 }

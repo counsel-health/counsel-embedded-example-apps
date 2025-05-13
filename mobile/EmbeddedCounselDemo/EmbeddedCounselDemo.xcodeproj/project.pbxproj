@@ -10,9 +10,22 @@
 		EC4B2CD12DC4131700DBF1C1 /* EmbeddedCounselDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmbeddedCounselDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EC4B2B9F2DD3E81B00A629A3 /* Exceptions for "EmbeddedCounselDemo" folder in "EmbeddedCounselDemo" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EC4B2CD02DC4131700DBF1C1 /* EmbeddedCounselDemo */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		EC4B2CD32DC4131700DBF1C1 /* EmbeddedCounselDemo */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EC4B2B9F2DD3E81B00A629A3 /* Exceptions for "EmbeddedCounselDemo" folder in "EmbeddedCounselDemo" target */,
+			);
 			path = EmbeddedCounselDemo;
 			sourceTree = "<group>";
 		};
@@ -252,6 +265,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EmbeddedCounselDemo/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Embedded Counsel";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -293,6 +307,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = EmbeddedCounselDemo/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Embedded Counsel";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
