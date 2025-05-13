@@ -47,6 +47,19 @@ export async function getCounselSignedAppUrl(userId: string) {
   return SignedAppUrlResponse.parse(data);
 }
 
+export async function signOutCounselUser(userId: string) {
+  const response = await fetchWithRetry(getRequestUrl(`/v1/user/${userId}/signOut`), {
+    method: "POST",
+    headers: getRequestHeaders(),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(
+      `Request to sign out user failed: ${response.status} ${response.statusText} ${JSON.stringify(error)}`
+    );
+  }
+}
+
 export async function createCounselUser(user: User) {
   const response = await fetchWithRetry(getRequestUrl(`/v1/user`), {
     method: "POST",

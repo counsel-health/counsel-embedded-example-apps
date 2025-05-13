@@ -11,6 +11,8 @@ const envConfig = z.object({
   COUNSEL_API_KEY: z.string(),
   COUNSEL_API_HOST: z.string().default("https://dev-api.counselhealth.com"),
   SERVER_BEARER_TOKEN: z.string().min(32),
+  ACCESS_CODE: z.string().length(6),
+  JWT_SECRET: z.string().min(32),
 });
 
 export const env = envConfig.parse(process.env);

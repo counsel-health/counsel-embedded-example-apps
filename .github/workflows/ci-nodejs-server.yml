@@ -33,10 +33,14 @@ jobs:
           touch .env
           echo COUNSEL_API_KEY=${COUNSEL_API_KEY} >> .env 
           echo SERVER_BEARER_TOKEN=${SERVER_BEARER_TOKEN} >> .env
+          echo ACCESS_CODE=${ACCESS_CODE} >> .env
+          echo JWT_SECRET=${JWT_SECRET} >> .env
           cat .env
         env: 
           COUNSEL_API_KEY: ${{ secrets.COUNSEL_API_KEY }}
           SERVER_BEARER_TOKEN: ${{ secrets.SERVER_BEARER_TOKEN }}
+          ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Lint
         run: npm run lint
