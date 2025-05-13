@@ -8,10 +8,26 @@
 import SwiftUI
 
 struct HomeView: View {
+    
+    @Binding var presentAccessCodeModal: Bool
+    
     var body: some View {
         NavigationStack {
-            List {}
-            .navigationTitle("Home")
+            VStack(alignment: .leading) {
+                HStack(spacing: 24) {
+                    NavigationLink(destination: AccountView(presentAccessCodeModal: $presentAccessCodeModal)) {
+                        Image(systemName: "person.crop.circle")
+                            .resizable()
+                            .frame(width: 36, height: 36)
+                            .padding(.top, 24)
+                            .padding(.leading, 24)
+                    }
+                    Spacer()
+                }
+            }
+            List {
+                // TODO: insert card UI
+            }
         }
     }
 }

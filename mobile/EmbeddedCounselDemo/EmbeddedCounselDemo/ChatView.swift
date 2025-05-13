@@ -8,12 +8,39 @@
 import SwiftUI
 
 struct ChatView: View {
-    let urlString: String
+    @State private var chatUrl: URL?
+    @State private var showErrorModal = false
+    @AppStorage("token") private var token: String?
     
     var body: some View {
-        WebView(urlString: urlString)
+        NavigationStack {
+            Group {
+                
+                if let chatUrl = chatUrl {
+                    WebView(url: chatUrl)
+                        .ignoresSafeArea(edges: .bottom)
+                } else {
+                    ProgressView()
+                }
+            }
             .navigationTitle("Chat")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(.hidden, for: .tabBar)
+        }
+        .task {
+            do {
+                let url = try await API.User.fetchChatURL(token: token)
+                chatUrl = url
+            } catch {
+                showErrorModal = true
+            }
+        }
+        .onDisappear {
+            chatUrl = nil
+        }
+        .alert("Error", isPresented: $showErrorModal) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Unable to load chat. Please try again later.")
+        }
     }
-} 
+}
