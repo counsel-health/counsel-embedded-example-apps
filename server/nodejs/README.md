@@ -1,6 +1,6 @@
 # Example Counsel Node.js Server
 
-A simple HTTP server built with Node.js and TypeScript.
+A simple HTTP server built with Node.js, Express, and TypeScript.
 
 ## Setup
 
@@ -29,12 +29,19 @@ The server will be available at http://localhost:4003
 ## Available Endpoints
 
 - `GET /`: Welcome message
-- `GET /chat/signedAppUrl`: Get the signed app url for the user
+- `GET /health`: Health check endpoint
+- `POST /chat/signedAppUrl`: Create a signed app url for the user (requires a valid API key passed in the Authorization header)
+- `POST /chat/user`: Create a new user (requires a valid API key passed in the Authorization header)
+- `POST /user/signUp`: Sign up a new user using an access code and returns a JWT session
+- `POST /user/signOut`: Sign out a user (requires a valid JWT session passed in the Authorization header)
+- `POST /user/signedAppUrl`: Gets the signed app url for the user (requires a valid JWT session passed in the Authorization header)
 
 ## Environment Variables
 
 - `PORT`: The port to run the server on
 - `COUNSEL_API_KEY`: The API key for the Example Counsel API
+- `ACCESS_CODE`: The access code for the Demo Server
+- `JWT_SECRET`: The JWT secret for the Demo Server
 
 ## Database
 
@@ -61,7 +68,7 @@ gcloud auth configure-docker us-east1-docker.pkg.dev
 docker build -t "us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nodejs-server:latest" --platform linux/amd64 ./
 docker push "us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nodejs-server:latest"
 
-gcloud run deploy embedded-demo-nodejs-server --image=us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nodejs-server:latest --project=${PROJECT_ID} --region=us-east1 --allow-unauthenticated --port=4003 --set-env-vars COUNSEL_API_KEY=${COUNSEL_API_KEY},SERVER_BEARER_TOKEN=${SERVER_BEARER_TOKEN}
+gcloud run deploy embedded-demo-nodejs-server --image=us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nodejs-server:latest --project=${PROJECT_ID} --region=us-east1 --allow-unauthenticated --port=4003 --set-env-vars <all-env-vars>
 ```
 
 
