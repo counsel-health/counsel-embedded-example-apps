@@ -2,7 +2,7 @@
 //  API.swift
 //  EmbeddedCounselDemo
 //
-//  Created by Ray Kim on 5/13/25.
+//  Created by Counsel on 5/13/25.
 //
 
 import Foundation
