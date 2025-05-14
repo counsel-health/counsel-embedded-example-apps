@@ -17,7 +17,7 @@ struct ChatView: View {
     var body: some View {
         NavigationStack {
             if showOnboarding {
-                OnboardingView(isPresented: $showOnboarding)
+                OnboardingPagesView(isPresented: $showOnboarding)
             } else {
                 Group {
                     if let chatUrl = chatUrl {
