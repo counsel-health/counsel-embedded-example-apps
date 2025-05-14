@@ -34,7 +34,7 @@ struct AccountView: View {
                 .padding(.horizontal)
                 .padding(.bottom, 24)
             }
+            .navigationTitle("Account")
         }
-        .navigationTitle("Account")
     }
 }
