@@ -7,66 +7,54 @@
 
 import SwiftUI
 
-struct OnboardingPage {
-    let title: String
-    let subtitle: String?
-    let imageName: String?
-    
-    init(title: String, subtitle: String? = nil, imageName: String? = nil) {
-        self.title = title
-        self.subtitle = subtitle
-        self.imageName = imageName
-    }
-}
-
 struct OnboardingView: View {
 
     @Binding var isPresented: Bool
     @State private var currentPage = 0
 
-    private let onboardingPages: [OnboardingPage] = [
-        .init(title: "Get personalized advice on anything — even the awkward stuff.", imageName: "onboarding1"),
-        .init(title: "Get treated with prescriptions, labs, and more when needed.", imageName: "onboarding2"),
-        .init(title: "Meet your health and lifestyle goals with medical-grade advice", imageName: "onboarding3"),
-        .init(title: "Our Policies", subtitle: "Please review our policies to understand your rights, our terms and privacy practices.", imageName: nil),
-        .init(title: "Congrats! You have free access for 30 days.", imageName: nil)
-    ]
+    private let onboardingPages = OnboardingPages()
     
     var body: some View {
         VStack {
             TabView(selection: $currentPage) {
-                ForEach(onboardingPages.indices, id: \.self) { idx in
-                    VStack(spacing: 16) {
-                        Text(onboardingPages[idx].title)
-                            .font(.title)
-                            .fontWeight(.semibold)
-                            .multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.bottom, onboardingPages[idx].subtitle != nil ? 0 : 24)
-                        if let subtitle = onboardingPages[idx].subtitle {
-                            Text(subtitle)
-                                .font(.subheadline)
+                ForEach(onboardingPages.pages.indices, id: \.self) { idx in
+                    Tab(value: idx) {
+                        VStack(spacing: 16) {
+                            Text(onboardingPages.pages[idx].title)
+                                .font(.title)
+                                .fontWeight(.semibold)
                                 .multilineTextAlignment(.leading)
-                                .foregroundStyle(Color(.systemGray))
-                                .padding(.bottom, 24)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.bottom, onboardingPages.pages[idx].subtitle != nil ? 0 : 24)
+                            if let subtitle = onboardingPages.pages[idx].subtitle {
+                                Text(subtitle)
+                                    .font(.subheadline)
+                                    .multilineTextAlignment(.leading)
+                                    .foregroundStyle(Color(.systemGray))
+                                    .padding(.bottom, 24)
+                            }
+                            ForEach(onboardingPages.pages[idx].checklist) { checklist in
+                                HStack {
+                                    Label(checklist.title, systemImage: "arrow.up.forward.square")
+                                }
+                            }
+                            if let imageName = onboardingPages.pages[idx].imageName {
+                                Image(imageName)
+                                    .resizable()
+                                    .scaledToFit()
+                            }
                         }
-                        if let imageName = onboardingPages[idx].imageName {
-                            Image(imageName)
-                                .resizable()
-                                .scaledToFit()
-                        }
+                        .padding(.horizontal, 32)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                    .padding(.horizontal, 32)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .tag(idx)
                 }
             }
-            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
+            .tabViewStyle(.page)
             .frame(maxHeight: .infinity)
             
             Button(action: {
                 withAnimation {
-                    if currentPage < onboardingPages.count - 1 {
+                    if currentPage < onboardingPages.pages.count - 1 {
                         currentPage += 1
                     } else {
                         // show loading spinner
