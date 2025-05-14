@@ -8,13 +8,16 @@
 import SwiftUI
 
 struct HomeView: View {
+    
+    @Binding var tabSelection: TabSelection
+    
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Here's an overview of your wellness journey.")
                     .foregroundStyle(.gray)
                 HealthScoreCardView()
-                CounselCardView()
+                CounselCardView(tabSelection: $tabSelection)
             }
             .padding(.horizontal)
             .frame(maxWidth: .infinity, maxHeight: .infinity)

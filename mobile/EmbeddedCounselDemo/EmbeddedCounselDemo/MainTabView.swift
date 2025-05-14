@@ -20,13 +20,13 @@ struct MainTabView: View {
         ZStack {
             TabView(selection: $selection) {
                 Tab("", systemImage: "house", value: .home) {
-                  HomeView()
+                    HomeView(tabSelection: $selection)
                 }
                 Tab("", systemImage: "bubble.left.and.text.bubble.right", value: .chat) {
-                  ChatView()
+                    ChatView()
                 }
                 Tab("", systemImage: "person.crop.circle", value: .account) {
-                  AccountView(presentAccessCodeModal: $presentAccessCodeModal)
+                    AccountView(presentAccessCodeModal: $presentAccessCodeModal)
                 }
             }
             if presentAccessCodeModal {

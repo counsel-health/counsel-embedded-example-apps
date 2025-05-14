@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct CounselCardView: View {
+    
+    @Binding var tabSelection: TabSelection
+    
     var body: some View {
         CardView {
             VStack(alignment: .leading, spacing: 8) {
@@ -22,7 +25,7 @@ struct CounselCardView: View {
                 ChecklistItem(title: "Get treatment")
                     .padding(.bottom)
                 Button(action: {
-                    // tap tab view
+                    tabSelection = .chat
                 }) {
                     Text("Message a doctor today")
                         .frame(maxWidth: .infinity)
