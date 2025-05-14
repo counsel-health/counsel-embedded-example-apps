@@ -15,7 +15,7 @@ struct CardView<Content: View>: View {
     }
     var body: some View {
         content
-            .padding()
+            .padding(24)
             .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 8)

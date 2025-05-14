@@ -10,7 +10,7 @@ import SwiftUI
 struct HealthScoreCardView: View {
     var body: some View {
         CardView {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("Health Score")
                     .padding(.bottom)
                     .frame(maxWidth: .infinity, alignment: .leading)

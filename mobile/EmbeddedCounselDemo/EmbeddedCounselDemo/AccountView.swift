@@ -16,25 +16,18 @@ struct AccountView: View {
         NavigationStack {
             VStack {
                 Spacer()
-                Button(action: {
+                AsyncButton(title: "Sign out") {
                     token = nil // clear token
                     presentAccessCodeModal = true
-                    Task {
-                        do {
-                            try await API.User.signOutChat()
-                        } catch {
-                            // noop
-                        }
+                    do {
+                        try await API.User.signOutChat()
+                    } catch {
+                        // noop
                     }
-                }) {
-                    Text("Sign out")
-                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .padding(.horizontal)
-                .padding(.bottom, 24)
             }
             .navigationTitle("Account")
+            .padding(32)
         }
     }
 }

@@ -29,10 +29,9 @@ struct CounselCardView: View {
                 }) {
                     Text("Message a doctor today")
                         .frame(maxWidth: .infinity)
+                        .padding(8)
                 }
                 .buttonStyle(.borderedProminent)
-                .padding(.horizontal)
-                .padding(.bottom)
             }
         }
     }
