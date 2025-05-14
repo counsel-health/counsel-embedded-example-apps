@@ -11,6 +11,7 @@ struct AccountView: View {
 
     @Binding var presentAccessCodeModal: Bool
     @AppStorage("token") private var token: String?
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
@@ -24,6 +25,10 @@ struct AccountView: View {
                             try await API.User.signOutChat()
                         } catch {
                             // noop
+                        }
+                        // Ensure we return to HomeView
+                        DispatchQueue.main.async {
+                            dismiss()
                         }
                     }
                 }) {
