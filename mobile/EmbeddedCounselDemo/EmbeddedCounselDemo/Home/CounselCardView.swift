@@ -15,9 +15,17 @@ struct CounselCardView: View {
         CardView {
             VStack(alignment: .leading, spacing: 8) {
                 Text("FREE for a limited time")
+                    .foregroundStyle(.brandDarkBlue)
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .padding(3)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(.brandLightBlue.opacity(0.2))
+                    )
                     .padding(.bottom)
                 Text("Got questions? Get smarter about your health and lifestyle with an expert doctor")
-                    .font(.system(.title, weight: .semibold))
+                    .font(.system(.title2, weight: .semibold))
                     .padding(.bottom)
                 ChecklistItem(title: "Get advice")
                 ChecklistItem(title: "Optimize your lifestyle")
@@ -28,10 +36,12 @@ struct CounselCardView: View {
                     tabSelection = .chat
                 }) {
                     Text("Message a doctor today")
+                        .foregroundStyle(.brandDarkBlue)
                         .frame(maxWidth: .infinity)
                         .padding(8)
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.brandLightBlue)
             }
         }
     }

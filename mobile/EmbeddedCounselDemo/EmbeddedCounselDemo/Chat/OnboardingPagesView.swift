@@ -39,10 +39,12 @@ struct OnboardingPagesView: View {
                 }
             }) {
                 Text("Next")
+                    .foregroundStyle(.brandDarkBlue)
                     .frame(maxWidth: .infinity)
                     .padding(8)
             }
             .buttonStyle(.borderedProminent)
+            .tint(.brandLightBlue)
             .padding()
         }
         .navigationBarHidden(true)

@@ -39,10 +39,12 @@ struct AsyncButton: View {
                     .padding(8)
             } else {
                 Text(title)
+                    .foregroundStyle(.brandDarkBlue)
                     .frame(maxWidth: .infinity)
                     .padding(8)
             }
         }
         .buttonStyle(.borderedProminent)
+        .tint(.brandLightBlue)
     }
 }

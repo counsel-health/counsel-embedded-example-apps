@@ -29,6 +29,7 @@ struct MainTabView: View {
                     AccountView(presentAccessCodeModal: $presentAccessCodeModal)
                 }
             }
+            .tint(.brandDarkBlue)
             if presentAccessCodeModal {
                 AccessCodeView(isPresented: $presentAccessCodeModal)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

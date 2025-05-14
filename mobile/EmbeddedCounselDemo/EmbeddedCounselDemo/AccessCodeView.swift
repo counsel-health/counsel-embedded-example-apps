@@ -17,9 +17,10 @@ struct AccessCodeView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Embedded Corp Demo App")
                 .font(.system(.largeTitle, weight: .bold))
+                .foregroundStyle(.brandMidGreen)
             Text("Ask the Counsel Team for an access code to play with the demo")
                 .font(.system(.subheadline))
-                .foregroundStyle(.blue)
+                .foregroundStyle(.brandDarkBlue)
                 .padding(.bottom, 80)
             SecureField(text: $accessCode, prompt: Text("Enter access code").font(.system(.subheadline)))
             {

@@ -12,10 +12,11 @@ struct OnboardingPageView: View {
     let page: OnboardingPage
     
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: 16) {
             Text(page.title)
                 .font(.title)
                 .fontWeight(.semibold)
+                .foregroundStyle(.brandMidGreen)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, page.subtitle != nil ? 0 : 24)
@@ -27,9 +28,13 @@ struct OnboardingPageView: View {
                     .padding(.bottom, 24)
             }
             ForEach(page.checklist) { checklist in
-                HStack {
-                    Label(checklist.title, systemImage: "arrow.up.forward.square")
-                }
+                ChecklistRowView(checklist: checklist)
+            }
+            if let body = page.body {
+                Text(body)
+                    .font(.subheadline)
+                    .multilineTextAlignment(.leading)
+                    .foregroundStyle(Color(.systemGray))
             }
             if let imageName = page.imageName {
                 Image(imageName)

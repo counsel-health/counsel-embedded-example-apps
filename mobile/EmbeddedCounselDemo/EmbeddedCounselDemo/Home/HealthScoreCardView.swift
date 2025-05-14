@@ -12,6 +12,7 @@ struct HealthScoreCardView: View {
         CardView {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Health Score")
+                    .fontWeight(.semibold)
                     .padding(.bottom)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text("87/100")

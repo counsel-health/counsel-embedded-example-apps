@@ -28,6 +28,7 @@ struct AccountView: View {
             }
             .navigationTitle("Account")
             .padding(32)
+            .background(Color(.systemGray6).ignoresSafeArea())
         }
     }
 }

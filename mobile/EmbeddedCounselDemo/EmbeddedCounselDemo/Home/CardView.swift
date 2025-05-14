@@ -18,7 +18,7 @@ struct CardView<Content: View>: View {
             .padding(24)
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 16)
                     .fill(Color.white)
                     .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.2), radius: 1, x: 0, y: 1)
             )

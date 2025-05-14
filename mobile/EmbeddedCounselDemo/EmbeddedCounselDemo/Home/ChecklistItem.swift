@@ -15,6 +15,8 @@ struct ChecklistItem: View {
             Text(title)
         } icon: {
             Image(systemName: "checkmark.circle")
+                .renderingMode(.template)
+                .foregroundColor(.brandDarkBlue)
         }
     }
 }
