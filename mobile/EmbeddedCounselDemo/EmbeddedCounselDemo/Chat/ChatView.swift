@@ -16,9 +16,7 @@ struct ChatView: View {
     
     var body: some View {
         NavigationStack {
-            if showOnboarding {
-                OnboardingPagesView(isPresented: $showOnboarding)
-            } else {
+            ZStack {
                 Group {
                     if let chatUrl = chatUrl {
                         WebView(url: chatUrl)
@@ -27,9 +25,17 @@ struct ChatView: View {
                         ProgressView()
                     }
                 }
+                if showOnboarding {
+                    OnboardingPagesView(isPresented: $showOnboarding)
+                        .zIndex(1)
+                        .transition(.opacity)
+                }
             }
+            .animation(.easeOut(duration: 0.5), value: showOnboarding)
         }
         .task {
+            guard chatUrl == nil else { return }
+
             do {
                 let url = try await API.User.fetchChatURL(token: token)
                 chatUrl = url
@@ -37,13 +43,17 @@ struct ChatView: View {
                 showErrorModal = true
             }
         }
-        .onDisappear {
-            chatUrl = nil
-        }
         .alert("Error", isPresented: $showErrorModal) {
             Button("OK", role: .cancel) {}
         } message: {
             Text("Unable to load chat. Please try again later.")
+        }
+        .onChange(of: token) { _, newToken in
+            // When the user signs out (token cleared), reset chat state
+            if newToken == nil {
+                chatUrl = nil
+                showOnboarding = true
+            }
         }
     }
 }
