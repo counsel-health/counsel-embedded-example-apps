@@ -10,7 +10,6 @@ struct AccessCodeView: View {
 
     @Binding var isPresented: Bool
     @State private var accessCode: String = ""
-    @State private var showButtonLoading: Bool = false
     @State private var showErrorModal: Bool = false
     @AppStorage("token") private var token: String?
     
@@ -18,40 +17,24 @@ struct AccessCodeView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Embedded Corp Demo App")
                 .font(.system(.largeTitle, weight: .bold))
+                .foregroundStyle(.brandMidGreen)
             Text("Ask the Counsel Team for an access code to play with the demo")
                 .font(.system(.subheadline))
-                .foregroundStyle(.blue)
+                .foregroundStyle(.brandDarkBlue)
                 .padding(.bottom, 80)
             SecureField(text: $accessCode, prompt: Text("Enter access code").font(.system(.subheadline)))
             {
                 Text("Access code")
             }
-            .padding(8)
+            .padding(12)
             .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray))
-            Button(action: {
-                showButtonLoading = true
-                Task {
-                    do {
-                        let newToken = try await API.User.fetchToken(accessCode: accessCode)
-                        token = newToken // store in UserDefaults
-                        showButtonLoading = false
-                        isPresented = false
-                    } catch {
-                        showButtonLoading = false
-                        showErrorModal = true
-                    }
-                }
-            }) {
-                if showButtonLoading {
-                    ProgressView()
-                        .tint(.white)
-                        .frame(maxWidth: .infinity)
-                } else {
-                    Text("Login")
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .buttonStyle(.borderedProminent)
+            AsyncButton(title: "Login", action: {
+                let newToken = try await API.User.fetchToken(accessCode: accessCode)
+                token = newToken
+                isPresented = false
+            }, onError: { _ in
+                showErrorModal = true
+            })
         }
         .padding(.horizontal, 32)
         .alert("Error", isPresented: $showErrorModal) {

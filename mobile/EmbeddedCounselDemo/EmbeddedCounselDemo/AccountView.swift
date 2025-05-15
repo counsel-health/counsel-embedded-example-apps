@@ -10,31 +10,28 @@ import SwiftUI
 struct AccountView: View {
 
     @Binding var presentAccessCodeModal: Bool
+    @Binding var tabSelection: TabSelection
+
     @AppStorage("token") private var token: String?
 
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer()
-                Button(action: {
+                AsyncButton(title: "Sign out") {
                     token = nil // clear token
                     presentAccessCodeModal = true
-                    Task {
-                        do {
-                            try await API.User.signOutChat()
-                        } catch {
-                            // noop
-                        }
+                    do {
+                        try await API.User.signOutChat()
+                    } catch {
+                        // noop
                     }
-                }) {
-                    Text("Sign out")
-                        .frame(maxWidth: .infinity)
+                    tabSelection = .home
                 }
-                .buttonStyle(.borderedProminent)
-                .padding(.horizontal)
-                .padding(.bottom, 24)
             }
+            .navigationTitle("Account")
+            .padding(32)
+            .background(Color(.systemGray6).ignoresSafeArea())
         }
-        .navigationTitle("Account")
     }
 }

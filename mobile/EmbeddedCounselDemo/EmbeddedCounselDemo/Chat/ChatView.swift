@@ -12,19 +12,22 @@ struct ChatView: View {
     @State private var showErrorModal = false
     @AppStorage("token") private var token: String?
     
+    @State private var showOnboarding = true
+    
     var body: some View {
         NavigationStack {
-            Group {
-                
-                if let chatUrl = chatUrl {
-                    WebView(url: chatUrl)
-                        .ignoresSafeArea(edges: .bottom)
-                } else {
-                    ProgressView()
+            if showOnboarding {
+                OnboardingPagesView(isPresented: $showOnboarding)
+            } else {
+                Group {
+                    if let chatUrl = chatUrl {
+                        WebView(url: chatUrl)
+                            .ignoresSafeArea(edges: .bottom)
+                    } else {
+                        ProgressView()
+                    }
                 }
             }
-            .navigationTitle("Chat")
-            .navigationBarTitleDisplayMode(.inline)
         }
         .task {
             do {
