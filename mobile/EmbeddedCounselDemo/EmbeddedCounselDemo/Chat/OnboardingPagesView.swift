@@ -31,9 +31,6 @@ struct OnboardingPagesView: View {
                     if currentPage < onboardingPages.pages.count - 1 {
                         currentPage += 1
                     } else {
-                        // show loading spinner
-                        // get signed app url
-                        // if succeed, dismiss, else show error modal
                         isPresented = false
                     }
                 }
