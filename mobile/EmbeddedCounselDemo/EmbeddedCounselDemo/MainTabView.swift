@@ -22,10 +22,10 @@ struct MainTabView: View {
                 Tab("", systemImage: "house", value: .home) {
                     HomeView(tabSelection: $selection)
                 }
-                Tab("", systemImage: "bubble.left.and.text.bubble.right", value: .chat) {
+                Tab("", systemImage: "bubble", value: .chat) {
                     ChatView()
                 }
-                Tab("", systemImage: "person.crop.circle", value: .account) {
+                Tab("", systemImage: "person", value: .account) {
                     AccountView(presentAccessCodeModal: $presentAccessCodeModal, tabSelection: $selection)
                 }
             }
