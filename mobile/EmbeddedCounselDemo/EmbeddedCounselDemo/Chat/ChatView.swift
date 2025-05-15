@@ -27,8 +27,11 @@ struct ChatView: View {
                 }
                 if showOnboarding {
                     OnboardingPagesView(isPresented: $showOnboarding)
+                        .zIndex(1)
+                        .transition(.opacity)
                 }
             }
+            .animation(.easeOut(duration: 0.5), value: showOnboarding)
         }
         .task {
             guard chatUrl == nil else { return }
