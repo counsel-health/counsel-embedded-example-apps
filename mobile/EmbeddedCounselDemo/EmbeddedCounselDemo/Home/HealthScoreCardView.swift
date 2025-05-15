@@ -13,15 +13,14 @@ struct HealthScoreCardView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Health Score")
                     .fontWeight(.semibold)
-                    .padding(.bottom)
+                    .padding(.bottom, 12)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text("87/100")
-                    .font(.system(.title))
+                    .font(.system(.title, weight: .bold))
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text("+2 points from last week")
-                    .font(.system(.callout))
+                    .font(.system(.caption))
                     .foregroundStyle(.gray)
-                    .padding(.bottom)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }

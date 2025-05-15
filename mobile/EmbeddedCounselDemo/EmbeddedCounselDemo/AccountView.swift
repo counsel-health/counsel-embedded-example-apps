@@ -10,6 +10,8 @@ import SwiftUI
 struct AccountView: View {
 
     @Binding var presentAccessCodeModal: Bool
+    @Binding var tabSelection: TabSelection
+
     @AppStorage("token") private var token: String?
 
     var body: some View {
@@ -24,6 +26,7 @@ struct AccountView: View {
                     } catch {
                         // noop
                     }
+                    tabSelection = .home
                 }
             }
             .navigationTitle("Account")

@@ -16,11 +16,12 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Here's an overview of your wellness journey.")
                     .foregroundStyle(.gray)
+                    .fontWeight(.medium)
                 HealthScoreCardView()
                 CounselCardView(tabSelection: $tabSelection)
             }
             .padding(.horizontal)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .navigationTitle("Welcome back!")
             .background(Color(.systemGray6).ignoresSafeArea())
         }

@@ -27,8 +27,6 @@ struct ChatView: View {
                         ProgressView()
                     }
                 }
-                .navigationTitle("Chat")
-                .navigationBarTitleDisplayMode(.inline)
             }
         }
         .task {

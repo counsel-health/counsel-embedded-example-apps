@@ -26,7 +26,7 @@ struct MainTabView: View {
                     ChatView()
                 }
                 Tab("", systemImage: "person.crop.circle", value: .account) {
-                    AccountView(presentAccessCodeModal: $presentAccessCodeModal)
+                    AccountView(presentAccessCodeModal: $presentAccessCodeModal, tabSelection: $selection)
                 }
             }
             .tint(.brandDarkBlue)

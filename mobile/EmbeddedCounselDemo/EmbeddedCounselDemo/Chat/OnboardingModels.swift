@@ -31,10 +31,10 @@ struct OnboardingPage {
 
 struct Checklists {
     let checklist: [Checklist] = [
-        .init(title: "Health Information Privacy Policy", url: "https://www.google.com"),
-        .init(title: "Privacy Agreement", url: "https://www.google.com"),
+        .init(title: "Health Information Privacy Policy", url: "https://www.counselhealth.com/hipaa-statement"),
+        .init(title: "Privacy Agreement", url: "https://www.counselhealth.com/privacy-policy"),
         .init(title: "Informed Consent", url: "https://www.google.com"),
-        .init(title: "Terms of Use", url: "https://www.google.com")
+        .init(title: "Terms of Use", url: "https://www.counselhealth.com/terms-of-service")
     ]
 }
 
