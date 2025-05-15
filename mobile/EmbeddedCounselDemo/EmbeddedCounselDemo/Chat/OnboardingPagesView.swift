@@ -44,6 +44,7 @@ struct OnboardingPagesView: View {
             .tint(.brandLightBlue)
             .padding()
         }
+        .background(.white)
         .navigationBarHidden(true)
     }
 }

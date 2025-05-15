@@ -16,9 +16,7 @@ struct ChatView: View {
     
     var body: some View {
         NavigationStack {
-            if showOnboarding {
-                OnboardingPagesView(isPresented: $showOnboarding)
-            } else {
+            ZStack {
                 Group {
                     if let chatUrl = chatUrl {
                         WebView(url: chatUrl)
@@ -26,6 +24,9 @@ struct ChatView: View {
                     } else {
                         ProgressView()
                     }
+                }
+                if showOnboarding {
+                    OnboardingPagesView(isPresented: $showOnboarding)
                 }
             }
         }
