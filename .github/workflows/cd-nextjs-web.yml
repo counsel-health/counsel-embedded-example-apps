@@ -83,8 +83,8 @@ jobs:
           flags: |
             --port=3001
             --allow-unauthenticated
-            --cpu=2
-            --memory=1Gi
+            --cpu=4
+            --memory=8Gi
             --max-instances=3
 
       - name: Show Output
