@@ -9,7 +9,7 @@ const envConfig = z.object({
     .transform((val) => parseInt(val))
     .default("4003"),
   COUNSEL_API_KEY: z.string(),
-  COUNSEL_API_HOST: z.string().default("https://dev-api.counselhealth.com"),
+  COUNSEL_API_HOST: z.string().default("https://sandbox-api.counselhealth.com"),
   SERVER_BEARER_TOKEN: z.string().min(32),
   ACCESS_CODE: z.string().length(6),
   JWT_SECRET: z.string().min(32),

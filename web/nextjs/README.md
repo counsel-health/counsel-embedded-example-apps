@@ -30,13 +30,6 @@ Ideally, the signed app url is cached for the entirety of the user's session. Th
 If instead, a new signed app url is generated each time the iFrame is reloaded, the user will see a flash of the iFrame loading.
 For the demo app, this is implemented using [NextJS's caching system](https://nextjs.org/docs/app/deep-dive/caching). Importantly, the cache is invalidated when the user signs out.
 
-## Caching of the iFrame
-
-Ideally the Counsel iFrame is mounted into the DOM once and never removed.
-This is to prevent the iFrame from being torn down by the browser on navigation.
-The demo app achieves this in NextJS by mounting the [ChatPage](./src/components/ChatPage.tsx) component in the layout and not the page.
-It then shows and hides the iframe based on the current route.
-
 ## Deploying to Cloud Run
 
 The web app is deployed to Cloud Run using the `cd-nextjs-web.yml` workflow in the `.github/workflows` directory.
@@ -52,7 +45,7 @@ gcloud auth configure-docker us-east1-docker.pkg.dev
 docker build -t "us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nextjs-web:latest" --platform linux/amd64 ./
 docker push "us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nextjs-web:latest"
 
-gcloud run deploy embedded-demo-nextjs-web --image=us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nextjs-web:latest --project=${PROJECT_ID} --region=us-east1 --allow-unauthenticated --port=3001 --set-env-vars SERVER_BEARER_TOKEN=${SERVER_BEARER_TOKEN},IRON_SESSION_PASSWORD=${IRON_SESSION_PASSWORD},ACCESS_CODE=${ACCESS_CODE},SERVER_HOST=${SERVER_HOST}
+gcloud run deploy embedded-demo-nextjs-web --image=us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nextjs-web:latest --project=${PROJECT_ID} --region=us-east1 --allow-unauthenticated --port=3001 --set-env-vars <ALL_ENV_VARS>
 ```
 
 

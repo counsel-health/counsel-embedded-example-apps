@@ -15,9 +15,13 @@ interface NavItem {
   label: string;
 }
 
-export default function Header() {
+type HeaderProps = {
+  userAgent?: string;
+};
+
+export default function Header({ userAgent }: HeaderProps) {
   const pathname = usePathname();
-  const isMobile = useMobile();
+  const isMobile = useMobile(userAgent);
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems: NavItem[] = [
