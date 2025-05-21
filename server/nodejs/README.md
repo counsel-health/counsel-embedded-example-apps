@@ -52,7 +52,7 @@ The database is a simple SQLite database that is created in memory.
 The database is seeded with a user when the server is started. We currently create a single demo user with the following details:
 
 - ID: 1
-- Name: John Doe'
+ - Name: John Doe
 
 
 ## Deploying to Cloud Run
