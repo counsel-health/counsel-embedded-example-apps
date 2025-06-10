@@ -42,6 +42,7 @@ The server will be available at http://localhost:4003
 - `COUNSEL_API_KEY`: The API key for the Example Counsel API
 - `ACCESS_CODE`: The access code for the Demo Server
 - `JWT_SECRET`: The JWT secret for the Demo Server
+- `COUNSEL_WEBHOOK_SECRET`: The secret for the counsel webhooks
 
 ## Database
 
@@ -71,5 +72,15 @@ docker push "us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-n
 gcloud run deploy embedded-demo-nodejs-server --image=us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nodejs-server:latest --project=${PROJECT_ID} --region=us-east1 --allow-unauthenticated --port=4003 --set-env-vars <all-env-vars>
 ```
 
+
+## Webhooks
+
+The server listens for webhooks from Counsel.
+
+The webhook endpoint is `POST /onCounselWebhook`.
+
+The webhook secret is stored in the environment variable `COUNSEL_WEBHOOK_SECRET`.
+
+Endpoints are registered using the Counsel API - see `https://sandbox-api.counselhealth.com/docs`
 
 

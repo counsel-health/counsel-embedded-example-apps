@@ -22,6 +22,7 @@ env:
   SERVER_BEARER_TOKEN: ${{ secrets.SERVER_BEARER_TOKEN }}
   ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  COUNSEL_WEBHOOK_SECRET: ${{ secrets.COUNSEL_WEBHOOK_SECRET }}
 
 jobs:
   deploy:
@@ -70,6 +71,7 @@ jobs:
             SERVER_BEARER_TOKEN=${{ env.SERVER_BEARER_TOKEN }}
             ACCESS_CODE=${{ env.ACCESS_CODE }}
             JWT_SECRET=${{ env.JWT_SECRET }}
+            COUNSEL_WEBHOOK_SECRET=${{ env.COUNSEL_WEBHOOK_SECRET }}
           flags: |
             --port=4003
             --allow-unauthenticated
