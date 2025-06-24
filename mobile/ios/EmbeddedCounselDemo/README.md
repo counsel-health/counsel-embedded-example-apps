@@ -1,5 +1,7 @@
 # iOS Mobile Demo App
 
+[Public TestFlight Link](https://testflight.apple.com/join/mseSbfQG). Reach out to get an access code. We're here to help at support@counselhealth.com!
+
 ### 🖥️ Running in the iOS Simulator
 
 1. **Install Xcode 16.0+**

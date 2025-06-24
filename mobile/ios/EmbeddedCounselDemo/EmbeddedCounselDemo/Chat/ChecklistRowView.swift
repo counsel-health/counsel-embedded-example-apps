@@ -10,9 +10,9 @@ import SwiftUI
 struct ChecklistRowView: View {
     
     let checklist: Checklist
+    @Binding var isChecked: Bool
 
     @Environment(\.openURL) private var openURL
-    @State private var isChecked = false
     
     var body: some View {
         HStack {
