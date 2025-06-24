@@ -10,6 +10,7 @@ import SwiftUI
 struct OnboardingPageView: View {
     
     let page: OnboardingPage
+    @Binding var checklistStates: [UUID: Bool]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -28,7 +29,13 @@ struct OnboardingPageView: View {
                     .padding(.bottom, 24)
             }
             ForEach(page.checklist) { checklist in
-                ChecklistRowView(checklist: checklist)
+                ChecklistRowView(
+                    checklist: checklist,
+                    isChecked: Binding(
+                        get: { checklistStates[checklist.id] ?? false },
+                        set: { checklistStates[checklist.id] = $0 }
+                    )
+                )
             }
             if let body = page.body {
                 Text(body)

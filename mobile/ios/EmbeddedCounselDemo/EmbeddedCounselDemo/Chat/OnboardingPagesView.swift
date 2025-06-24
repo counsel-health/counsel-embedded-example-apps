@@ -11,15 +11,29 @@ struct OnboardingPagesView: View {
 
     @Binding var isPresented: Bool
     @State private var currentPage = 0
+    @State private var checklistStates: [UUID: Bool] = [:]
 
     private let onboardingPages = OnboardingPages()
+    
+    private var canProceed: Bool {
+        let currentPageData = onboardingPages.pages[currentPage]
+        if currentPageData.checklist.isEmpty {
+            return true
+        }
+        return currentPageData.checklist.allSatisfy { checklist in
+            checklistStates[checklist.id] == true
+        }
+    }
     
     var body: some View {
         VStack {
             TabView(selection: $currentPage) {
                 ForEach(onboardingPages.pages.indices, id: \.self) { idx in
                     Tab(value: idx) {
-                        OnboardingPageView(page: onboardingPages.pages[idx])
+                        OnboardingPageView(
+                            page: onboardingPages.pages[idx],
+                            checklistStates: $checklistStates
+                        )
                     }
                 }
             }
@@ -42,6 +56,8 @@ struct OnboardingPagesView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(.brandLightBlue)
+            .disabled(!canProceed)
+            .opacity(canProceed ? 1.0 : 0.5)
             .padding()
         }
         .background(.white)
