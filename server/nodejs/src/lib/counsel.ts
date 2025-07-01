@@ -63,7 +63,8 @@ export async function signOutCounselUser(userId: string) {
 export async function createCounselUser(user: User) {
   const response = await fetchWithRetry(getRequestUrl(`/v1/user`), {
     method: "POST",
-    headers: getRequestHeaders(),
+    // Use the user id as the idempotency key
+    headers: getRequestHeaders(user.id),
     body: JSON.stringify(convertUserToCounselUser(user)),
   });
   if (!response.ok) {
@@ -81,6 +82,7 @@ export async function createCounselUser(user: User) {
 function convertUserToCounselUser(user: User) {
   const { firstName, lastName } = parseName(user.name);
   return {
+    id: user.id,
     first_name: firstName,
     last_name: lastName,
     phone: user.info.phone,

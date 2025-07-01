@@ -54,14 +54,9 @@ export function AccountPage({ user }: { user: User }) {
                 </div>
               </div>
 
-              <div className="pt-4">
-                <Button>Edit Profile</Button>
-                <Button
-                  variant="outline"
-                  className="ml-2"
-                  onClick={handleSignOut}
-                  loading={isSigningOut}
-                >
+              <div className="pt-4 flex gap-2 max-w-20">
+                <Button size="sm">Edit Profile</Button>
+                <Button variant="outline" size="sm" onClick={handleSignOut} loading={isSigningOut}>
                   Sign Out
                 </Button>
               </div>

@@ -18,10 +18,11 @@ function SubmitButton() {
 }
 
 export default function LoginPage() {
-  const [state, formAction] = useActionState(handleLogin, null);
+  const [state, formAction, isPending] = useActionState(handleLogin, null);
 
   // Submit form on Enter key
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (isPending) return;
     if ((e.ctrlKey || e.metaKey) && (e.key === "Enter" || e.key === "NumpadEnter")) {
       e.preventDefault();
       e.currentTarget.form?.requestSubmit();
@@ -50,6 +51,7 @@ export default function LoginPage() {
                   placeholder="Enter access code"
                   required
                   type="password"
+                  disabled={isPending}
                   // Don't prompt browser autocomplete
                   autoComplete="off"
                   onKeyDown={handleKeyDown}

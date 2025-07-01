@@ -53,7 +53,7 @@ function Button({
     <Comp
       className={cn(
         buttonVariants({ variant, size }),
-        loading && "flex items-center justify-center",
+        loading && "flex items-center justify-center w-full",
         className
       )}
       ref={ref}
