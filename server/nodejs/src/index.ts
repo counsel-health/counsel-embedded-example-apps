@@ -9,10 +9,10 @@ app
     // Seed the in-memory database
     getDb()
       .then(() => {
-        console.log("In-memory database seeded");
+        console.log("Database initialized");
       })
       .catch((error) => {
-        console.error("Critical error seeding the in-memory database", error);
+        console.error("Critical error initializing the database", error);
         process.exit(1);
       });
 

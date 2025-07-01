@@ -1,7 +1,8 @@
 import { DatabaseSync } from "node:sqlite";
 import { createUser } from "@/db/actions/createUser";
+import { v4 as uuidv4 } from "uuid";
 
 export async function seedUsers(db: DatabaseSync) {
   // Seed an initial user
-  await createUser("7661f3ee-f4c6-4833-91d0-77c8d4452820", db);
+  await createUser(uuidv4(), db);
 }

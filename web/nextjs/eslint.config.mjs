@@ -2,6 +2,7 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import unusedImports from "eslint-plugin-unused-imports";
+import importPlugin from "eslint-plugin-import";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,9 +30,11 @@ const eslintConfig = [
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": "error",
       "unused-imports/no-unused-vars": "off",
+      "import/no-extraneous-dependencies": ["error", { devDependencies: false }],
     },
     plugins: {
       "unused-imports": unusedImports,
+      "import": importPlugin,
     },
   },
 ];
