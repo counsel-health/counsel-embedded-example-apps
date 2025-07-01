@@ -31,6 +31,8 @@ export async function handleLogin(_: unknown, formData: FormData) {
   // Generate a random user id each time someone logs in
   const userId = uuidv4();
 
+  console.log("Access code is correct, creating user", userId);
+
   // Create a user in the counsel app
   await createCounselUser(userId);
 

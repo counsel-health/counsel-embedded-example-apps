@@ -14,8 +14,11 @@ export async function getDb(): Promise<DatabaseSync> {
     dbInstance.exec(`
       CREATE TABLE users(id TEXT PRIMARY KEY, counsel_user_id UUID, name TEXT, email TEXT, info JSONB);
     `);
-    // 2. Seed the tables
-    await seedUsers(dbInstance);
+    // 2. Seed the tables if we're in development mode
+    if (process.env.NODE_ENV === "development") {
+      await seedUsers(dbInstance);
+      console.log("Database seeded");
+    }
   }
   return dbInstance;
 }
