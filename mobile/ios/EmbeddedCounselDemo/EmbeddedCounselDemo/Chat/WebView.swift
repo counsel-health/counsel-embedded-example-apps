@@ -14,6 +14,9 @@ struct WebView: UIViewRepresentable {
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         let userContentController = WKUserContentController()
+
+        // Enable JavaScript to open new windows
+        configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
         
         // Inject viewport meta tag script to set the viewport to the device width
         let viewportScript = WKUserScript(
@@ -34,6 +37,8 @@ struct WebView: UIViewRepresentable {
         
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
+        webView.uiDelegate = context.coordinator
+        webView.translatesAutoresizingMaskIntoConstraints = false
         return webView
     }
     
@@ -46,20 +51,39 @@ struct WebView: UIViewRepresentable {
         Coordinator()
     }
     
-    class Coordinator: NSObject, WKNavigationDelegate {
+    class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
+        private func openInExternalBrowser(_ url: URL) {
+            print("Opening URL in external browser: \(url)")
+            
+            UIApplication.shared.open(url, options: [:]) { success in
+                print("External browser open success: \(success)")
+            }
+        }
+        
+        // Handle target="_blank" links
         func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-            // Check if the navigation is for a new window/tab (target="_blank")
+            print("decidePolicyFor called with URL: \(navigationAction.request.url)")
+            print("Current webView URL: \(webView.url?.absoluteString ?? "none")")
             if navigationAction.targetFrame == nil {
-                // This is a new window/tab request, open in OS browser
                 if let url = navigationAction.request.url {
-                    UIApplication.shared.open(url)
+                    openInExternalBrowser(url)
                 }
                 decisionHandler(.cancel)
                 return
             }
             
-            // Allow normal navigation within the webview
             decisionHandler(.allow)
+        }
+        
+        // Handle window.open() calls
+        func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+            print("createWebView called with URL: \(navigationAction.request.url)")
+            print("Current webView URL: \(webView.url?.absoluteString ?? "none")")
+            if let url = navigationAction.request.url, url != webView.url {
+                openInExternalBrowser(url)
+            }
+            // Always return nil to prevent creating new WebViews
+            return nil
         }
     }
 }

@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct AccountView: View {
-
     @Binding var presentAccessCodeModal: Bool
     @Binding var tabSelection: TabSelection
 
@@ -38,10 +37,10 @@ struct AccountView: View {
                         // Right side - Profile Image
                         Circle()
                             .fill(Color.blue.gradient)
-                            .frame(width: 40, height: 40)
+                            .frame(width: 4, height: 60)
                             .overlay {
                                 Text("JD")
-                                    .font(.title2)
+                                    .font(.title3)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.white)
                             }
@@ -49,15 +48,15 @@ struct AccountView: View {
                     
                     // Sign out button
                     AsyncButton(title: "Sign out") {
-                        token = nil // clear token
-                        userType = nil // clear user type
-                        presentAccessCodeModal = true
                         do {
-                            try await API.User.signOutChat()
+                            try await API.User.signOutChat(token: token!)
                         } catch {
                             print("Error signing out: \(error)")
                             // noop
                         }
+                        token = nil // clear token
+                        userType = nil // clear user type
+                        presentAccessCodeModal = true
                         tabSelection = .home
                     }
                 }
