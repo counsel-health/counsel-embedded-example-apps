@@ -7,12 +7,21 @@ import { fetchWithRetry } from "@/lib/http";
 
 const CounselApiHost = env.COUNSEL_API_HOST;
 
+export const UserTypeSchema = z.enum(["main", "onboarding"]);
+export type UserType = z.infer<typeof UserTypeSchema>;
+
 const getRequestUrl = (path: string) => `${CounselApiHost}${path}`;
 
-const getRequestHeaders = (idempotencyKey?: string) => {
+const getRequestHeaders = ({
+  idempotencyKey,
+  apiKey,
+}: {
+  idempotencyKey?: string;
+  apiKey: string;
+}) => {
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${env.COUNSEL_API_KEY}`,
+    Authorization: `Bearer ${apiKey}`,
     "Idempotency-Key": idempotencyKey ?? uuidv4(),
   };
 };
@@ -27,11 +36,24 @@ const UserResponse = z.object({
   id: z.string(),
 });
 
-export async function getCounselSignedAppUrl(userId: string) {
+const DraftUserResponse = z.object({
+  id: z.string(),
+});
+
+const getApiKey = (userType: UserType) =>
+  userType === "main" ? env.COUNSEL_API_KEY : env.COUNSEL_ONBOARDING_API_KEY;
+
+export async function getCounselSignedAppUrl({
+  userId,
+  userType,
+}: {
+  userId: string;
+  userType: UserType;
+}) {
   console.log("Getting signed app url for user", userId);
   const response = await fetchWithRetry(getRequestUrl(`/v1/user/${userId}/signedAppUrl`), {
     method: "POST",
-    headers: getRequestHeaders(),
+    headers: getRequestHeaders({ apiKey: getApiKey(userType) }),
     // Empty body is required by Counsel
     body: JSON.stringify({}),
   });
@@ -47,10 +69,16 @@ export async function getCounselSignedAppUrl(userId: string) {
   return SignedAppUrlResponse.parse(data);
 }
 
-export async function signOutCounselUser(userId: string) {
+export async function signOutCounselUser({
+  userId,
+  userType,
+}: {
+  userId: string;
+  userType: UserType;
+}) {
   const response = await fetchWithRetry(getRequestUrl(`/v1/user/${userId}/signOut`), {
     method: "POST",
-    headers: getRequestHeaders(),
+    headers: getRequestHeaders({ apiKey: getApiKey(userType) }),
   });
   if (!response.ok) {
     const error = await response.json();
@@ -64,7 +92,7 @@ export async function createCounselUser(user: User) {
   const response = await fetchWithRetry(getRequestUrl(`/v1/user`), {
     method: "POST",
     // Use the user id as the idempotency key
-    headers: getRequestHeaders(user.id),
+    headers: getRequestHeaders({ apiKey: getApiKey("main") }),
     body: JSON.stringify(convertUserToCounselUser(user)),
   });
   if (!response.ok) {
@@ -102,5 +130,34 @@ function convertUserToCounselUser(user: User) {
       conditions: user.info.medicalProfile.conditions,
       medications: user.info.medicalProfile.medications,
     },
+  };
+}
+
+export async function createCounselDraftUser(user: User) {
+  const response = await fetchWithRetry(getRequestUrl(`/v1/user/draft`), {
+    method: "POST",
+    // Use the user id as the idempotency key
+    headers: getRequestHeaders({ apiKey: getApiKey("onboarding") }),
+    body: JSON.stringify(convertUserToCounselDraftUser(user)),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(
+      `Request to create draft user failed: ${response.status} ${
+        response.statusText
+      } ${JSON.stringify(error)}`
+    );
+  }
+  const data = await response.json();
+  return DraftUserResponse.parse(data);
+}
+
+/**
+ * @description Convert a user to a Counsel draft user
+ * Draft users are empty users that have to go through the Counsel onboarding process
+ */
+function convertUserToCounselDraftUser(user: User) {
+  return {
+    id: user.id,
   };
 }

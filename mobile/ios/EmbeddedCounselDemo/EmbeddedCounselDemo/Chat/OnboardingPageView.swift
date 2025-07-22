@@ -19,12 +19,16 @@ struct OnboardingPageView: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(.brandMidGreen)
                 .multilineTextAlignment(.leading)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, page.subtitle != nil ? 0 : 24)
             if let subtitle = page.subtitle {
                 Text(subtitle)
                     .font(.subheadline)
                     .multilineTextAlignment(.leading)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                     .foregroundStyle(Color(.systemGray))
                     .padding(.bottom, 24)
             }
@@ -41,6 +45,8 @@ struct OnboardingPageView: View {
                 Text(body)
                     .font(.subheadline)
                     .multilineTextAlignment(.leading)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
                     .foregroundStyle(Color(.systemGray))
             }
             if let imageName = page.imageName {

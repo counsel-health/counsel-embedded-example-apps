@@ -8,3 +8,5 @@ export type User = {
   email: string;
   phone: string;
 };
+
+export type UserType = "main" | "onboarding";

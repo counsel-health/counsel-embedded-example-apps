@@ -44,6 +44,6 @@ struct OnboardingPages {
         .init(title: "Get treated with prescriptions, labs, and more when needed.", imageName: "onboarding2"),
         .init(title: "Meet your health and lifestyle goals with medical-grade advice", imageName: "onboarding3"),
         .init(title: "Our Policies", subtitle: "Please review our policies to understand your rights, our terms and privacy practices.", imageName: nil, checklist: Checklists().checklist, body: "Data security is of utmost importance at Counsel. All communications are secure and encrypted. Only your personal physician advisor will have access to the health information you share."),
-        .init(title: "Congrats! You have free access for 30 days.", imageName: nil)
+        .init(title: "Congrats! You have free access for 7 days.", imageName: nil)
     ]
 }

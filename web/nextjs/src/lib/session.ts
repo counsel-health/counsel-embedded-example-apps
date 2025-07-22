@@ -1,9 +1,13 @@
 import { getIronSession, SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
 import { serverEnv } from "@/envConfig";
+import { UserType } from "@/types/user";
 
 export interface SessionData {
-  userId: string;
+  // The JWT token for the user, used to authenticate the user in the demo app.
+  token: string;
+  // The type of user, used to determine which user to get the signed app url for
+  userType: UserType;
 }
 
 export async function getSession() {

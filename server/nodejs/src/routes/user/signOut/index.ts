@@ -11,9 +11,9 @@ export default async function index(req: Request, res: Response, _next: NextFunc
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
-  const { userId } = req.user;
+  const { userId, userType } = req.user;
 
-  await signOutCounselUser(userId);
+  await signOutCounselUser({ userId, userType });
 
   // NOTE: we don't end the session here because the JWT is stateless
   // and we don't have a long-running database to delete the session from

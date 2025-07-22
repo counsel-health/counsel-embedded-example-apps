@@ -11,6 +11,12 @@ struct SignedAppResponse: Codable {
     let url: String
 }
 
+enum UserType: String, Codable {
+    case main
+    case onboarding
+}
+
 struct AccessCodeTokenResponse: Codable {
     let token: String
+    let userType: UserType
 }

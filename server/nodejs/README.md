@@ -48,8 +48,6 @@ The server will be available at http://localhost:4003
 
 - `GET /`: Welcome message
 - `GET /health`: Health check endpoint
-- `POST /chat/signedAppUrl`: Create a signed app url for the user (requires a valid API key passed in the Authorization header)
-- `POST /chat/user`: Create a new user (requires a valid API key passed in the Authorization header)
 - `POST /user/signUp`: Sign up a new user using an access code and returns a JWT session
 - `POST /user/signOut`: Sign out a user (requires a valid JWT session passed in the Authorization header)
 - `POST /user/signedAppUrl`: Gets the signed app url for the user (requires a valid JWT session passed in the Authorization header)

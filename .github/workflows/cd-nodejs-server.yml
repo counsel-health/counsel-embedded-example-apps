@@ -19,10 +19,11 @@ env:
   SERVICE: 'embedded-demo-nodejs-server'
   GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}
   COUNSEL_API_KEY: ${{ secrets.COUNSEL_API_KEY }}
-  SERVER_BEARER_TOKEN: ${{ secrets.SERVER_BEARER_TOKEN }}
   ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   COUNSEL_WEBHOOK_SECRET: ${{ secrets.COUNSEL_WEBHOOK_SECRET }}
+  COUNSEL_ONBOARDING_API_KEY: ${{ secrets.COUNSEL_ONBOARDING_API_KEY }}
+  ACCESS_CODE_COUNSEL_ONBOARDING: ${{ secrets.ACCESS_CODE_COUNSEL_ONBOARDING }}
 
 jobs:
   deploy:
@@ -68,10 +69,11 @@ jobs:
           env_vars: |
             NODE_ENV=production
             COUNSEL_API_KEY=${{ env.COUNSEL_API_KEY }}
-            SERVER_BEARER_TOKEN=${{ env.SERVER_BEARER_TOKEN }}
             ACCESS_CODE=${{ env.ACCESS_CODE }}
             JWT_SECRET=${{ env.JWT_SECRET }}
             COUNSEL_WEBHOOK_SECRET=${{ env.COUNSEL_WEBHOOK_SECRET }}
+            COUNSEL_ONBOARDING_API_KEY=${{ env.COUNSEL_ONBOARDING_API_KEY }}
+            ACCESS_CODE_COUNSEL_ONBOARDING=${{ env.ACCESS_CODE_COUNSEL_ONBOARDING }}
           flags: |
             --port=4003
             --allow-unauthenticated

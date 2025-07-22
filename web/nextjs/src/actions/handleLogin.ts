@@ -1,14 +1,13 @@
 "use server";
 
-import { serverEnv } from "@/envConfig";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
-import { createCounselUser } from "@/lib/server";
+import { signUpCounselUser } from "@/lib/server";
 
 const FormDataSchema = z.object({
-  accessCode: z.string().min(1),
+  accessCode: z.string().length(6),
 });
 
 export async function handleLogin(_: unknown, formData: FormData) {
@@ -23,22 +22,23 @@ export async function handleLogin(_: unknown, formData: FormData) {
 
   const { accessCode } = parsedResponse.data;
 
-  // Check if the access code is correct, case insensitive
-  if (accessCode.toLowerCase() !== serverEnv.ACCESS_CODE.toLowerCase()) {
-    return { message: "Invalid access code" };
-  }
-
   // Generate a random user id each time someone logs in
   const userId = uuidv4();
 
-  console.log("Access code is correct, creating user", userId);
+  console.log("Attempting to sign up user", userId);
 
   // Create a user in the counsel app
-  await createCounselUser(userId);
+
+  const resp = await signUpCounselUser(userId, accessCode);
+  if (!resp.success) {
+    console.warn("Failed to sign up user", resp.error);
+    return { message: "Invalid access code" };
+  }
 
   // start an iron session, save creds to cookie
   const session = await getSession();
-  session.userId = userId;
+  session.token = resp.data.token;
+  session.userType = resp.data.userType;
   await session.save();
 
   // redirect to the dashboard, user is now authenticated.

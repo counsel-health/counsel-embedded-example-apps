@@ -1,5 +1,4 @@
 import ChatPage from "@/components/ChatPage";
-import { getUser } from "@/lib/mocks";
 import { getCounselSignedAppUrl } from "@/lib/server";
 import { getSession } from "@/lib/session";
 
@@ -8,8 +7,7 @@ import { getSession } from "@/lib/session";
  */
 export default async function Chat() {
   const session = await getSession();
-  const user = getUser(session.userId);
-  const signedAppUrl = await getCounselSignedAppUrl(user.id);
+  const signedAppUrl = await getCounselSignedAppUrl(session.token);
 
   return <ChatPage signedAppUrl={signedAppUrl} />;
 }
