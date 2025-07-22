@@ -25,18 +25,15 @@ jobs:
       
       - name: Install dependencies
         run: npm install
-
+        
       - name: Create env file
         run: |
           touch .env
           echo IRON_SESSION_PASSWORD=${IRON_SESSION_PASSWORD} >> .env
-          echo ACCESS_CODE=${ACCESS_CODE} >> .env
-          echo SERVER_BEARER_TOKEN=${SERVER_BEARER_TOKEN} >> .env
           cat .env
         env: 
           IRON_SESSION_PASSWORD: ${{ secrets.IRON_SESSION_PASSWORD }}
-          ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
-          SERVER_BEARER_TOKEN: ${{ secrets.SERVER_BEARER_TOKEN }}
+
       - name: Lint
         run: npm run lint
       

@@ -12,6 +12,7 @@ struct AccessCodeView: View {
     @State private var accessCode: String = ""
     @State private var showErrorModal: Bool = false
     @AppStorage("token") private var token: String?
+    @AppStorage("userType") private var userType: UserType?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -29,8 +30,9 @@ struct AccessCodeView: View {
             .padding(12)
             .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray))
             AsyncButton(title: "Login", action: {
-                let newToken = try await API.User.fetchToken(accessCode: accessCode)
+                let (newToken, newUserType) = try await API.User.fetchToken(accessCode: accessCode)
                 token = newToken
+                userType = newUserType
                 isPresented = false
             }, onError: { _ in
                 showErrorModal = true

@@ -1,5 +1,6 @@
 import { serverEnv } from "@/envConfig";
 import { fetchWithRetry } from "./http";
+import { UserType } from "@/types/user";
 
 //================================================================================
 // Counsel Demo Server API Calls
@@ -7,24 +8,29 @@ import { fetchWithRetry } from "./http";
 
 const CACHE_TAG_CHAT_SIGNED_APP_URL = "chat-signed-app-url";
 
-export const getChatSignedAppUrlCacheKey = (userId: string) =>
-  `${CACHE_TAG_CHAT_SIGNED_APP_URL}-${userId}`;
+export const getChatSignedAppUrlCacheKey = (token: string) =>
+  `${CACHE_TAG_CHAT_SIGNED_APP_URL}-${token}`;
+
+function getAuthorizationHeader(token: string) {
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
 
 /**
- * @description Get the signed app url for a user
+ * @description Get the signed app url for a user using their JWT token
  *
  * Cached in NextJS so that a signed in user can use the same login across multiple pages, sessions or navigations.
  */
-export async function getCounselSignedAppUrl(userId: string) {
-  console.log("Getting signed app url for user", userId);
+export async function getCounselSignedAppUrl(token: string) {
+  console.log("Getting signed app url for user", token);
   const resp = await fetchFromCounselServer<{ url: string }>(
-    "chat/signedAppUrl",
+    "user/signedAppUrl",
     "POST",
+    {},
+    token,
     {
-      userId,
-    },
-    {
-      tags: [getChatSignedAppUrlCacheKey(userId)],
+      tags: [getChatSignedAppUrlCacheKey(token)],
       revalidate: 3600, // 1 hour
     }
   );
@@ -32,26 +38,46 @@ export async function getCounselSignedAppUrl(userId: string) {
 }
 
 /**
- * @description Create a new user in the demo server
+ * @description Sign up a new user in the demo server
  * The user info is mocked out in the demo server and we just create new users based on the userId each time.
  * In your app you would likely want to pass the full user object to your API + Counsel API.
  * In the future, once our demo app has a full sign up flow with user info, we'll swap this to pass the full user object.
+ *
+ * Returns a JWT token that can be used to authenticate the user in the demo app.
  */
-export async function createCounselUser(userId: string) {
-  return await fetchFromCounselServer<void>("chat/user", "POST", {
-    userId,
-  });
+export async function signUpCounselUser(
+  userId: string,
+  accessCode: string
+): Promise<
+  | { success: true; data: { token: string; userType: UserType } }
+  | { success: false; error: unknown }
+> {
+  try {
+    const data = await fetchFromCounselServer<{ token: string; userType: UserType }>(
+      "user/signUp",
+      "POST",
+      {
+        userId,
+        accessCode,
+      }
+    );
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error };
+  }
+}
+
+/**
+ * @description Sign out a user from the demo server
+ */
+export async function signOutCounselUser(token: string) {
+  console.log("Signing out user", token);
+  await fetchFromCounselServer("user/signOut", "POST", {}, token);
 }
 
 //================================================================================
 // Helper Functions
 //================================================================================
-
-function getAuthorizationHeader() {
-  return {
-    Authorization: `Bearer ${serverEnv.SERVER_BEARER_TOKEN}`,
-  };
-}
 
 async function safeParseJson<T>(response: Response): Promise<T | null> {
   try {
@@ -65,6 +91,8 @@ async function fetchFromCounselServer<T>(
   path: `${string}/${string}`,
   method: "POST",
   body: unknown,
+  // If the request is authenticated, pass the auth token in the headers
+  token?: string,
   cache?: {
     tags: string[];
     revalidate?: number;
@@ -76,7 +104,7 @@ async function fetchFromCounselServer<T>(
     method,
     headers: {
       "Content-Type": "application/json",
-      ...getAuthorizationHeader(),
+      ...(token ? getAuthorizationHeader(token) : {}),
     },
     body: JSON.stringify(body),
     cache: cache ? "default" : "no-store",

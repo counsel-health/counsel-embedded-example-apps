@@ -13,12 +13,14 @@ export default async function middleware(req: NextRequest) {
   const session = await getSession();
 
   // 4. Redirect to /login if the user is not authenticated
-  if (!isPublicRoute && !session.userId) {
+  if (!isPublicRoute && !session.token) {
+    console.log("Redirecting to login because user is not authenticated");
     return NextResponse.redirect(new URL("/login", req.nextUrl));
   }
 
   // 5. Redirect to /dashboard if the user is already authenticated
-  if (isPublicRoute && session.userId) {
+  if (isPublicRoute && session.token) {
+    console.log("Redirecting to dashboard because user is authenticated");
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 

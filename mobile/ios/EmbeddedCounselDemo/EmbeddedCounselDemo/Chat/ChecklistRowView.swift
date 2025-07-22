@@ -16,20 +16,22 @@ struct ChecklistRowView: View {
     
     var body: some View {
         HStack {
-            HStack {
-                Text(checklist.title)
-                    .lineLimit(1)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .foregroundStyle(.brandMidGreen)
-                Button {
-                    if let url = URL(string: checklist.url) {
-                        openURL(url)
-                    }
-                } label: {
-                    Image(systemName: "arrow.up.right.square")
+            Text(checklist.title)
+                .lineLimit(2)
+                .foregroundStyle(.brandMidGreen)
+                .layoutPriority(1)
+            
+            Button {
+                if let url = URL(string: checklist.url) {
+                    openURL(url)
                 }
+            } label: {
+                Image(systemName: "arrow.up.right.square")
             }
+            .padding(.leading, 8)
+            
             Spacer()
+            
             Toggle(isOn: $isChecked) {}
         }
         .tint(.brandMidGreen)

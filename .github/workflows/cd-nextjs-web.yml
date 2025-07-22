@@ -19,9 +19,7 @@ env:
   REPOSITORY: ${{ vars.REPOSITORY }}
   SERVICE: 'embedded-demo-nextjs-web'
   GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}
-  SERVER_BEARER_TOKEN: ${{ secrets.SERVER_BEARER_TOKEN }}
   IRON_SESSION_PASSWORD: ${{ secrets.IRON_SESSION_PASSWORD }}
-  ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
   SERVER_HOST: ${{ secrets.SERVER_HOST }}
 
 jobs:
@@ -57,7 +55,6 @@ jobs:
         run: |
           touch .env
           {
-            echo "SERVER_BEARER_TOKEN=<server-bearer-token>"
             echo "IRON_SESSION_PASSWORD=<iron-session-password>"
             echo "ACCESS_CODE=TESTER"
           } >> .env
@@ -76,8 +73,6 @@ jobs:
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           env_vars: |
             NODE_ENV=production
-            ACCESS_CODE=${{ env.ACCESS_CODE }}
-            SERVER_BEARER_TOKEN=${{ env.SERVER_BEARER_TOKEN }}
             SERVER_HOST=${{ env.SERVER_HOST }}
             IRON_SESSION_PASSWORD=${{ env.IRON_SESSION_PASSWORD }}
           flags: |

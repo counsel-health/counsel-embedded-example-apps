@@ -33,7 +33,7 @@ enum API {
             return signedUrl
         }
         
-        static func fetchToken(accessCode: String) async throws -> String {
+        static func fetchToken(accessCode: String) async throws -> (token: String, userType: UserType) {
             guard let urlBaseString = Bundle.main.infoDictionary?["baseUrl"] as? String,
                   let url = URL(string: "\(urlBaseString)/user/signUp") else {
                 throw URLError(.badURL)
@@ -49,7 +49,7 @@ enum API {
             let (data, _) = try await URLSession.shared.data(for: request)
             let response = try JSONDecoder().decode(AccessCodeTokenResponse.self, from: data)
 
-            return response.token
+            return (response.token, response.userType)
         }
         
         static func signOutChat() async throws -> Void {

@@ -38,7 +38,7 @@ struct OnboardingPagesView: View {
                 }
             }
             .tabViewStyle(.page)
-            .frame(maxHeight: .infinity)
+            .frame(maxHeight: .infinity).frame(maxWidth: .infinity)
             
             Button(action: {
                 withAnimation {

@@ -1,4 +1,3 @@
-import { env } from "@/envConfig";
 import { NextFunction, Request, Response } from "express";
 import crypto from "crypto";
 
@@ -30,10 +29,15 @@ export const authenticateBearerToken = (req: Request, res: Response, next: NextF
   }
 
   // Compare the token hash to the env variable
-  if (!safeCompare(token, env.SERVER_BEARER_TOKEN)) {
+  // We removed this method of authentication in place of JWTs but leave this here in case we need it later on.
+  if (!safeCompare(token, "DUMMY_TOKEN")) {
     res.status(401).json({ message: "Invalid bearer token" });
     return;
   }
 
   next();
+};
+
+export const stringCompare = (a: string, b: string): boolean => {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
 };

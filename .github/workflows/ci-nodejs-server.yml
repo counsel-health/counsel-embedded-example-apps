@@ -32,17 +32,19 @@ jobs:
         run: |
           touch .env
           echo COUNSEL_API_KEY=${COUNSEL_API_KEY} >> .env 
-          echo SERVER_BEARER_TOKEN=${SERVER_BEARER_TOKEN} >> .env
           echo ACCESS_CODE=${ACCESS_CODE} >> .env
+          echo COUNSEL_ONBOARDING_API_KEY=${COUNSEL_ONBOARDING_API_KEY} >> .env
+          echo ACCESS_CODE_COUNSEL_ONBOARDING=${ACCESS_CODE_COUNSEL_ONBOARDING} >> .env
           echo JWT_SECRET=${JWT_SECRET} >> .env
           echo COUNSEL_WEBHOOK_SECRET=${COUNSEL_WEBHOOK_SECRET} >> .env
           cat .env
         env: 
           COUNSEL_API_KEY: ${{ secrets.COUNSEL_API_KEY }}
-          SERVER_BEARER_TOKEN: ${{ secrets.SERVER_BEARER_TOKEN }}
           ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           COUNSEL_WEBHOOK_SECRET: ${{ secrets.COUNSEL_WEBHOOK_SECRET }}
+          COUNSEL_ONBOARDING_API_KEY: ${{ secrets.COUNSEL_ONBOARDING_API_KEY }}
+          ACCESS_CODE_COUNSEL_ONBOARDING: ${{ secrets.ACCESS_CODE_COUNSEL_ONBOARDING }}
 
       - name: Lint
         run: npm run lint
