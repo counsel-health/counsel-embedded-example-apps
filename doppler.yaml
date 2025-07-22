@@ -1,0 +1,3 @@
+setup:
+  - project: demo
+    config: dev_personal

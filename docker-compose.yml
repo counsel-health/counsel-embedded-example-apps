@@ -25,6 +25,7 @@ services:
     environment: 
       - NODE_ENV=production
       - PORT=4003
+      - COUNSEL_API_HOST=http://host.docker.internal:4002
     networks:
       - shared
 
