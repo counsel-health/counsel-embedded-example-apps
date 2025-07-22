@@ -2,14 +2,15 @@
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
 Open [http://localhost:3001](http://localhost:3001) to see the demo app.
@@ -17,6 +18,21 @@ Open [http://localhost:3001](http://localhost:3001) to see the demo app.
 Or see the live demo at [https://embedded-demo.counselhealth.com](https://embedded-demo.counselhealth.com).
 Reach out to a member of the Counsel Health team to get an access code.
 
+## Secret Management
+
+The server uses [Doppler](https://docs.doppler.com/) to manage secrets. This makes it easy to manage secrets for different environments and to keep them private. 
+
+You can remove the doppler dependency and set custom environment variables in the `.env.local` file.
+Just change the `dev` script in `package.json` to:
+```json
+"dev": "next dev -p 3001 --turbo",
+```
+
+To get started, run:
+
+```bash
+doppler setup
+```
 
 ## Important Notes
 

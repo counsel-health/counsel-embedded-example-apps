@@ -16,6 +16,24 @@ To run the server in development mode with hot reloading:
 npm run dev
 ```
 
+## Secret Management
+
+The server uses [Doppler](https://docs.doppler.com/) to manage secrets. This makes it easy to manage secrets for different environments and to keep them private. 
+
+You can remove the doppler dependency and set custom environment variables in the `.env.local` file.
+Just change the `dev` script in `package.json` to:
+```json
+"dev": "NODE_ENV=development tsx watch src/index.ts",
+```
+
+To get started, run:
+
+```bash
+doppler setup
+```
+
+
+
 ## Simulate Production locally
 
 Ideally, run this server with Docker.

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
+<!-- Change this to the http://localhost:4003 if running locally and you want to test against the local server -->
 <dict>
 	<key>baseUrl</key>
 	<string>https://embedded-demo-nodejs-server-2l27waanva-ue.a.run.app</string>
