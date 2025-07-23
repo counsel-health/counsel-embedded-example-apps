@@ -4,10 +4,20 @@ import { getSession } from "./lib/session";
 // 1. All routes are protected by default, specify public routes below
 const publicRoutes = ["/login"];
 
+// https://github.com/vercel/next.js/discussions/36308
+// next matcher won't match .well-known routes
+const shouldSkipMiddleware = (path: string) => {
+  return path.startsWith("/.well-known");
+};
+
 export default async function middleware(req: NextRequest) {
   // 2. Check if the current route is protected or public
   const path = req.nextUrl.pathname;
   const isPublicRoute = publicRoutes.includes(path);
+
+  if (shouldSkipMiddleware(path)) {
+    return NextResponse.next();
+  }
 
   // 3. Decrypt the session from the cookie
   const session = await getSession();

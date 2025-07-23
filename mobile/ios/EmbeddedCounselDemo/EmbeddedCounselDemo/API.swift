@@ -52,7 +52,7 @@ enum API {
             return (response.token, response.userType)
         }
         
-        static func signOutChat() async throws -> Void {
+        static func signOutChat(token: String) async throws -> Void {
             guard let urlBaseString = Bundle.main.infoDictionary?["baseUrl"] as? String,
                   let url = URL(string: "\(urlBaseString)/user/signOut") else {
                 throw URLError(.badURL)
@@ -60,6 +60,9 @@ enum API {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            let bearerToken = "Bearer \(token)"
+            request.setValue(bearerToken, forHTTPHeaderField: "Authorization")
             
             let (_, response) = try await URLSession.shared.data(for: request)
             

@@ -12,26 +12,25 @@ enum TabSelection: Hashable {
 }
 
 struct MainTabView: View {
-
-    @State private var selection: TabSelection = .home
-    @State private var presentAccessCodeModal: Bool = true
+    @EnvironmentObject var navigationCoordinator: NavigationCoordinator
+    @AppStorage("token") private var token: String?
     
     var body: some View {
         ZStack {
-            TabView(selection: $selection) {
+            TabView(selection: $navigationCoordinator.selectedTab) {
                 Tab("", systemImage: "house", value: .home) {
-                    HomeView(tabSelection: $selection)
+                    HomeView(tabSelection: $navigationCoordinator.selectedTab)
                 }
                 Tab("", systemImage: "bubble", value: .chat) {
                     ChatView()
                 }
                 Tab("", systemImage: "person", value: .account) {
-                    AccountView(presentAccessCodeModal: $presentAccessCodeModal, tabSelection: $selection)
+                    AccountView(presentAccessCodeModal: $navigationCoordinator.presentAccessCodeModal, tabSelection: $navigationCoordinator.selectedTab)
                 }
             }
 
-            if presentAccessCodeModal {
-                AccessCodeView(isPresented: $presentAccessCodeModal)
+            if navigationCoordinator.presentAccessCodeModal && token == nil {
+                AccessCodeView(isPresented: $navigationCoordinator.presentAccessCodeModal)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.white)
             }
