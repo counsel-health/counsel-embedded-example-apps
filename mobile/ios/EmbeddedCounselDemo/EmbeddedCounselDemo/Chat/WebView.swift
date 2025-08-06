@@ -10,6 +10,7 @@ import SwiftUI
 
 struct WebView: UIViewRepresentable {
     let url: URL
+    @Binding var showLoadingScreen: Bool
     
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
@@ -48,10 +49,21 @@ struct WebView: UIViewRepresentable {
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(showLoadingScreen: $showLoadingScreen)
     }
     
     class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
+        @Binding var showLoadingScreen: Bool
+        
+        init(showLoadingScreen: Binding<Bool>) {
+            _showLoadingScreen = showLoadingScreen
+        }
+
+        // Hide loading screen when the web view finishes loading
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            showLoadingScreen = false
+        }
+        
         private func openInExternalBrowser(_ url: URL) {
             print("Opening URL in external browser: \(url)")
             

@@ -5,5 +5,11 @@
 <dict>
 	<key>baseUrl</key>
 	<string>https://embedded-demo-nodejs-server-2l27waanva-ue.a.run.app</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs access to the camera to take photos for medical interactions with Counsel Physicians.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to select and share photos in medical interactions with Counsel Physicians.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs access to the microphone for voice calls and voice messages with Counsel Physicians.</string>
 </dict>
 </plist>
