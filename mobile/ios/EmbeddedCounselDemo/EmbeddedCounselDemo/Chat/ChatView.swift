@@ -8,48 +8,31 @@
 import SwiftUI
 
 struct ChatView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var chatUrl: URL?
     @State private var showErrorModal = false
+    @State private var isLoading = false
     @AppStorage("token") private var token: String?
     @AppStorage("userType") private var userType: UserType?
-    // Stores whether to show the native onboarding pages
-    @State private var showOnboarding: Bool = true
+
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                // Only show the native onboarding pages if the user is a main user and the onboarding pages are not already shown
-                // User type onboarding specifies that onboarding is handled by the WebView
-                if showOnboarding && userType != .onboarding {
-                    OnboardingPagesView(isPresented: $showOnboarding)
-                        .zIndex(1)
-                        .transition(.opacity)
-                } else if let chatUrl = chatUrl {
-                    WebView(url: chatUrl)
-                } else {
-                    // Loading screen is default state if no chat URL is available or onboarding is not shown
-                    VStack(spacing: 0) {
-                        ProgressView()
-                            .scaleEffect(1.5)
-                            .progressViewStyle(CircularProgressViewStyle(tint: .blue))
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(.systemBackground))
-                    .zIndex(2)
-                    .transition(.opacity)
-                }
+            if userType == .onboarding {
+                ChatViewUserTypeOnboarding(chatUrl: chatUrl, isLoading: $isLoading)
+            } else {
+                ChatViewUserTypeMain(chatUrl: chatUrl, isLoading: $isLoading)
             }
-            .animation(.easeOut(duration: 0.5), value: showOnboarding)
-            .padding(.bottom, 5)
         }
         .task {
-            guard chatUrl == nil else { return }
-
-            do {
-                let url = try await API.User.fetchChatURL(token: token)
-                chatUrl = url
-            } catch {
-                showErrorModal = true
+            await fetchChatURL()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                // App became active (reopened), fetch a fresh URL
+                Task {
+                    await fetchChatURL()
+                }
             }
         }
         .alert("Error", isPresented: $showErrorModal) {
@@ -61,8 +44,21 @@ struct ChatView: View {
             // When the user signs out (token cleared), reset chat state
             if newToken == nil {
                 chatUrl = nil
-                showOnboarding = true
             }
+        }
+    }
+    
+    private func fetchChatURL() async {
+        guard token != nil else { return }
+        
+        do {
+            isLoading = true
+            print("Fetching chat URL")
+            let url = try await API.User.fetchChatURL(token: token)
+            chatUrl = url
+        } catch {
+            isLoading = false
+            showErrorModal = true
         }
     }
 }

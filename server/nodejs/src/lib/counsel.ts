@@ -79,6 +79,8 @@ export async function signOutCounselUser({
   const response = await fetchWithRetry(getRequestUrl(`/v1/user/${userId}/signOut`), {
     method: "POST",
     headers: getRequestHeaders({ apiKey: getApiKey(userType) }),
+    // Empty body is required by Counsel
+    body: JSON.stringify({}),
   });
   if (!response.ok) {
     const error = await response.json();
