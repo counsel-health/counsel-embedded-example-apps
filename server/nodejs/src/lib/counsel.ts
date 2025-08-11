@@ -98,6 +98,15 @@ export async function createCounselUser(user: User) {
     body: JSON.stringify(convertUserToCounselUser(user)),
   });
   if (!response.ok) {
+    // Handle duplicate user case (this can happen on server restarts where the in-memory DB is reset)
+    if (response.status === 409) {
+      console.log("User already exists, returning existing user", user.id);
+      // User already exists, return the existing user
+      return UserResponse.parse({
+        id: user.id,
+      });
+    }
+
     const error = await response.json();
     throw new Error(
       `Request to create user failed: ${response.status} ${
@@ -143,6 +152,14 @@ export async function createCounselDraftUser(user: User) {
     body: JSON.stringify(convertUserToCounselDraftUser(user)),
   });
   if (!response.ok) {
+    // Handle duplicate user case (this can happen on server restarts where the in-memory DB is reset)
+    if (response.status === 409) {
+      console.log("User already exists, returning existing user", user.id);
+      // User already exists, return the existing user
+      return UserResponse.parse({
+        id: user.id,
+      });
+    }
     const error = await response.json();
     throw new Error(
       `Request to create draft user failed: ${response.status} ${

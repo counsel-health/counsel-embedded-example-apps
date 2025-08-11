@@ -38,7 +38,7 @@ struct ChatView: View {
         .alert("Error", isPresented: $showErrorModal) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Unable to load chat. Please try again later.")
+            Text("Unable to load chat. Please try signing out and signing in again.")
         }
         .onChange(of: token) { _, newToken in
             // When the user signs out (token cleared), reset chat state
@@ -57,6 +57,12 @@ struct ChatView: View {
             let url = try await API.User.fetchChatURL(token: token)
             chatUrl = url
         } catch {
+            print("Error fetching chat URL: \(error)")
+            if let error = error as? APIError, error == .tokenExpired {
+                // Token expired
+                token = nil
+                userType = nil
+            }
             isLoading = false
             showErrorModal = true
         }
