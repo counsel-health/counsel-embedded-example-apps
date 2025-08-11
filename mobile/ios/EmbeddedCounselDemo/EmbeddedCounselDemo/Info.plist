@@ -4,7 +4,14 @@
 <!-- Change this to the http://localhost:4003 if running locally and you want to test against the local server -->
 <dict>
 	<key>baseUrl</key>
-	<string>https://embedded-demo-nodejs-server-2l27waanva-ue.a.run.app</string>
+	<string>http://localhost:4003</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs access to the camera to take photos for medical interactions with Counsel Physicians.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

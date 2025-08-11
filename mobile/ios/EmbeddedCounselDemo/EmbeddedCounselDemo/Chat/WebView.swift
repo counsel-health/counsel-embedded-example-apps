@@ -39,7 +39,18 @@ struct WebView: UIViewRepresentable {
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
         webView.uiDelegate = context.coordinator
-        webView.translatesAutoresizingMaskIntoConstraints = false
+        // webView.translatesAutoresizingMaskIntoConstraints = false
+        // https://stackoverflow.com/questions/63136482/wkwebview-how-to-disable-adjustedcontentinset-when-keyboard-is-shown/63136483#63136483
+        // NotificationCenter.default.removeObserver(webView, name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+        // NotificationCenter.default.removeObserver(webView, name: UIResponder.keyboardWillShowNotification, object: nil)
+        // NotificationCenter.default.removeObserver(webView, name: UIResponder.keyboardWillHideNotification, object: nil)
+
+        webView.allowsBackForwardNavigationGestures = false   // Disable swiping to navigate 
+        webView.scrollView.contentInsetAdjustmentBehavior = .never;
+        webView.scrollView.backgroundColor = .red;
+
+        // webView.scrollView.contentInsetAdjustmentBehavior = .never
+        // webView.scrollView.automaticallyAdjustsScrollIndicatorInsets = false
         return webView
     }
     
@@ -62,6 +73,7 @@ struct WebView: UIViewRepresentable {
         // Hide loading screen when the web view finishes loading
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             showLoadingScreen = false
+            // webView.scrollView.contentSize = webView.bounds.size
         }
         
         private func openInExternalBrowser(_ url: URL) {

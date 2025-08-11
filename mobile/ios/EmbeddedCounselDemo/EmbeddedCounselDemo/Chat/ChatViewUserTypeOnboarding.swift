@@ -19,8 +19,9 @@ struct ChatViewUserTypeOnboarding: View {
             ZStack {
                if let chatUrl = chatUrl {
                     VStack {
-                        WebView(url: chatUrl, showLoadingScreen: $isLoading)
+                        WebView(url: URL(string: "http://localhost:3000/layout")!, showLoadingScreen: $isLoading)
                     }
+                    .ignoresSafeArea(.keyboard)
                 }
                 if isLoading {
                     // Loading screen is default state if no chat URL is available or onboarding is not shown
