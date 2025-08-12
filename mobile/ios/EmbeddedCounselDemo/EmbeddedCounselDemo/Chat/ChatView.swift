@@ -56,6 +56,7 @@ struct ChatView: View {
             print("Fetching chat URL")
             let url = try await API.User.fetchChatURL(token: token)
             chatUrl = url
+            isLoading = false
         } catch {
             print("Error fetching chat URL: \(error)")
             if let error = error as? APIError, error == .tokenExpired {
