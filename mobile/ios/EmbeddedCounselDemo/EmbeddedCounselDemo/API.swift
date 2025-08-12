@@ -26,7 +26,12 @@ enum API {
             let bearerToken = "Bearer \(token)"
             request.setValue(bearerToken, forHTTPHeaderField: "Authorization")
             
-            let (data, _) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 400 {
+                throw APIError.tokenExpired
+            }
+
             let signedAppResponse = try JSONDecoder().decode(SignedAppResponse.self, from: data)
             let signedUrl = URL(string: signedAppResponse.url)
 
@@ -75,4 +80,5 @@ enum API {
 
 enum APIError: Error {
     case badStatusCode
+    case tokenExpired
 }

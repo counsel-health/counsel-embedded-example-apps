@@ -33,7 +33,11 @@ type JWTPayload = jwt.JwtPayload & CustomJwtPayloadData;
 export const createJWTSession = ({
   userId,
   userType,
-  expiresIn = "1h",
+  /**
+   * 30 days - some really long amount of time someone could have the demo app open for. Don't do this in your real app.
+   * This is just for the demo app to preserve the user session for as long as possible. Since the JWT is basically the user's only identifier.
+   */
+  expiresIn = "30d",
 }: {
   userId: string;
   userType: UserType;
@@ -60,6 +64,11 @@ export const verifyJWTSession = (req: Request, res: Response, next: NextFunction
     (req as AuthenticatedRequest).user = { userId: decoded.userId, userType: decoded.userType };
     next();
   } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      console.log("Token expired", { error });
+      res.status(400).json({ error: "Token expired" });
+      return;
+    }
     console.error("Token verification failed", { error });
     res.status(401).json({ error: "Invalid token" });
     return;
