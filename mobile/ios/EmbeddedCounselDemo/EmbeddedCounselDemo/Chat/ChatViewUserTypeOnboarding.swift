@@ -19,7 +19,7 @@ struct ChatViewUserTypeOnboarding: View {
             ZStack {
                if let chatUrl = chatUrl {
                     VStack {
-                        WebView(url: chatUrl, showLoadingScreen: $isLoading)
+                        WebView(url: chatUrl, showLoadingScreen: $isLoading).ignoresSafeArea(.keyboard)
                     }
                 }
                 if isLoading {
@@ -36,7 +36,6 @@ struct ChatViewUserTypeOnboarding: View {
                 }
             }
             .animation(.easeOut(duration: 0.5), value: isLoading)
-            .padding(.bottom, 5)
         }
     }
 }
