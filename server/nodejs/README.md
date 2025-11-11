@@ -56,10 +56,31 @@ The server will be available at http://localhost:4003
 ## Environment Variables
 
 - `PORT`: The port to run the server on
-- `COUNSEL_API_KEY`: The API key for the Example Counsel API
-- `ACCESS_CODE`: The access code for the Demo Server
 - `JWT_SECRET`: The JWT secret for the Demo Server
 - `COUNSEL_WEBHOOK_SECRET`: The secret for the counsel webhooks
+- `ACCESS_CODE_CONFIGS`: A JSON string mapping access codes to their configurations. Format:
+  ```json
+  {
+    "ACCESS_CODE_CONFIGS": {
+      "client": "embedded-counsel-1",
+      "apiUrl": "https://test-api.counselhealth.com",
+      "apiKey": "your-api-key",
+      "userType": "main"
+    },
+    "ONBR01": {
+      "client": "embedded-counsel-2",
+      "apiUrl": "https://test-api.counselhealth.com",
+      "apiKey": "your-onboarding-api-key",
+      "userType": "onboarding"
+    }
+  }
+  ```
+  
+  Each access code configuration must include:
+  - `client`: The client identifier
+  - `apiUrl`: The full URL of the Counsel API endpoint
+  - `apiKey`: The API key for that specific access code
+  - `userType`: Either "main" or "onboarding" (defaults to "main" if not provided)
 
 ## Database
 

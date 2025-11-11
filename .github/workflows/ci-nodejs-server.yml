@@ -31,20 +31,14 @@ jobs:
       - name: Create env file
         run: |
           touch .env
-          echo COUNSEL_API_KEY=${COUNSEL_API_KEY} >> .env 
-          echo ACCESS_CODE=${ACCESS_CODE} >> .env
-          echo COUNSEL_ONBOARDING_API_KEY=${COUNSEL_ONBOARDING_API_KEY} >> .env
-          echo ACCESS_CODE_COUNSEL_ONBOARDING=${ACCESS_CODE_COUNSEL_ONBOARDING} >> .env
           echo JWT_SECRET=${JWT_SECRET} >> .env
           echo COUNSEL_WEBHOOK_SECRET=${COUNSEL_WEBHOOK_SECRET} >> .env
+          printf 'ACCESS_CODE_CONFIGS=%s\n' "${ACCESS_CODE_CONFIGS}" >> .env
           cat .env
         env: 
-          COUNSEL_API_KEY: ${{ secrets.COUNSEL_API_KEY }}
-          ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           COUNSEL_WEBHOOK_SECRET: ${{ secrets.COUNSEL_WEBHOOK_SECRET }}
-          COUNSEL_ONBOARDING_API_KEY: ${{ secrets.COUNSEL_ONBOARDING_API_KEY }}
-          ACCESS_CODE_COUNSEL_ONBOARDING: ${{ secrets.ACCESS_CODE_COUNSEL_ONBOARDING }}
+          ACCESS_CODE_CONFIGS: ${{ secrets.ACCESS_CODE_CONFIGS }}
 
       - name: Lint
         run: npm run lint

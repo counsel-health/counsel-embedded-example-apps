@@ -10,6 +10,8 @@
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
     "dev": "NODE_ENV=development doppler run -- tsx watch src/index.ts",
+    "test": "tsx --test 'src/**/*.test.ts'",
+    "test:watch": "tsx --test --watch 'src/**/*.test.ts'",
     "ci": "npm install --production && npm run build",
     "healthcheck": "sh ./healthcheck.sh"
   },

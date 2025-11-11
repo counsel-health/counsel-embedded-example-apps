@@ -1,13 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { env } from "@/envConfig";
+import { getAccessCodeConfig } from "@/envConfig";
 import { createUser } from "@/db/actions/createUser";
 import { createJWTSession } from "@/lib/user-session";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { parseBody } from "@/lib/http";
-import { UserType } from "@/lib/counsel";
-import { stringCompare } from "@/lib/authentication";
-
 const SignUpBodySchema = z.object({
   userId: z.string().optional(),
   accessCode: z.string().length(6),
@@ -16,21 +13,27 @@ const SignUpBodySchema = z.object({
 type AccessCodeCheck =
   | {
       success: true;
-      type: UserType;
+      client: string;
+      accessCode: string;
+      userType: "main" | "onboarding";
     }
   | {
       success: false;
       error: string;
     };
 
-function checkAccessCode(accessCode: string): AccessCodeCheck {
-  if (stringCompare(accessCode, env.ACCESS_CODE)) {
-    return { success: true, type: "main" };
+export function checkAccessCode(accessCode: string): AccessCodeCheck {
+  const config = getAccessCodeConfig(accessCode);
+  if (!config) {
+    return { success: false, error: "Invalid access code" };
   }
-  if (stringCompare(accessCode, env.ACCESS_CODE_COUNSEL_ONBOARDING)) {
-    return { success: true, type: "onboarding" };
-  }
-  return { success: false, error: "Invalid access code" };
+  
+  return {
+    success: true,
+    client: config.client,
+    accessCode,
+    userType: config.userType,
+  };
 }
 
 /**
@@ -46,14 +49,25 @@ export default async function index(req: Request, res: Response, _next: NextFunc
     return;
   }
 
-  // Create a new user
+  const { client, accessCode, userType } = accessCodeCheck;
+
+  // Create a new user with the determined userType
   const user = await createUser({
     userId: body.userId ?? uuidv4(),
-    userType: accessCodeCheck.type,
+    accessCode,
+    userType,
   });
 
-  // Create a new session
-  const jwtToken = createJWTSession({ userId: user.id, userType: accessCodeCheck.type });
-
-  res.status(200).json({ token: jwtToken, userType: accessCodeCheck.type });
+  // Create a new session with client and accessCode
+  const jwtToken = createJWTSession({
+    userId: user.id,
+    client,
+    accessCode,
+  });
+  
+  res.status(200).json({
+    token: jwtToken,
+    userType, 
+    client,
+  });
 }

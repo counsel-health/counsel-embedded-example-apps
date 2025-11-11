@@ -18,12 +18,9 @@ env:
   REPOSITORY: ${{ vars.REPOSITORY }}
   SERVICE: 'embedded-demo-nodejs-server'
   GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}
-  COUNSEL_API_KEY: ${{ secrets.COUNSEL_API_KEY }}
-  ACCESS_CODE: ${{ secrets.ACCESS_CODE }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   COUNSEL_WEBHOOK_SECRET: ${{ secrets.COUNSEL_WEBHOOK_SECRET }}
-  COUNSEL_ONBOARDING_API_KEY: ${{ secrets.COUNSEL_ONBOARDING_API_KEY }}
-  ACCESS_CODE_COUNSEL_ONBOARDING: ${{ secrets.ACCESS_CODE_COUNSEL_ONBOARDING }}
+  ACCESS_CODE_CONFIGS: ${{ secrets.ACCESS_CODE_CONFIGS }}
 
 jobs:
   deploy:
@@ -68,12 +65,9 @@ jobs:
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           env_vars: |
             NODE_ENV=production
-            COUNSEL_API_KEY=${{ env.COUNSEL_API_KEY }}
-            ACCESS_CODE=${{ env.ACCESS_CODE }}
+            ACCESS_CODE_CONFIGS='${{ env.ACCESS_CODE_CONFIGS }}'
             JWT_SECRET=${{ env.JWT_SECRET }}
             COUNSEL_WEBHOOK_SECRET=${{ env.COUNSEL_WEBHOOK_SECRET }}
-            COUNSEL_ONBOARDING_API_KEY=${{ env.COUNSEL_ONBOARDING_API_KEY }}
-            ACCESS_CODE_COUNSEL_ONBOARDING=${{ env.ACCESS_CODE_COUNSEL_ONBOARDING }}
           flags: |
             --port=4003
             --allow-unauthenticated

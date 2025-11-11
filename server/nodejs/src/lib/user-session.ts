@@ -2,12 +2,12 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import ms from "ms";
 import { env } from "@/envConfig";
-import { UserType } from "./counsel";
 
 export type AuthenticatedRequest = Request & {
   user: {
     userId: string;
-    userType: UserType;
+    client: string;
+    accessCode: string;
   };
 };
 
@@ -18,21 +18,26 @@ export const isAuthenticatedRequest = (req: Request): req is AuthenticatedReques
     req.user !== null &&
     "userId" in req.user &&
     typeof req.user.userId === "string" &&
-    "userType" in req.user &&
-    typeof req.user.userType === "string"
+    "client" in req.user &&
+    typeof req.user.client === "string" &&
+    "accessCode" in req.user &&
+    typeof req.user.accessCode === "string" &&
+    req.user.accessCode.length === 6
   );
 };
 
 type CustomJwtPayloadData = {
   userId: string;
-  userType: UserType;
+  client: string;
+  accessCode: string;
 };
 
 type JWTPayload = jwt.JwtPayload & CustomJwtPayloadData;
 
 export const createJWTSession = ({
   userId,
-  userType,
+  client,
+  accessCode,
   /**
    * 30 days - some really long amount of time someone could have the demo app open for. Don't do this in your real app.
    * This is just for the demo app to preserve the user session for as long as possible. Since the JWT is basically the user's only identifier.
@@ -40,12 +45,14 @@ export const createJWTSession = ({
   expiresIn = "30d",
 }: {
   userId: string;
-  userType: UserType;
+  client: string;
+  accessCode: string;
   expiresIn?: ms.StringValue;
 }) => {
   const payload: CustomJwtPayloadData = {
     userId,
-    userType,
+    client,
+    accessCode,
   };
   return jwt.sign(payload, env.JWT_SECRET, { expiresIn });
 };
@@ -61,7 +68,11 @@ export const verifyJWTSession = (req: Request, res: Response, next: NextFunction
     }
 
     const decoded = jwt.verify(token, env.JWT_SECRET) as JWTPayload;
-    (req as AuthenticatedRequest).user = { userId: decoded.userId, userType: decoded.userType };
+    (req as AuthenticatedRequest).user = {
+      userId: decoded.userId,
+      client: decoded.client,
+      accessCode: decoded.accessCode,
+    };
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
