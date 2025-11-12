@@ -27,17 +27,22 @@ const demoUser = (id: string) => ({
 
 export async function createUser({
   userId,
+  accessCode,
   userType,
   dbProvider,
 }: {
   userId: string;
-  userType: "main" | "onboarding";
+  accessCode: string;
+  userType: "main" | "onboarding"; 
   dbProvider?: DatabaseSync;
 }) {
   const db = dbProvider ?? (await getDb());
   const newUser = demoUser(userId);
-  const user =
-    userType === "main" ? await createCounselUser(newUser) : await createCounselDraftUser(newUser);
+  // Determine if this is a draft user based on userType
+  const isDraftUser = userType === "onboarding";
+  const user = isDraftUser
+    ? await createCounselDraftUser(newUser, accessCode)
+    : await createCounselUser(newUser, accessCode);
   const stmt = db.prepare(
     `
     INSERT INTO users (id, counsel_user_id, name, email, info) VALUES (?, ?, ?, ?, ?);

@@ -1,16 +1,14 @@
 import { z } from "zod";
-import { env } from "@/envConfig";
+import { getAccessCodeConfig } from "@/envConfig";
 import { v4 as uuidv4 } from "uuid";
 import { User } from "@/db/schemas/user";
 import { parseName } from "@/lib/name";
 import { fetchWithRetry } from "@/lib/http";
 
-const CounselApiHost = env.COUNSEL_API_HOST;
-
 export const UserTypeSchema = z.enum(["main", "onboarding"]);
 export type UserType = z.infer<typeof UserTypeSchema>;
 
-const getRequestUrl = (path: string) => `${CounselApiHost}${path}`;
+const getRequestUrl = (apiUrl: string, path: string) => `${apiUrl}${path}`;
 
 const getRequestHeaders = ({
   idempotencyKey,
@@ -40,20 +38,35 @@ const DraftUserResponse = z.object({
   id: z.string(),
 });
 
-const getApiKey = (userType: UserType) =>
-  userType === "main" ? env.COUNSEL_API_KEY : env.COUNSEL_ONBOARDING_API_KEY;
+/**
+ * Get config for an access code
+ * Returns both apiKey and apiUrl from the access code configuration
+ */
+function getAccessCodeConfigForRequest(accessCode: string): { apiKey: string; apiUrl: string } {
+  const config = getAccessCodeConfig(accessCode);
+
+  if (!config) {
+    throw new Error(`No config found for access code "${accessCode}".`);
+  }
+
+  return {
+    apiKey: config.apiKey,
+    apiUrl: config.apiUrl,
+  };
+}
 
 export async function getCounselSignedAppUrl({
   userId,
-  userType,
+  accessCode,
 }: {
   userId: string;
-  userType: UserType;
+  accessCode: string;
 }) {
   console.log("Getting signed app url for user", userId);
-  const response = await fetchWithRetry(getRequestUrl(`/v1/user/${userId}/signedAppUrl`), {
+  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/${userId}/signedAppUrl`), {
     method: "POST",
-    headers: getRequestHeaders({ apiKey: getApiKey(userType) }),
+    headers: getRequestHeaders({ apiKey }),
     // Empty body is required by Counsel
     body: JSON.stringify({}),
   });
@@ -71,14 +84,15 @@ export async function getCounselSignedAppUrl({
 
 export async function signOutCounselUser({
   userId,
-  userType,
+  accessCode,
 }: {
   userId: string;
-  userType: UserType;
+  accessCode: string;
 }) {
-  const response = await fetchWithRetry(getRequestUrl(`/v1/user/${userId}/signOut`), {
+  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/${userId}/signOut`), {
     method: "POST",
-    headers: getRequestHeaders({ apiKey: getApiKey(userType) }),
+    headers: getRequestHeaders({ apiKey }),
     // Empty body is required by Counsel
     body: JSON.stringify({}),
   });
@@ -90,11 +104,12 @@ export async function signOutCounselUser({
   }
 }
 
-export async function createCounselUser(user: User) {
-  const response = await fetchWithRetry(getRequestUrl(`/v1/user`), {
+export async function createCounselUser(user: User, accessCode: string) {
+  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user`), {
     method: "POST",
     // Use the user id as the idempotency key
-    headers: getRequestHeaders({ apiKey: getApiKey("main") }),
+    headers: getRequestHeaders({ apiKey }),
     body: JSON.stringify(convertUserToCounselUser(user)),
   });
   if (!response.ok) {
@@ -144,11 +159,12 @@ function convertUserToCounselUser(user: User) {
   };
 }
 
-export async function createCounselDraftUser(user: User) {
-  const response = await fetchWithRetry(getRequestUrl(`/v1/user/draft`), {
+export async function createCounselDraftUser(user: User, accessCode: string) {
+  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/draft`), {
     method: "POST",
     // Use the user id as the idempotency key
-    headers: getRequestHeaders({ apiKey: getApiKey("onboarding") }),
+    headers: getRequestHeaders({ apiKey }),
     body: JSON.stringify(convertUserToCounselDraftUser(user)),
   });
   if (!response.ok) {
