@@ -21,8 +21,6 @@ env:
   REPOSITORY: ${{ vars.REPOSITORY }}
   SERVICE: "embedded-demo-nextjs-web"
   GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}
-  IRON_SESSION_PASSWORD: ${{ secrets.IRON_SESSION_PASSWORD }}
-  SERVER_HOST: ${{ secrets.SERVER_HOST }}
 
 jobs:
   deploy:
@@ -58,7 +56,6 @@ jobs:
           touch .env
           {
             echo "IRON_SESSION_PASSWORD=<iron-session-password>"
-            echo "ACCESS_CODE=TESTER"
           } >> .env
 
       - name: Build and Push Container

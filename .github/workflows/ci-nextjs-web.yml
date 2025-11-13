@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'web/nextjs/**'
+      - "web/nextjs/**"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -16,17 +16,17 @@ jobs:
         working-directory: ./web/nextjs
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: useblacksmith/setup-node@v5
         with:
           node-version: "24.x"
           cache: "npm"
           cache-dependency-path: "web/nextjs/**/package-lock.json"
-      
+
       - name: Install dependencies
-        run: npm install
-        
+        run: npm ci
+
       - name: Create env file
         run: |
           touch .env
@@ -35,7 +35,7 @@ jobs:
 
       - name: Lint
         run: npm run lint
-      
+
       # Handles type checking too
       - name: Build
         run: npm run build
