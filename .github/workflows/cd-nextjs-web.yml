@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - "web/nextjs/**"
+      - ".github/workflows/cd-nextjs-web.yml"
   # Allow manual dispatch of the workflow
   workflow_dispatch:
 
@@ -75,9 +76,14 @@ jobs:
           flags: |
             --port=3001
             --allow-unauthenticated
-            --cpu=4
-            --memory=8Gi
-            --max-instances=3
+            --cpu=8
+            --memory=16Gi
+            --max-instances=10
+            --min-instances=1
+            --concurrency=1000
+            --timeout=300
+            --execution-environment=gen2
+            --remove-env-vars=SERVER_HOST,IRON_SESSION_PASSWORD
             --set-secrets=SERVER_HOST=doppler-gsm-syncSERVER_HOST:latest
             --set-secrets=IRON_SESSION_PASSWORD=doppler-gsm-syncIRON_SESSION_PASSWORD:latest
 

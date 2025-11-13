@@ -7,6 +7,8 @@ on:
     branches: [main]
     paths:
       - "server/nodejs/**"
+      - ".github/workflows/cd-nodejs-server.yml"
+
   # Allow manual dispatch of the workflow
   workflow_dispatch:
 
@@ -66,7 +68,13 @@ jobs:
             NODE_ENV=production
           flags: |
             --port=4003
+            --max-instances=5
+            --min-instances=1
+            --concurrency=1000
+            --timeout=300
+            --execution-environment=gen2
             --allow-unauthenticated
+            --remove-env-vars=ACCESS_CODE_CONFIGS,JWT_SECRET,COUNSEL_WEBHOOK_SECRET
             --set-secrets=ACCESS_CODE_CONFIGS=doppler-gsm-syncACCESS_CODE_CONFIGS:latest
             --set-secrets=JWT_SECRET=doppler-gsm-syncJWT_SECRET:latest
             --set-secrets=COUNSEL_WEBHOOK_SECRET=doppler-gsm-syncCOUNSEL_WEBHOOK_SECRET:latest
