@@ -70,9 +70,9 @@ jobs:
           flags: |
             --port=4003
             --allow-unauthenticated
-            --set-secrets=ACCESS_CODE_CONFIGS=projects/${{ env.PROJECT_ID }}/secrets/doppler-gsm-syncACCESS_CODE_CONFIGS:latest
-            --set-secrets=JWT_SECRET=projects/${{ env.PROJECT_ID }}/secrets/doppler-gsm-syncJWT_SECRET:latest
-            --set-secrets=COUNSEL_WEBHOOK_SECRET=projects/${{ env.PROJECT_ID }}/secrets/doppler-gsm-syncCOUNSEL_WEBHOOK_SECRET:latest
+            --set-secrets=ACCESS_CODE_CONFIGS=doppler-gsm-syncACCESS_CODE_CONFIGS:latest@${{ env.PROJECT_ID }}
+            --set-secrets=JWT_SECRET=doppler-gsm-syncJWT_SECRET:latest@${{ env.PROJECT_ID }}
+            --set-secrets=COUNSEL_WEBHOOK_SECRET=doppler-gsm-syncCOUNSEL_WEBHOOK_SECRET:latest@${{ env.PROJECT_ID }}
             
 
       - name: Show Output
