@@ -67,12 +67,13 @@ jobs:
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}
           env_vars: |
             NODE_ENV=production
-            ACCESS_CODE_CONFIGS=${{ env.ACCESS_CODE_CONFIGS }}
-            JWT_SECRET=${{ env.JWT_SECRET }}
-            COUNSEL_WEBHOOK_SECRET=${{ env.COUNSEL_WEBHOOK_SECRET }}
           flags: |
             --port=4003
             --allow-unauthenticated
+            --set-secrets=ACCESS_CODE_CONFIGS=projects/${{ env.PROJECT_ID }}/secrets/doppler-gsm-syncACCESS_CODE_CONFIGS:latest
+            --set-secrets=JWT_SECRET=projects/${{ env.PROJECT_ID }}/secrets/doppler-gsm-syncJWT_SECRET:latest
+            --set-secrets=COUNSEL_WEBHOOK_SECRET=projects/${{ env.PROJECT_ID }}/secrets/doppler-gsm-syncCOUNSEL_WEBHOOK_SECRET:latest
+            
 
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

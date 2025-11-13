@@ -1,5 +1,6 @@
 name: Next.js Web App CI
 on:
+  workflow_dispatch:
   pull_request:
     branches: [main]
     paths:
@@ -29,10 +30,8 @@ jobs:
       - name: Create env file
         run: |
           touch .env
-          echo IRON_SESSION_PASSWORD=${IRON_SESSION_PASSWORD} >> .env
+          echo IRON_SESSION_PASSWORD=test-password >> .env
           cat .env
-        env: 
-          IRON_SESSION_PASSWORD: ${{ secrets.IRON_SESSION_PASSWORD }}
 
       - name: Lint
         run: npm run lint
