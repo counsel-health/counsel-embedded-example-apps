@@ -20,9 +20,6 @@ env:
   REPOSITORY: ${{ vars.REPOSITORY }}
   SERVICE: "embedded-demo-nodejs-server"
   GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}
-  JWT_SECRET: ${{ secrets.JWT_SECRET }}
-  COUNSEL_WEBHOOK_SECRET: ${{ secrets.COUNSEL_WEBHOOK_SECRET }}
-  ACCESS_CODE_CONFIGS: ${{ secrets.ACCESS_CODE_CONFIGS }}
 
 jobs:
   deploy:

@@ -21,8 +21,6 @@ env:
   REPOSITORY: ${{ vars.REPOSITORY }}
   SERVICE: "embedded-demo-nextjs-web"
   GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}
-  IRON_SESSION_PASSWORD: ${{ secrets.IRON_SESSION_PASSWORD }}
-  SERVER_HOST: ${{ secrets.SERVER_HOST }}
 
 jobs:
   deploy:
