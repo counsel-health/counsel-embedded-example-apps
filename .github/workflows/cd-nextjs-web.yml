@@ -81,8 +81,8 @@ jobs:
             --cpu=4
             --memory=8Gi
             --max-instances=3
-            --set-secrets=SERVER_HOST=projects/${{ env.PROJECT_ID }}/secrets/doppler-gsm-syncSERVER_HOST:latest
-            --set-secrets=IRON_SESSION_PASSWORD=projects/${{ env.PROJECT_ID }}/secrets/doppler-gsm-syncIRON_SESSION_PASSWORD:latest
+            --set-secrets=SERVER_HOST=doppler-gsm-syncSERVER_HOST:latest@${{ env.PROJECT_ID }}
+            --set-secrets=IRON_SESSION_PASSWORD=doppler-gsm-syncIRON_SESSION_PASSWORD:latest@${{ env.PROJECT_ID }}
 
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
