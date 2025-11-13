@@ -20,9 +20,6 @@ env:
   REPOSITORY: ${{ vars.REPOSITORY }}
   SERVICE: "embedded-demo-nodejs-server"
   GOOGLE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}
-  JWT_SECRET: ${{ secrets.JWT_SECRET }}
-  COUNSEL_WEBHOOK_SECRET: ${{ secrets.COUNSEL_WEBHOOK_SECRET }}
-  ACCESS_CODE_CONFIGS: ${{ secrets.ACCESS_CODE_CONFIGS }}
 
 jobs:
   deploy:
@@ -73,7 +70,6 @@ jobs:
             --set-secrets=ACCESS_CODE_CONFIGS=doppler-gsm-syncACCESS_CODE_CONFIGS:latest@${{ env.PROJECT_ID }}
             --set-secrets=JWT_SECRET=doppler-gsm-syncJWT_SECRET:latest@${{ env.PROJECT_ID }}
             --set-secrets=COUNSEL_WEBHOOK_SECRET=doppler-gsm-syncCOUNSEL_WEBHOOK_SECRET:latest@${{ env.PROJECT_ID }}
-            
 
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}

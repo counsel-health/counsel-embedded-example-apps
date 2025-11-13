@@ -3,12 +3,12 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'server/nodejs/**'
+      - "server/nodejs/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-  
+
 jobs:
   build:
     runs-on: blacksmith-4vcpu-ubuntu-2404
@@ -17,16 +17,16 @@ jobs:
         working-directory: ./server/nodejs
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: useblacksmith/setup-node@v5
         with:
           node-version: "24.x"
           cache: "npm"
           cache-dependency-path: "server/nodejs/**/package-lock.json"
-      
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Create env file
         run: |
@@ -35,14 +35,17 @@ jobs:
           echo COUNSEL_WEBHOOK_SECRET=${COUNSEL_WEBHOOK_SECRET} >> .env
           printf 'ACCESS_CODE_CONFIGS=%s\n' "${ACCESS_CODE_CONFIGS}" >> .env
           cat .env
-        env: 
+        env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           COUNSEL_WEBHOOK_SECRET: ${{ secrets.COUNSEL_WEBHOOK_SECRET }}
           ACCESS_CODE_CONFIGS: ${{ secrets.ACCESS_CODE_CONFIGS }}
 
       - name: Lint
         run: npm run lint
-      
+
+      - name: Test
+        run: npm run test
+
       - name: Build
         run: npm run build
 

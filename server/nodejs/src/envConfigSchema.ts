@@ -29,10 +29,10 @@ export const envConfig = z.object({
       }
     })
     .pipe(
-      z.record(z.string().length(6), AccessCodeConfigSchema).refine(
-        (configs) => Object.keys(configs).length > 0,
-        { message: "At least one access code configuration is required" }
-      )
+      z
+        .record(z.string().length(6), AccessCodeConfigSchema)
+        .refine((configs) => Object.keys(configs).length > 0, {
+          message: "At least one access code configuration is required",
+        })
     ),
 });
-
