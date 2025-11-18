@@ -149,18 +149,6 @@ describe("envConfig", () => {
       assert.strictEqual(config.userType, "main");
     });
 
-    test("should normalize lowercase access code to uppercase", async () => {
-      const { getAccessCodeConfig } = await import("@/envConfig");
-      const config = getAccessCodeConfig("main01");
-
-      assert.ok(config);
-      assert.strictEqual(config.client, "main");
-      assert.strictEqual(config.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(config.apiKey, "sk_test_123");
-      assert.strictEqual(config.userType, "main");
-    });
-
-  
     test("should return null for non-existent access code", async () => {
       const { getAccessCodeConfig } = await import("@/envConfig");
       const config = getAccessCodeConfig("INVALID");

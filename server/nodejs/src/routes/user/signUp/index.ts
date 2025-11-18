@@ -23,15 +23,15 @@ type AccessCodeCheck =
     };
 
 export function checkAccessCode(accessCode: string): AccessCodeCheck {
-  const config = getAccessCodeConfig(accessCode);
+  const normalizedAccessCode = accessCode.trim().toUpperCase();
+  const config = getAccessCodeConfig(normalizedAccessCode);
   if (!config) {
     return { success: false, error: "Invalid access code" };
   }
-  
   return {
     success: true,
     client: config.client,
-    accessCode,
+    accessCode: normalizedAccessCode,
     userType: config.userType,
   };
 }
