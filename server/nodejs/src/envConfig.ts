@@ -12,9 +12,8 @@ export function loadEnvConfig() {
 
 // Helper to get access code config
 export function getAccessCodeConfig(
-  accessCode: string
+  normalizedAccessCode: string
 ): z.infer<typeof AccessCodeConfigSchema> | null {
-  const normalizedAccessCode = accessCode.trim().toUpperCase();
   const config = env.ACCESS_CODE_CONFIGS[normalizedAccessCode];
   return config || null;
 }

@@ -1,5 +1,8 @@
 import { test, describe } from "node:test";
 import assert from "node:assert";
+import { setupTestEnv } from "@/lib/__mocks__/envConfig";
+setupTestEnv();
+const { checkAccessCode } = await import("./index");
 
 describe("signUp route handler", () => {
   describe("request body validation", () => {
@@ -74,6 +77,51 @@ describe("signUp route handler", () => {
       assert.strictEqual(typeof mockResponse.token, "string");
       assert.strictEqual(mockResponse.userType, "main");
       assert.strictEqual(mockResponse.client, "main");
+    });
+  });
+
+  describe("checkAccessCode function", () => {
+    test("should normalize lowercase access code to uppercase", () => {
+      const result = checkAccessCode("main01");
+
+      assert.strictEqual(result.success, true);
+      // TypeScript requires the if check for type narrowing of discriminated unions
+      if (result.success) {
+        assert.strictEqual(result.accessCode, "MAIN01");
+      }
+    });
+
+    test("should normalize mixed case access code to uppercase", () => {
+      const result = checkAccessCode("MaIn01");
+
+      assert.strictEqual(result.success, true);
+      if (result.success) {
+        assert.strictEqual(result.accessCode, "MAIN01");
+      }
+    });
+
+    test("should trim whitespace and normalize access code", () => {
+      const result = checkAccessCode("  main01  ");
+
+      assert.strictEqual(result.success, true);
+      if (result.success) {
+        assert.strictEqual(result.accessCode, "MAIN01");
+      }
+    });
+
+    test("should return uppercase access code even when input is already uppercase", () => {
+      const result = checkAccessCode("MAIN01");
+
+      assert.strictEqual(result.success, true);
+      if (result.success) {
+        assert.strictEqual(result.accessCode, "MAIN01");
+      }
+    });
+
+    test("should return error for invalid access code", () => {
+      const result = checkAccessCode("INVALID");
+
+      assert.strictEqual(result.success, false);
     });
   });
 });
