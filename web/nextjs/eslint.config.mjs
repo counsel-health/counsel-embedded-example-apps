@@ -1,7 +1,10 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { FlatCompat } from "@eslint/eslintrc";
+// eslint-disable-next-line import/no-extraneous-dependencies
 import unusedImports from "eslint-plugin-unused-imports";
+// eslint-disable-next-line import/no-extraneous-dependencies
 import importPlugin from "eslint-plugin-import";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,7 +37,7 @@ const eslintConfig = [
     },
     plugins: {
       "unused-imports": unusedImports,
-      "import": importPlugin,
+      import: importPlugin,
     },
   },
 ];
