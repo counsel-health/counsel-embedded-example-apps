@@ -10,10 +10,7 @@ export const AccessCodeConfigSchema = z.object({
 
 // Environment configuration schema
 export const envConfig = z.object({
-  PORT: z
-    .string()
-    .transform((val) => parseInt(val))
-    .default("4003"),
+  PORT: z.coerce.number().default(4003),
   JWT_SECRET: z.string().min(32),
   COUNSEL_WEBHOOK_SECRET: z.string(),
   // JSON string mapping access codes to client/environment/API key configs
