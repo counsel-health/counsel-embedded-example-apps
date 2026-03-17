@@ -67,16 +67,19 @@ describe("signUp route handler", () => {
         assert.strictEqual(mockOnboardingUserParams.accessCode, "ONBR01");
       });
 
-    test("should return token, userType, and client", () => {
+    test("should return token, userType, client, and counselUserId", () => {
       const mockResponse = {
         token: "mock-jwt-token",
         userType: "main" as const,
         client: "main",
+        counselUserId: "counsel-user-123",
       };
 
       assert.strictEqual(typeof mockResponse.token, "string");
       assert.strictEqual(mockResponse.userType, "main");
       assert.strictEqual(mockResponse.client, "main");
+      assert.strictEqual(mockResponse.counselUserId, "counsel-user-123");
+      assert.strictEqual(typeof mockResponse.counselUserId, "string");
     });
   });
 

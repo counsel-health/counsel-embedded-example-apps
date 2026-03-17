@@ -38,7 +38,6 @@ describe("getOrCreateUser behavior", () => {
       // createUser should be called with correct parameters
       const mockConfig = {
         client: "main",
-        apiKey: "sk_test_123",
         apiUrl: "https://test-api.counselhealth.com",
         userType: "main" as const,
       };

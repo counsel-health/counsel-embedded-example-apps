@@ -58,28 +58,29 @@ The server will be available at http://localhost:4003
 - `PORT`: The port to run the server on
 - `JWT_SECRET`: The JWT secret for the Demo Server
 - `COUNSEL_WEBHOOK_SECRET`: The secret for the counsel webhooks
+- `COUNSEL_PRIVATE_KEY_PEM`: RSA private key for signing JWTs sent to Counsel API. The corresponding public key is served at `/.well-known/jwks.json` and must be registered in Counsel's `orgByIssuer` map.
 - `ACCESS_CODE_CONFIGS`: A JSON string mapping access codes to their configurations. Format:
   ```json
   {
-    "ACCESS_CODE_CONFIGS": {
+    "MAIN01": {
       "client": "embedded-counsel-1",
       "apiUrl": "https://test-api.counselhealth.com",
-      "apiKey": "your-api-key",
+      "issuer": "https://embedded-demo.counselhealth.com/main",
       "userType": "main"
     },
     "ONBR01": {
       "client": "embedded-counsel-2",
       "apiUrl": "https://test-api.counselhealth.com",
-      "apiKey": "your-onboarding-api-key",
+      "issuer": "https://embedded-demo.counselhealth.com/onboarding",
       "userType": "onboarding"
     }
   }
   ```
-  
+
   Each access code configuration must include:
   - `client`: The client identifier
   - `apiUrl`: The full URL of the Counsel API endpoint
-  - `apiKey`: The API key for that specific access code
+  - `issuer`: The `iss` claim put in JWTs for this access code. Must match an entry in Counsel's `orgByIssuer` map pointing to the correct org.
   - `userType`: Either "main" or "onboarding" (defaults to "main" if not provided)
 
 ## Database

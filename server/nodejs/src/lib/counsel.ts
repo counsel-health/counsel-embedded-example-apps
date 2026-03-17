@@ -4,22 +4,23 @@ import { v4 as uuidv4 } from "uuid";
 import { User } from "@/db/schemas/user";
 import { parseName } from "@/lib/name";
 import { fetchWithRetry } from "@/lib/http";
+import { signCounselJwt } from "./keys";
 
 export const UserTypeSchema = z.enum(["main", "onboarding"]);
 export type UserType = z.infer<typeof UserTypeSchema>;
 
 const getRequestUrl = (apiUrl: string, path: string) => `${apiUrl}${path}`;
 
-const getRequestHeaders = ({
-  idempotencyKey,
-  apiKey,
-}: {
-  idempotencyKey?: string;
-  apiKey: string;
-}) => {
+const getRequestHeaders = async (
+  accessCode: string,
+  idempotencyKey?: string
+): Promise<Record<string, string>> => {
+  const config = getAccessCodeConfig(accessCode);
+  if (!config) throw new Error(`No config found for access code "${accessCode}".`);
+  const jwt = await signCounselJwt("server", config.issuer);
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${apiKey}`,
+    Authorization: `Bearer ${jwt}`,
     "Idempotency-Key": idempotencyKey ?? uuidv4(),
   };
 };
@@ -38,21 +39,10 @@ const DraftUserResponse = z.object({
   id: z.string(),
 });
 
-/**
- * Get config for an access code
- * Returns both apiKey and apiUrl from the access code configuration
- */
-function getAccessCodeConfigForRequest(accessCode: string): { apiKey: string; apiUrl: string } {
+function getApiUrl(accessCode: string): string {
   const config = getAccessCodeConfig(accessCode);
-
-  if (!config) {
-    throw new Error(`No config found for access code "${accessCode}".`);
-  }
-
-  return {
-    apiKey: config.apiKey,
-    apiUrl: config.apiUrl,
-  };
+  if (!config) throw new Error(`No config found for access code "${accessCode}".`);
+  return config.apiUrl;
 }
 
 export async function getCounselSignedAppUrl({
@@ -63,10 +53,10 @@ export async function getCounselSignedAppUrl({
   accessCode: string;
 }) {
   console.log("Getting signed app url for user", userId);
-  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const apiUrl = getApiUrl(accessCode);
   const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/${userId}/signedAppUrl`), {
     method: "POST",
-    headers: getRequestHeaders({ apiKey }),
+    headers: await getRequestHeaders(accessCode),
     // Empty body is required by Counsel
     body: JSON.stringify({}),
   });
@@ -89,10 +79,10 @@ export async function signOutCounselUser({
   userId: string;
   accessCode: string;
 }) {
-  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const apiUrl = getApiUrl(accessCode);
   const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/${userId}/signOut`), {
     method: "POST",
-    headers: getRequestHeaders({ apiKey }),
+    headers: await getRequestHeaders(accessCode),
     // Empty body is required by Counsel
     body: JSON.stringify({}),
   });
@@ -105,11 +95,11 @@ export async function signOutCounselUser({
 }
 
 export async function createCounselUser(user: User, accessCode: string) {
-  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const apiUrl = getApiUrl(accessCode);
   const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user`), {
     method: "POST",
     // Use the user id as the idempotency key
-    headers: getRequestHeaders({ apiKey }),
+    headers: await getRequestHeaders(accessCode),
     body: JSON.stringify(convertUserToCounselUser(user)),
   });
   if (!response.ok) {
@@ -160,11 +150,11 @@ function convertUserToCounselUser(user: User) {
 }
 
 export async function createCounselDraftUser(user: User, accessCode: string) {
-  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const apiUrl = getApiUrl(accessCode);
   const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/draft`), {
     method: "POST",
     // Use the user id as the idempotency key
-    headers: getRequestHeaders({ apiKey }),
+    headers: await getRequestHeaders(accessCode),
     body: JSON.stringify(convertUserToCounselDraftUser(user)),
   });
   if (!response.ok) {

@@ -8,6 +8,7 @@ export interface SessionData {
   token: string;
   // The type of user, used to determine which user to get the signed app url for
   userType: UserType;
+  counselUserId: string;
 }
 
 export async function getSession() {

@@ -3,9 +3,11 @@ import { z } from "zod";
 // Access code configuration schema
 export const AccessCodeConfigSchema = z.object({
   client: z.string(),
-  apiKey: z.string(),
   apiUrl: z.string().url(),
   userType: z.enum(["main", "onboarding"]).default("main"),
+  // The iss claim put in JWTs for this access code's org.
+  // Counsel maps this to the org in orgByIssuer.
+  issuer: z.string().url(),
 });
 
 // Environment configuration schema
@@ -13,8 +15,10 @@ export const envConfig = z.object({
   PORT: z.coerce.number().default(4003),
   JWT_SECRET: z.string().min(32),
   COUNSEL_WEBHOOK_SECRET: z.string(),
-  // JSON string mapping access codes to client/environment/API key configs
-  // Format: {"ACCESS_CODE_CONFIGS": {"client": "main", "apiUrl": "https://test-api.counselhealth.com", "apiKey": "key123"}, ...}
+  // RSA private key PEM for signing JWTs sent to Counsel
+  COUNSEL_PRIVATE_KEY_PEM: z.string(),
+  // JSON string mapping access codes to client/environment configs
+  // Format: {"ACCESS_CODE_CONFIGS": {"MAIN01": {"client": "main", "apiUrl": "https://test-api.counselhealth.com", "userType": "main"}, ...}}
   ACCESS_CODE_CONFIGS: z
     .string()
     .transform((val) => {

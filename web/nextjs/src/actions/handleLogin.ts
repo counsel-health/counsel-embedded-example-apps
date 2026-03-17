@@ -39,6 +39,7 @@ export async function handleLogin(_: unknown, formData: FormData) {
   const session = await getSession();
   session.token = resp.data.token;
   session.userType = resp.data.userType;
+  session.counselUserId = resp.data.counselUserId;
   await session.save();
 
   // redirect to the dashboard, user is now authenticated.

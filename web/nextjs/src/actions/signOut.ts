@@ -14,6 +14,6 @@ export async function signOut() {
   // Destroy the session
   session.destroy();
   // Invalidate the chat signed app url cache
-  revalidateTag(getChatSignedAppUrlCacheKey(session.token));
+  revalidateTag(getChatSignedAppUrlCacheKey(session.counselUserId));
   redirect("/login");
 }

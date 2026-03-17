@@ -69,5 +69,6 @@ export default async function index(req: Request, res: Response, _next: NextFunc
     token: jwtToken,
     userType, 
     client,
+    counselUserId: user.counsel_user_id,
   });
 }
