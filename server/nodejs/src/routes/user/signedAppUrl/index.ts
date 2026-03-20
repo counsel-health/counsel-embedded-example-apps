@@ -7,10 +7,7 @@ import { createUser } from "@/db/actions/createUser";
 import { isAuthenticatedRequest } from "@/lib/user-session";
 import { getAccessCodeConfig } from "@/envConfig";
 
-export async function getOrCreateUser(
-  userId: string,
-  accessCode: string
-) {
+export async function getOrCreateUser(userId: string, accessCode: string) {
   const [user, error] = await safePromise(getUser(userId));
   if (error instanceof DBRowNotFoundError) {
     const config = getAccessCodeConfig(accessCode);

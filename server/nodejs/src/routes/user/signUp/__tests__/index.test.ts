@@ -2,7 +2,7 @@ import { test, describe } from "node:test";
 import assert from "node:assert";
 import { setupTestEnv } from "@/lib/__mocks__/envConfig";
 setupTestEnv();
-const { checkAccessCode } = await import("./index");
+const { checkAccessCode } = await import("../index");
 
 describe("signUp route handler", () => {
   describe("request body validation", () => {
@@ -39,44 +39,47 @@ describe("signUp route handler", () => {
 
   describe("response structure", () => {
     test("should include client, accessCode and userType in user creation parameters", () => {
-        // Test that userType is passed to createUser
-        const mockUserCreationParams = {
-          userId: "test-user-id",
-          client: "main",
-          accessCode: "MAIN01",
-          userType: "main" as const,
-        };
-  
-        assert.strictEqual(mockUserCreationParams.userType, "main");
-        assert.strictEqual(mockUserCreationParams.accessCode, "MAIN01");
-        assert.ok(
-          mockUserCreationParams.userType === "main" ||
-            mockUserCreationParams.userType === "onboarding"
-        );
-      });
-  
-      test("should handle onboarding userType in user creation", () => {
-        const mockOnboardingUserParams = {
-          userId: "test-user-id",
-          client: "client1",
-          accessCode: "ONBR01",
-          userType: "onboarding" as const,
-        };
-  
-        assert.strictEqual(mockOnboardingUserParams.userType, "onboarding");
-        assert.strictEqual(mockOnboardingUserParams.accessCode, "ONBR01");
-      });
+      // Test that userType is passed to createUser
+      const mockUserCreationParams = {
+        userId: "test-user-id",
+        client: "main",
+        accessCode: "MAIN01",
+        userType: "main" as const,
+      };
 
-    test("should return token, userType, and client", () => {
+      assert.strictEqual(mockUserCreationParams.userType, "main");
+      assert.strictEqual(mockUserCreationParams.accessCode, "MAIN01");
+      assert.ok(
+        mockUserCreationParams.userType === "main" ||
+          mockUserCreationParams.userType === "onboarding"
+      );
+    });
+
+    test("should handle onboarding userType in user creation", () => {
+      const mockOnboardingUserParams = {
+        userId: "test-user-id",
+        client: "client1",
+        accessCode: "ONBR01",
+        userType: "onboarding" as const,
+      };
+
+      assert.strictEqual(mockOnboardingUserParams.userType, "onboarding");
+      assert.strictEqual(mockOnboardingUserParams.accessCode, "ONBR01");
+    });
+
+    test("should return token, userType, client, and counselUserId", () => {
       const mockResponse = {
         token: "mock-jwt-token",
         userType: "main" as const,
         client: "main",
+        counselUserId: "counsel-user-123",
       };
 
       assert.strictEqual(typeof mockResponse.token, "string");
       assert.strictEqual(mockResponse.userType, "main");
       assert.strictEqual(mockResponse.client, "main");
+      assert.strictEqual(mockResponse.counselUserId, "counsel-user-123");
+      assert.strictEqual(typeof mockResponse.counselUserId, "string");
     });
   });
 

@@ -7,7 +7,6 @@ import { setupTestEnv } from "@/lib/__mocks__/envConfig";
 // Set up test environment before importing @/envConfig
 setupTestEnv();
 
-
 describe("envConfig", () => {
   describe("ACCESS_CODE_CONFIGS parsing", () => {
     test("should parse valid ACCESS_CODE_CONFIGS JSON", () => {
@@ -15,14 +14,14 @@ describe("envConfig", () => {
         MAIN01: {
           client: "main",
           apiUrl: "https://test-api.counselhealth.com",
-          apiKey: "sk_test_123",
           userType: "main",
+          issuer: "https://local-test-partner.example.com/main",
         },
         ONBR01: {
           client: "onboarding",
           apiUrl: "https://test-api.counselhealth.com",
-          apiKey: "sk_test_456",
           userType: "onboarding",
+          issuer: "https://local-test-partner.example.com/onboarding",
         },
       });
 
@@ -30,10 +29,10 @@ describe("envConfig", () => {
 
       assert.strictEqual(result.MAIN01.client, "main");
       assert.strictEqual(result.MAIN01.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.MAIN01.apiKey, "sk_test_123");
+      assert.strictEqual(result.MAIN01.issuer, "https://local-test-partner.example.com/main");
       assert.strictEqual(result.ONBR01.client, "onboarding");
       assert.strictEqual(result.ONBR01.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.ONBR01.apiKey, "sk_test_456");
+      assert.strictEqual(result.ONBR01.issuer, "https://local-test-partner.example.com/onboarding");
       assert.strictEqual(result.MAIN01.userType, "main");
       assert.strictEqual(result.ONBR01.userType, "onboarding");
     });
@@ -43,7 +42,7 @@ describe("envConfig", () => {
         MAIN01: {
           client: "main",
           apiUrl: "https://test-api.counselhealth.com",
-          apiKey: "sk_test_123",
+          issuer: "https://local-test-partner.example.com/main",
           // userType not provided, should default to "main"
         },
       });
@@ -52,7 +51,7 @@ describe("envConfig", () => {
 
       assert.strictEqual(result.MAIN01.client, "main");
       assert.strictEqual(result.MAIN01.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.MAIN01.apiKey, "sk_test_123");
+      assert.strictEqual(result.MAIN01.issuer, "https://local-test-partner.example.com/main");
       assert.strictEqual(result.MAIN01.userType, "main");
     });
 
@@ -64,6 +63,38 @@ describe("envConfig", () => {
         (error: Error) => {
           return error.message.includes("ACCESS_CODE_CONFIGS must be valid JSON");
         }
+      );
+    });
+
+    test("should parse config with apiKey (API key auth)", () => {
+      const apiKeyConfig = JSON.stringify({
+        APIK01: {
+          client: "main",
+          apiUrl: "https://test-api.counselhealth.com",
+          userType: "main",
+          apiKey: "sk_test_123",
+        },
+      });
+
+      const result = envConfig.shape.ACCESS_CODE_CONFIGS.parse(apiKeyConfig);
+
+      assert.strictEqual(result.APIK01.client, "main");
+      assert.strictEqual(result.APIK01.apiKey, "sk_test_123");
+      assert.strictEqual(result.APIK01.issuer, undefined);
+    });
+
+    test("should reject config with neither apiKey nor issuer", () => {
+      const invalidConfig = JSON.stringify({
+        BADCFG: {
+          client: "main",
+          apiUrl: "https://test-api.counselhealth.com",
+          userType: "main",
+        },
+      });
+
+      assert.throws(
+        () => envConfig.shape.ACCESS_CODE_CONFIGS.parse(invalidConfig),
+        /apiKey or issuer/
       );
     });
 
@@ -80,26 +111,25 @@ describe("envConfig", () => {
       );
     });
 
-
     test("should accept multiple clients with same apiUrl", () => {
       const validConfig = JSON.stringify({
         MAIN01: {
           client: "main",
           apiUrl: "https://test-api.counselhealth.com",
-          apiKey: "sk_main_123",
           userType: "main",
+          issuer: "https://local-test-partner.example.com/main",
         },
         CLNT01: {
           client: "client1",
           apiUrl: "https://test-api.counselhealth.com",
-          apiKey: "sk_client1_123",
           userType: "main",
+          issuer: "https://local-test-partner.example.com/client1",
         },
         CLNT02: {
           client: "client2",
           apiUrl: "https://test-api.counselhealth.com",
-          apiKey: "sk_client2_123",
           userType: "onboarding",
+          issuer: "https://local-test-partner.example.com/client2",
         },
       });
 
@@ -107,13 +137,13 @@ describe("envConfig", () => {
 
       assert.strictEqual(result.MAIN01.client, "main");
       assert.strictEqual(result.MAIN01.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.MAIN01.apiKey, "sk_main_123");
+      assert.strictEqual(result.MAIN01.issuer, "https://local-test-partner.example.com/main");
       assert.strictEqual(result.CLNT02.client, "client2");
       assert.strictEqual(result.CLNT02.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.CLNT02.apiKey, "sk_client2_123");
+      assert.strictEqual(result.CLNT02.issuer, "https://local-test-partner.example.com/client2");
       assert.strictEqual(result.CLNT01.client, "client1");
       assert.strictEqual(result.CLNT01.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.CLNT01.apiKey, "sk_client1_123");
+      assert.strictEqual(result.CLNT01.issuer, "https://local-test-partner.example.com/client1");
       assert.strictEqual(Object.keys(result).length, 3);
       assert.strictEqual(result.MAIN01.userType, "main");
       assert.strictEqual(result.CLNT01.userType, "main");
@@ -121,21 +151,20 @@ describe("envConfig", () => {
     });
   });
 
-
   describe("getAccessCodeConfig helper function logic", () => {
     test("should return config for existing access code", () => {
       const mockConfigs = {
         MAIN01: {
           client: "main",
           apiUrl: "https://test-api.counselhealth.com",
-          apiKey: "sk_test_123",
           userType: "main",
+          issuer: "https://local-test-partner.example.com/main",
         },
         ONBR01: {
           client: "onboarding",
           apiUrl: "https://test-api.counselhealth.com",
-          apiKey: "sk_test_456",
           userType: "onboarding",
+          issuer: "https://local-test-partner.example.com/onboarding",
         },
       };
 
@@ -145,7 +174,7 @@ describe("envConfig", () => {
       assert.ok(config);
       assert.strictEqual(config.client, "main");
       assert.strictEqual(config.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(config.apiKey, "sk_test_123");
+      assert.strictEqual(config.issuer, "https://local-test-partner.example.com/main");
       assert.strictEqual(config.userType, "main");
     });
 
@@ -164,4 +193,3 @@ describe("envConfig", () => {
     });
   });
 });
-

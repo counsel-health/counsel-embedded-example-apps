@@ -8,6 +8,15 @@ export interface SessionData {
   token: string;
   // The type of user, used to determine which user to get the signed app url for
   userType: UserType;
+  counselUserId: string;
+  // "apiKey" = demo server handles Counsel API calls with an API key
+  // "jwt"    = Next.js calls Counsel API directly with a signed JWT
+  authType: "apiKey" | "jwt";
+  // Counsel JWT pre-warmed at login for the "jwt" flow. Used as a cache — if present and not
+  // expired it avoids a /token round-trip on chat page load. Never refreshed into the session
+  // from the chat page (Server Component can't write cookies in Next.js 15); after it expires
+  // a fresh JWT is fetched per-request in memory only.
+  counselJwt?: string;
 }
 
 export async function getSession() {

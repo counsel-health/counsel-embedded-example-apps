@@ -4,7 +4,7 @@ import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
-import { signUpCounselUser } from "@/lib/server";
+import { signUpCounselUser, prewarmSessionJwt } from "@/lib/server";
 
 const FormDataSchema = z.object({
   accessCode: z.string().length(6),
@@ -39,6 +39,11 @@ export async function handleLogin(_: unknown, formData: FormData) {
   const session = await getSession();
   session.token = resp.data.token;
   session.userType = resp.data.userType;
+  session.counselUserId = resp.data.counselUserId;
+  session.authType = resp.data.authType;
+  // Pre-warm the Counsel JWT for the jwt flow so the first chat page load is fast.
+  // session.save() below persists it — allowed here because handleLogin is a Server Action.
+  await prewarmSessionJwt(session);
   await session.save();
 
   // redirect to the dashboard, user is now authenticated.

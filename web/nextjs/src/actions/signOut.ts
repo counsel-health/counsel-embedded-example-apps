@@ -7,13 +7,19 @@ import { getChatSignedAppUrlCacheKey, signOutCounselUser } from "@/lib/server";
 
 export async function signOut() {
   const session = await getSession();
-  // Don't block the sign out process if there's a server error
-  signOutCounselUser(session.token).catch((error) => {
-    console.error("Failed to sign out user from demo server", error);
-  });
+  // Capture values before destroying the session (destroy() clears all session properties)
+  const { token, counselUserId } = session;
+  if (token) {
+    // Don't block the sign out process if there's a server error
+    signOutCounselUser(token).catch((error) => {
+      console.error("Failed to sign out user from demo server", error);
+    });
+  }
   // Destroy the session
   session.destroy();
-  // Invalidate the chat signed app url cache
-  revalidateTag(getChatSignedAppUrlCacheKey(session.token));
+  if (counselUserId) {
+    // Invalidate the chat signed app url cache
+    revalidateTag(getChatSignedAppUrlCacheKey(counselUserId));
+  }
   redirect("/login");
 }
