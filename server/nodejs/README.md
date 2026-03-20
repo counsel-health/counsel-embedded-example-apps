@@ -58,28 +58,36 @@ The server will be available at http://localhost:4003
 - `PORT`: The port to run the server on
 - `JWT_SECRET`: The JWT secret for the Demo Server
 - `COUNSEL_WEBHOOK_SECRET`: The secret for the counsel webhooks
-- `ACCESS_CODE_CONFIGS`: A JSON string mapping access codes to their configurations. Format:
+- `COUNSEL_PRIVATE_KEY_PEM`: RSA private key for signing JWTs sent to Counsel API. The corresponding public key is served at `/.well-known/jwks.json` and must be registered in Counsel's `orgByIssuer` map.
+- `ACCESS_CODE_CONFIGS`: A JSON string mapping access codes to their configurations. Each config must have either `apiKey` or `issuer` (or both). Format:
   ```json
   {
-    "ACCESS_CODE_CONFIGS": {
+    "MAIN01": {
       "client": "embedded-counsel-1",
       "apiUrl": "https://test-api.counselhealth.com",
-      "apiKey": "your-api-key",
+      "issuer": "https://embedded-demo.counselhealth.com/main",
+      "userType": "main"
+    },
+    "APIK01": {
+      "client": "embedded-counsel-1",
+      "apiUrl": "https://test-api.counselhealth.com",
+      "apiKey": "sk_your_counsel_api_key",
       "userType": "main"
     },
     "ONBR01": {
       "client": "embedded-counsel-2",
       "apiUrl": "https://test-api.counselhealth.com",
-      "apiKey": "your-onboarding-api-key",
+      "issuer": "https://embedded-demo.counselhealth.com/onboarding",
       "userType": "onboarding"
     }
   }
   ```
-  
+
   Each access code configuration must include:
   - `client`: The client identifier
   - `apiUrl`: The full URL of the Counsel API endpoint
-  - `apiKey`: The API key for that specific access code
+  - `apiKey` (optional): Counsel API key for API key auth. When present, used as Bearer token for server→Counsel calls.
+  - `issuer` (optional): The `iss` claim for JWT auth. Required when no `apiKey`. Must match an entry in Counsel's `orgByIssuer` map. Needed for `/token` endpoint (Next.js app calling Counsel directly).
   - `userType`: Either "main" or "onboarding" (defaults to "main" if not provided)
 
 ## Database

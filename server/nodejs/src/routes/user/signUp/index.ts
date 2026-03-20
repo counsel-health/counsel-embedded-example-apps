@@ -50,6 +50,7 @@ export default async function index(req: Request, res: Response, _next: NextFunc
   }
 
   const { client, accessCode, userType } = accessCodeCheck;
+  const config = getAccessCodeConfig(accessCode)!;
 
   // Create a new user with the determined userType
   const user = await createUser({
@@ -64,10 +65,13 @@ export default async function index(req: Request, res: Response, _next: NextFunc
     client,
     accessCode,
   });
-  
+
   res.status(200).json({
     token: jwtToken,
-    userType, 
+    userType,
     client,
+    counselUserId: user.counsel_user_id,
+    // Tells the Next.js app which auth flow to use for Counsel API calls
+    authType: config.apiKey ? "apiKey" : "jwt",
   });
 }

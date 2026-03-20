@@ -33,7 +33,7 @@ export async function createUser({
 }: {
   userId: string;
   accessCode: string;
-  userType: "main" | "onboarding"; 
+  userType: "main" | "onboarding";
   dbProvider?: DatabaseSync;
 }) {
   const db = dbProvider ?? (await getDb());

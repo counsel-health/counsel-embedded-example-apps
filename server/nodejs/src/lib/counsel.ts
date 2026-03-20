@@ -4,22 +4,36 @@ import { v4 as uuidv4 } from "uuid";
 import { User } from "@/db/schemas/user";
 import { parseName } from "@/lib/name";
 import { fetchWithRetry } from "@/lib/http";
+import { signCounselJwt } from "./keys";
 
 export const UserTypeSchema = z.enum(["main", "onboarding"]);
 export type UserType = z.infer<typeof UserTypeSchema>;
 
 const getRequestUrl = (apiUrl: string, path: string) => `${apiUrl}${path}`;
 
-const getRequestHeaders = ({
-  idempotencyKey,
-  apiKey,
-}: {
-  idempotencyKey?: string;
-  apiKey: string;
-}) => {
+function getConfig(accessCode: string) {
+  const config = getAccessCodeConfig(accessCode);
+  if (!config) throw new Error(`No config found for access code "${accessCode}".`);
+  return config;
+}
+
+const getRequestHeaders = async (
+  accessCode: string,
+  idempotencyKey?: string
+): Promise<Record<string, string>> => {
+  const config = getConfig(accessCode);
+
+  // API key auth: use apiKey as Bearer token when present
+  // JWT auth only: sign a JWT with issuer when apiKey is not present
+  const { apiKey, issuer } = config;
+  if (!apiKey && !issuer) {
+    throw new Error(`Access code "${accessCode}" must have either apiKey or issuer configured`);
+  }
+  const authToken = apiKey ? apiKey : await signCounselJwt("server", issuer!);
+
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${apiKey}`,
+    Authorization: `Bearer ${authToken}`,
     "Idempotency-Key": idempotencyKey ?? uuidv4(),
   };
 };
@@ -38,21 +52,8 @@ const DraftUserResponse = z.object({
   id: z.string(),
 });
 
-/**
- * Get config for an access code
- * Returns both apiKey and apiUrl from the access code configuration
- */
-function getAccessCodeConfigForRequest(accessCode: string): { apiKey: string; apiUrl: string } {
-  const config = getAccessCodeConfig(accessCode);
-
-  if (!config) {
-    throw new Error(`No config found for access code "${accessCode}".`);
-  }
-
-  return {
-    apiKey: config.apiKey,
-    apiUrl: config.apiUrl,
-  };
+function getApiUrl(accessCode: string): string {
+  return getConfig(accessCode).apiUrl;
 }
 
 export async function getCounselSignedAppUrl({
@@ -63,10 +64,10 @@ export async function getCounselSignedAppUrl({
   accessCode: string;
 }) {
   console.log("Getting signed app url for user", userId);
-  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const apiUrl = getApiUrl(accessCode);
   const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/${userId}/signedAppUrl`), {
     method: "POST",
-    headers: getRequestHeaders({ apiKey }),
+    headers: await getRequestHeaders(accessCode),
     // Empty body is required by Counsel
     body: JSON.stringify({}),
   });
@@ -89,10 +90,10 @@ export async function signOutCounselUser({
   userId: string;
   accessCode: string;
 }) {
-  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const apiUrl = getApiUrl(accessCode);
   const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/${userId}/signOut`), {
     method: "POST",
-    headers: getRequestHeaders({ apiKey }),
+    headers: await getRequestHeaders(accessCode),
     // Empty body is required by Counsel
     body: JSON.stringify({}),
   });
@@ -105,11 +106,11 @@ export async function signOutCounselUser({
 }
 
 export async function createCounselUser(user: User, accessCode: string) {
-  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const apiUrl = getApiUrl(accessCode);
   const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user`), {
     method: "POST",
     // Use the user id as the idempotency key
-    headers: getRequestHeaders({ apiKey }),
+    headers: await getRequestHeaders(accessCode),
     body: JSON.stringify(convertUserToCounselUser(user)),
   });
   if (!response.ok) {
@@ -160,11 +161,11 @@ function convertUserToCounselUser(user: User) {
 }
 
 export async function createCounselDraftUser(user: User, accessCode: string) {
-  const { apiKey, apiUrl } = getAccessCodeConfigForRequest(accessCode);
+  const apiUrl = getApiUrl(accessCode);
   const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/draft`), {
     method: "POST",
     // Use the user id as the idempotency key
-    headers: getRequestHeaders({ apiKey }),
+    headers: await getRequestHeaders(accessCode),
     body: JSON.stringify(convertUserToCounselDraftUser(user)),
   });
   if (!response.ok) {

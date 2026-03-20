@@ -7,7 +7,7 @@ import { getSession } from "@/lib/session";
  */
 export default async function Chat() {
   const session = await getSession();
-  const signedAppUrl = await getCounselSignedAppUrl(session.token);
+  const signedAppUrl = await getCounselSignedAppUrl(session);
 
   return <ChatPage signedAppUrl={signedAppUrl} />;
 }
