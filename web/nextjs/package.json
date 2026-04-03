@@ -10,7 +10,8 @@
     "format": "oxfmt 'src/**/*.{ts,tsx}'",
     "format:check": "oxfmt --check 'src/**/*.{ts,tsx}'",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "verify": "bun run lint && bun run test"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",

@@ -16,6 +16,7 @@
     "dev": "NODE_ENV=development doppler run -- bun --hot src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "verify": "bun run lint && bun run test && bun run typecheck && bun run compile",
     "ci": "bun install --production && bun run compile",
     "healthcheck": "sh ./healthcheck.sh"
   },

@@ -1,7 +1,6 @@
 name: Node.js Server CI
 on:
   pull_request:
-    branches: [main]
     paths:
       - "server/nodejs/**"
 
@@ -16,7 +15,7 @@ jobs:
       run:
         working-directory: ./server/nodejs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2

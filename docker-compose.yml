@@ -1,32 +1,40 @@
+# Docker Compose for embedded demo (Next.js web + Node API).
+#
+# Container env comes from the `environment:` list below. Values are filled at
+# `docker compose` parse time via variable substitution: `${VAR}` is taken from the current shell environment first.
+# So Doppler-injected CI env, or `doppler run` locally, supplies real secrets into
+# containers the same way writing a temp `.env` file from `os.environ` did—without
+# an intermediate env file for Compose.
+#
+# `.env.local` is only for Next/Node local dev (`start.sh` copies into web/nextjs
+# and server/nodejs); Compose does not read it.
+
 services:
   web:
-    env_file:
-      - ./.env.local
     build:
       context: ./web/nextjs
       dockerfile: Dockerfile
     ports:
-      - '3001:3001'
-    environment: 
+      - "3001:3001"
+    environment:
       - NODE_ENV=production
       - PORT=3001
       - SERVER_HOST=http://server:4003
-    networks:
-      - shared
+      - IRON_SESSION_PASSWORD=${IRON_SESSION_PASSWORD}
+      # Reachable from inside the web container (not localhost unless Counsel is in Compose)
+      - COUNSEL_API_URL=${COUNSEL_API_URL}
+      - COUNSEL_API_HOST=${COUNSEL_API_HOST}
 
   server:
-    env_file:
-      - ./.env.local
     build:
       context: ./server/nodejs
       dockerfile: Dockerfile
     ports:
-      - '4003:4003'
-    environment: 
+      - "4003:4003"
+    environment:
       - NODE_ENV=production
       - PORT=4003
-    networks:
-      - shared
-
-networks:
-  shared:
+      - JWT_SECRET=${JWT_SECRET}
+      - COUNSEL_WEBHOOK_SECRET=${COUNSEL_WEBHOOK_SECRET}
+      - COUNSEL_PRIVATE_KEY_PEM=${COUNSEL_PRIVATE_KEY_PEM}
+      - ACCESS_CODE_CONFIGS=${ACCESS_CODE_CONFIGS}
