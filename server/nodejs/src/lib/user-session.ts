@@ -11,7 +11,9 @@ export type AuthenticatedRequest = Request & {
   };
 };
 
-export const isAuthenticatedRequest = (req: Request): req is AuthenticatedRequest => {
+export const isAuthenticatedRequest = (
+  req: Request
+): req is AuthenticatedRequest => {
   return (
     "user" in req &&
     typeof req.user === "object" &&
@@ -58,7 +60,11 @@ export const createJWTSession = ({
 };
 
 // Middleware to verify JWT token
-export const verifyJWTSession = (req: Request, res: Response, next: NextFunction) => {
+export const verifyJWTSession = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
 

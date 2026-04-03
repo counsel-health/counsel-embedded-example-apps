@@ -1,45 +1,35 @@
-import { test, describe } from "node:test";
-import assert from "node:assert";
+import { describe, expect, test } from "vitest";
 import { setupTestEnv } from "@/lib/__mocks__/envConfig";
+
 setupTestEnv();
-const { checkAccessCode } = await import("../index");
+
+const { checkAccessCode } = await import("../accessCode");
 
 describe("signUp route handler", () => {
   describe("request body validation", () => {
     test("should accept valid request body with accessCode", () => {
-      const validRequestBody = {
-        accessCode: "MAIN01",
-        userId: "test-user-id", // optional
-      };
+      const validRequestBody = { accessCode: "MAIN01", userId: "test-user-id" };
 
-      assert.strictEqual(validRequestBody.accessCode.length, 6);
-      assert.strictEqual(typeof validRequestBody.userId, "string");
+      expect(validRequestBody.accessCode.length).toBe(6);
+      expect(typeof validRequestBody.userId).toBe("string");
     });
 
     test("should accept request body without userId (optional field)", () => {
-      const validRequestBodyWithoutUserId = {
-        accessCode: "MAIN01",
-        // userId is optional
-      };
+      const validRequestBodyWithoutUserId = { accessCode: "MAIN01" };
 
-      assert.strictEqual(validRequestBodyWithoutUserId.accessCode.length, 6);
-      assert.ok("userId" in validRequestBodyWithoutUserId === false);
+      expect(validRequestBodyWithoutUserId.accessCode.length).toBe(6);
+      expect("userId" in validRequestBodyWithoutUserId).toBe(false);
     });
 
     test("should require accessCode to be exactly 6 characters", () => {
-      const validAccessCode = "MAIN01"; // 6 characters
-      const invalidAccessCodeShort = "SHORT"; // less than 6
-      const invalidAccessCodeLong = "TOOLONG"; // more than 6
-
-      assert.strictEqual(validAccessCode.length, 6);
-      assert.strictEqual(invalidAccessCodeShort.length < 6, true);
-      assert.strictEqual(invalidAccessCodeLong.length > 6, true);
+      expect("MAIN01".length).toBe(6);
+      expect("SHORT".length < 6).toBe(true);
+      expect("TOOLONG".length > 6).toBe(true);
     });
   });
 
   describe("response structure", () => {
     test("should include client, accessCode and userType in user creation parameters", () => {
-      // Test that userType is passed to createUser
       const mockUserCreationParams = {
         userId: "test-user-id",
         client: "main",
@@ -47,12 +37,12 @@ describe("signUp route handler", () => {
         userType: "main" as const,
       };
 
-      assert.strictEqual(mockUserCreationParams.userType, "main");
-      assert.strictEqual(mockUserCreationParams.accessCode, "MAIN01");
-      assert.ok(
+      expect(mockUserCreationParams.userType).toBe("main");
+      expect(mockUserCreationParams.accessCode).toBe("MAIN01");
+      expect(
         mockUserCreationParams.userType === "main" ||
           mockUserCreationParams.userType === "onboarding"
-      );
+      ).toBe(true);
     });
 
     test("should handle onboarding userType in user creation", () => {
@@ -63,8 +53,8 @@ describe("signUp route handler", () => {
         userType: "onboarding" as const,
       };
 
-      assert.strictEqual(mockOnboardingUserParams.userType, "onboarding");
-      assert.strictEqual(mockOnboardingUserParams.accessCode, "ONBR01");
+      expect(mockOnboardingUserParams.userType).toBe("onboarding");
+      expect(mockOnboardingUserParams.accessCode).toBe("ONBR01");
     });
 
     test("should return token, userType, client, and counselUserId", () => {
@@ -75,11 +65,11 @@ describe("signUp route handler", () => {
         counselUserId: "counsel-user-123",
       };
 
-      assert.strictEqual(typeof mockResponse.token, "string");
-      assert.strictEqual(mockResponse.userType, "main");
-      assert.strictEqual(mockResponse.client, "main");
-      assert.strictEqual(mockResponse.counselUserId, "counsel-user-123");
-      assert.strictEqual(typeof mockResponse.counselUserId, "string");
+      expect(typeof mockResponse.token).toBe("string");
+      expect(mockResponse.userType).toBe("main");
+      expect(mockResponse.client).toBe("main");
+      expect(mockResponse.counselUserId).toBe("counsel-user-123");
+      expect(typeof mockResponse.counselUserId).toBe("string");
     });
   });
 
@@ -87,44 +77,43 @@ describe("signUp route handler", () => {
     test("should normalize lowercase access code to uppercase", () => {
       const result = checkAccessCode("main01");
 
-      assert.strictEqual(result.success, true);
-      // TypeScript requires the if check for type narrowing of discriminated unions
+      expect(result.success).toBe(true);
       if (result.success) {
-        assert.strictEqual(result.accessCode, "MAIN01");
+        expect(result.accessCode).toBe("MAIN01");
       }
     });
 
     test("should normalize mixed case access code to uppercase", () => {
       const result = checkAccessCode("MaIn01");
 
-      assert.strictEqual(result.success, true);
+      expect(result.success).toBe(true);
       if (result.success) {
-        assert.strictEqual(result.accessCode, "MAIN01");
+        expect(result.accessCode).toBe("MAIN01");
       }
     });
 
     test("should trim whitespace and normalize access code", () => {
       const result = checkAccessCode("  main01  ");
 
-      assert.strictEqual(result.success, true);
+      expect(result.success).toBe(true);
       if (result.success) {
-        assert.strictEqual(result.accessCode, "MAIN01");
+        expect(result.accessCode).toBe("MAIN01");
       }
     });
 
     test("should return uppercase access code even when input is already uppercase", () => {
       const result = checkAccessCode("MAIN01");
 
-      assert.strictEqual(result.success, true);
+      expect(result.success).toBe(true);
       if (result.success) {
-        assert.strictEqual(result.accessCode, "MAIN01");
+        expect(result.accessCode).toBe("MAIN01");
       }
     });
 
     test("should return error for invalid access code", () => {
       const result = checkAccessCode("INVALID");
 
-      assert.strictEqual(result.success, false);
+      expect(result.success).toBe(false);
     });
   });
 });

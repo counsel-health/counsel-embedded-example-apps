@@ -1,0 +1,8 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "import", "jsx-a11y", "react", "react-hooks", "nextjs"],
+  "rules": {
+    "no-unused-vars": "error",
+    "no-unused-private-class-members": "error"
+  }
+}

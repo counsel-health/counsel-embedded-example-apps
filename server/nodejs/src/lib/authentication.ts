@@ -13,7 +13,11 @@ export const safeCompare = (a: string, b: string) => {
  * Express middleware to authenticate a bearer token.
  * The token is just an env variable for now.
  */
-export const authenticateBearerToken = (req: Request, res: Response, next: NextFunction): void => {
+export const authenticateBearerToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
   const authHeader = req.headers["authorization"];
   if (!authHeader) {
     res.status(401).json({ message: "Missing authorization header" });

@@ -1,0 +1,42 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.enable": false,
+  "prettier.enable": false,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.codeActionsOnSave": {
+    "source.format.oxc": "always",
+    "source.fixAll.oxc": "always",
+    "source.organizeImports": "always"
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "inferrinizzard.prettier-sql-vscode"
+  },
+  "Prettier-SQL.keywordCase": "upper",
+  "Prettier-SQL.SQLFlavourOverride": "postgresql",
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "tailwindCSS.experimental.configFile": {
+    "web/nextjs/tailwind.config.ts": "web/nextjs/**"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["cn\\(([\\s\\S]*?)\\)", "\"([^\"]*)\""],
+    ["cn\\(([\\s\\S]*?)\\)", "'([^']*)'"],
+    ["cn\\(([\\s\\S]*?)\\)", "`([^`]*)`"]
+  ],
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.next/**": true,
+    "**/coverage/**": true
+  },
+  "typescript.tsserver.watchOptions": {
+    "excludeDirectories": ["**/node_modules", "**/dist", "**/.next", "**/coverage"]
+  },
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "vitest.disableWorkspaceWarning": true
+}

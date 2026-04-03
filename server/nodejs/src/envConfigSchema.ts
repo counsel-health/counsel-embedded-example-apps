@@ -36,8 +36,11 @@ export const envConfig = z
         try {
           return JSON.parse(val);
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          throw new Error(`ACCESS_CODE_CONFIGS must be valid JSON: ${errorMessage}`);
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          throw new Error(
+            `ACCESS_CODE_CONFIGS must be valid JSON: ${errorMessage}`
+          );
         }
       })
       .pipe(
@@ -49,7 +52,9 @@ export const envConfig = z
       ),
   })
   .superRefine((data, ctx) => {
-    const hasIssuerConfig = Object.values(data.ACCESS_CODE_CONFIGS).some((c) => c.issuer);
+    const hasIssuerConfig = Object.values(data.ACCESS_CODE_CONFIGS).some(
+      (c) => c.issuer
+    );
     if (hasIssuerConfig && !data.COUNSEL_PRIVATE_KEY_PEM) {
       ctx.addIssue({
         code: "custom",

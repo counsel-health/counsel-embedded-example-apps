@@ -5,7 +5,11 @@ import { v4 as uuidv4 } from "uuid";
  * @description Observability middleware
  * Tracks request & responses in logs
  */
-export default function observabilityMiddleware(req: Request, res: Response, next: NextFunction) {
+export default function observabilityMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const start = Date.now();
   const requestId = uuidv4();
 

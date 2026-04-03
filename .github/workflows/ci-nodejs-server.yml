@@ -18,15 +18,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: useblacksmith/setup-node@v5
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: "24.x"
-          cache: "npm"
-          cache-dependency-path: "server/nodejs/**/package-lock.json"
+          bun-version: latest
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Create env file
         run: |
@@ -41,13 +39,16 @@ jobs:
           ACCESS_CODE_CONFIGS: ${{ secrets.ACCESS_CODE_CONFIGS }}
 
       - name: Lint
-        run: npm run lint
+        run: bun run lint
 
       - name: Test
-        run: npm run test
+        run: bun run test
 
-      - name: Build
-        run: npm run build
+      - name: Type Check
+        run: bun run build
+
+      - name: Compile
+        run: bun run compile
 
       - name: Healthcheck
-        run: npm run healthcheck
+        run: bun run healthcheck

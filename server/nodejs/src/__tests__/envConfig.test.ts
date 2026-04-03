@@ -1,10 +1,7 @@
-import { test, describe } from "node:test";
-import assert from "node:assert";
-import { z } from "zod";
 import { envConfig } from "@/envConfigSchema";
 import { setupTestEnv } from "@/lib/__mocks__/envConfig";
+import { describe, expect, test } from "vitest";
 
-// Set up test environment before importing @/envConfig
 setupTestEnv();
 
 describe("envConfig", () => {
@@ -27,14 +24,14 @@ describe("envConfig", () => {
 
       const result = envConfig.shape.ACCESS_CODE_CONFIGS.parse(validConfig);
 
-      assert.strictEqual(result.MAIN01.client, "main");
-      assert.strictEqual(result.MAIN01.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.MAIN01.issuer, "https://local-test-partner.example.com/main");
-      assert.strictEqual(result.ONBR01.client, "onboarding");
-      assert.strictEqual(result.ONBR01.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.ONBR01.issuer, "https://local-test-partner.example.com/onboarding");
-      assert.strictEqual(result.MAIN01.userType, "main");
-      assert.strictEqual(result.ONBR01.userType, "onboarding");
+      expect(result.MAIN01.client).toBe("main");
+      expect(result.MAIN01.apiUrl).toBe("https://test-api.counselhealth.com");
+      expect(result.MAIN01.issuer).toBe("https://local-test-partner.example.com/main");
+      expect(result.ONBR01.client).toBe("onboarding");
+      expect(result.ONBR01.apiUrl).toBe("https://test-api.counselhealth.com");
+      expect(result.ONBR01.issuer).toBe("https://local-test-partner.example.com/onboarding");
+      expect(result.MAIN01.userType).toBe("main");
+      expect(result.ONBR01.userType).toBe("onboarding");
     });
 
     test("should default userType to 'main' if not provided", () => {
@@ -43,26 +40,22 @@ describe("envConfig", () => {
           client: "main",
           apiUrl: "https://test-api.counselhealth.com",
           issuer: "https://local-test-partner.example.com/main",
-          // userType not provided, should default to "main"
         },
       });
 
       const result = envConfig.shape.ACCESS_CODE_CONFIGS.parse(configWithoutUserType);
 
-      assert.strictEqual(result.MAIN01.client, "main");
-      assert.strictEqual(result.MAIN01.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.MAIN01.issuer, "https://local-test-partner.example.com/main");
-      assert.strictEqual(result.MAIN01.userType, "main");
+      expect(result.MAIN01.client).toBe("main");
+      expect(result.MAIN01.apiUrl).toBe("https://test-api.counselhealth.com");
+      expect(result.MAIN01.issuer).toBe("https://local-test-partner.example.com/main");
+      expect(result.MAIN01.userType).toBe("main");
     });
 
     test("should reject invalid JSON", () => {
       const invalidJson = '{"invalid": json}';
 
-      assert.throws(
-        () => envConfig.shape.ACCESS_CODE_CONFIGS.parse(invalidJson),
-        (error: Error) => {
-          return error.message.includes("ACCESS_CODE_CONFIGS must be valid JSON");
-        }
+      expect(() => envConfig.shape.ACCESS_CODE_CONFIGS.parse(invalidJson)).toThrow(
+        "ACCESS_CODE_CONFIGS must be valid JSON",
       );
     });
 
@@ -78,9 +71,9 @@ describe("envConfig", () => {
 
       const result = envConfig.shape.ACCESS_CODE_CONFIGS.parse(apiKeyConfig);
 
-      assert.strictEqual(result.APIK01.client, "main");
-      assert.strictEqual(result.APIK01.apiKey, "sk_test_123");
-      assert.strictEqual(result.APIK01.issuer, undefined);
+      expect(result.APIK01.client).toBe("main");
+      expect(result.APIK01.apiKey).toBe("sk_test_123");
+      expect(result.APIK01.issuer).toBeUndefined();
     });
 
     test("should reject config with neither apiKey nor issuer", () => {
@@ -92,22 +85,16 @@ describe("envConfig", () => {
         },
       });
 
-      assert.throws(
-        () => envConfig.shape.ACCESS_CODE_CONFIGS.parse(invalidConfig),
-        /apiKey or issuer/
+      expect(() => envConfig.shape.ACCESS_CODE_CONFIGS.parse(invalidConfig)).toThrow(
+        /apiKey or issuer/,
       );
     });
 
     test("should reject empty ACCESS_CODE_CONFIGS", () => {
       const emptyConfig = JSON.stringify({});
 
-      assert.throws(
-        () => envConfig.shape.ACCESS_CODE_CONFIGS.parse(emptyConfig),
-        (error: z.ZodError) => {
-          return error.issues.some(
-            (issue) => issue.message === "At least one access code configuration is required"
-          );
-        }
+      expect(() => envConfig.shape.ACCESS_CODE_CONFIGS.parse(emptyConfig)).toThrow(
+        "At least one access code configuration is required",
       );
     });
 
@@ -135,19 +122,19 @@ describe("envConfig", () => {
 
       const result = envConfig.shape.ACCESS_CODE_CONFIGS.parse(validConfig);
 
-      assert.strictEqual(result.MAIN01.client, "main");
-      assert.strictEqual(result.MAIN01.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.MAIN01.issuer, "https://local-test-partner.example.com/main");
-      assert.strictEqual(result.CLNT02.client, "client2");
-      assert.strictEqual(result.CLNT02.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.CLNT02.issuer, "https://local-test-partner.example.com/client2");
-      assert.strictEqual(result.CLNT01.client, "client1");
-      assert.strictEqual(result.CLNT01.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(result.CLNT01.issuer, "https://local-test-partner.example.com/client1");
-      assert.strictEqual(Object.keys(result).length, 3);
-      assert.strictEqual(result.MAIN01.userType, "main");
-      assert.strictEqual(result.CLNT01.userType, "main");
-      assert.strictEqual(result.CLNT02.userType, "onboarding");
+      expect(result.MAIN01.client).toBe("main");
+      expect(result.MAIN01.apiUrl).toBe("https://test-api.counselhealth.com");
+      expect(result.MAIN01.issuer).toBe("https://local-test-partner.example.com/main");
+      expect(result.CLNT02.client).toBe("client2");
+      expect(result.CLNT02.apiUrl).toBe("https://test-api.counselhealth.com");
+      expect(result.CLNT02.issuer).toBe("https://local-test-partner.example.com/client2");
+      expect(result.CLNT01.client).toBe("client1");
+      expect(result.CLNT01.apiUrl).toBe("https://test-api.counselhealth.com");
+      expect(result.CLNT01.issuer).toBe("https://local-test-partner.example.com/client1");
+      expect(Object.keys(result).length).toBe(3);
+      expect(result.MAIN01.userType).toBe("main");
+      expect(result.CLNT01.userType).toBe("main");
+      expect(result.CLNT02.userType).toBe("onboarding");
     });
   });
 
@@ -168,28 +155,23 @@ describe("envConfig", () => {
         },
       };
 
-      const accessCode = "MAIN01";
-      const config = mockConfigs[accessCode as keyof typeof mockConfigs];
+      const config = mockConfigs["MAIN01" as keyof typeof mockConfigs];
 
-      assert.ok(config);
-      assert.strictEqual(config.client, "main");
-      assert.strictEqual(config.apiUrl, "https://test-api.counselhealth.com");
-      assert.strictEqual(config.issuer, "https://local-test-partner.example.com/main");
-      assert.strictEqual(config.userType, "main");
+      expect(config).toBeTruthy();
+      expect(config.client).toBe("main");
+      expect(config.apiUrl).toBe("https://test-api.counselhealth.com");
+      expect(config.issuer).toBe("https://local-test-partner.example.com/main");
+      expect(config.userType).toBe("main");
     });
 
     test("should return null for non-existent access code", async () => {
       const { getAccessCodeConfig } = await import("@/envConfig");
-      const config = getAccessCodeConfig("INVALID");
-
-      assert.strictEqual(config, null);
+      expect(getAccessCodeConfig("INVALID")).toBeNull();
     });
 
     test("should return null for non-existent access code (even after normalization)", async () => {
       const { getAccessCodeConfig } = await import("@/envConfig");
-      const config = getAccessCodeConfig("  invalid  ");
-
-      assert.strictEqual(config, null);
+      expect(getAccessCodeConfig("  invalid  ")).toBeNull();
     });
   });
 });

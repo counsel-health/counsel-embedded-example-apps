@@ -13,7 +13,8 @@ const getRequestUrl = (apiUrl: string, path: string) => `${apiUrl}${path}`;
 
 function getConfig(accessCode: string) {
   const config = getAccessCodeConfig(accessCode);
-  if (!config) throw new Error(`No config found for access code "${accessCode}".`);
+  if (!config)
+    throw new Error(`No config found for access code "${accessCode}".`);
   return config;
 }
 
@@ -27,7 +28,9 @@ const getRequestHeaders = async (
   // JWT auth only: sign a JWT with issuer when apiKey is not present
   const { apiKey, issuer } = config;
   if (!apiKey && !issuer) {
-    throw new Error(`Access code "${accessCode}" must have either apiKey or issuer configured`);
+    throw new Error(
+      `Access code "${accessCode}" must have either apiKey or issuer configured`
+    );
   }
   const authToken = apiKey ? apiKey : await signCounselJwt("server", issuer!);
 
@@ -65,12 +68,15 @@ export async function getCounselSignedAppUrl({
 }) {
   console.log("Getting signed app url for user", userId);
   const apiUrl = getApiUrl(accessCode);
-  const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/${userId}/signedAppUrl`), {
-    method: "POST",
-    headers: await getRequestHeaders(accessCode),
-    // Empty body is required by Counsel
-    body: JSON.stringify({}),
-  });
+  const response = await fetchWithRetry(
+    getRequestUrl(apiUrl, `/v1/user/${userId}/signedAppUrl`),
+    {
+      method: "POST",
+      headers: await getRequestHeaders(accessCode),
+      // Empty body is required by Counsel
+      body: JSON.stringify({}),
+    }
+  );
   if (!response.ok) {
     const error = await response.json();
     throw new Error(
@@ -91,12 +97,15 @@ export async function signOutCounselUser({
   accessCode: string;
 }) {
   const apiUrl = getApiUrl(accessCode);
-  const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/${userId}/signOut`), {
-    method: "POST",
-    headers: await getRequestHeaders(accessCode),
-    // Empty body is required by Counsel
-    body: JSON.stringify({}),
-  });
+  const response = await fetchWithRetry(
+    getRequestUrl(apiUrl, `/v1/user/${userId}/signOut`),
+    {
+      method: "POST",
+      headers: await getRequestHeaders(accessCode),
+      // Empty body is required by Counsel
+      body: JSON.stringify({}),
+    }
+  );
   if (!response.ok) {
     const error = await response.json();
     throw new Error(
@@ -162,12 +171,15 @@ function convertUserToCounselUser(user: User) {
 
 export async function createCounselDraftUser(user: User, accessCode: string) {
   const apiUrl = getApiUrl(accessCode);
-  const response = await fetchWithRetry(getRequestUrl(apiUrl, `/v1/user/draft`), {
-    method: "POST",
-    // Use the user id as the idempotency key
-    headers: await getRequestHeaders(accessCode),
-    body: JSON.stringify(convertUserToCounselDraftUser(user)),
-  });
+  const response = await fetchWithRetry(
+    getRequestUrl(apiUrl, `/v1/user/draft`),
+    {
+      method: "POST",
+      // Use the user id as the idempotency key
+      headers: await getRequestHeaders(accessCode),
+      body: JSON.stringify(convertUserToCounselDraftUser(user)),
+    }
+  );
   if (!response.ok) {
     // Handle duplicate user case (this can happen on server restarts where the in-memory DB is reset)
     if (response.status === 409) {

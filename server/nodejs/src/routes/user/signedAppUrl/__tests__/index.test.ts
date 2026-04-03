@@ -1,11 +1,10 @@
-import { test, describe } from "node:test";
-import assert from "node:assert";
 import { DBRowNotFoundError } from "@/db/lib/dbErrors";
+import { describe, expect, test } from "vitest";
 
 describe("getOrCreateUser behavior", () => {
   test("should handle existing user scenario", () => {
-    // When getUser succeeds, it should return the user directly
     const mockUser = {
+      // When getUser succeeds, it should return the user directly
       id: "test-user-id",
       counsel_user_id: "counsel-123",
       name: "John Doe",
@@ -13,29 +12,18 @@ describe("getOrCreateUser behavior", () => {
       info: {
         dob: "1990-01-01",
         sex: "Male",
-        address: {
-          line1: "123 Main St",
-          city: "San Francisco",
-          state: "CA",
-          zip: "94101",
-        },
+        address: { line1: "123 Main St", city: "San Francisco", state: "CA", zip: "94101" },
         phone: "+18007006000",
-        medicalProfile: {
-          conditions: [],
-          medications: [],
-        },
+        medicalProfile: { conditions: [], medications: [] },
       },
     };
 
-    // Expected: getUser is called once, user is returned
-    assert.ok(mockUser);
-    assert.strictEqual(mockUser.id, "test-user-id");
-    assert.strictEqual(typeof mockUser.counsel_user_id, "string");
+    expect(mockUser).toBeTruthy();
+    expect(mockUser.id).toBe("test-user-id");
+    expect(typeof mockUser.counsel_user_id).toBe("string");
   });
 
   test("should handle user creation when user not found and access code config exists", () => {
-    // When getUser throws DBRowNotFoundError and getAccessCodeConfig returns a config,
-    // createUser should be called with correct parameters
     const mockConfig = {
       client: "main",
       apiUrl: "https://test-api.counselhealth.com",
@@ -48,9 +36,13 @@ describe("getOrCreateUser behavior", () => {
       userType: "main" as const,
     };
 
-    assert.ok(mockConfig);
-    assert.strictEqual(mockConfig.userType, "main");
-    assert.deepStrictEqual(expectedCreateUserParams, {
+    // Expected: getUser is called once, user is returned
+    expect(mockConfig).toBeTruthy();
+    expect(mockConfig.userType).toBe("main");
+
+    // When getUser throws DBRowNotFoundError and getAccessCodeConfig returns a config,
+    // createUser should be called with correct parameters
+    expect(expectedCreateUserParams).toEqual({
       userId: "new-user-id",
       accessCode: "MAIN01",
       userType: "main",
@@ -61,15 +53,11 @@ describe("getOrCreateUser behavior", () => {
     // When getUser throws DBRowNotFoundError and getAccessCodeConfig returns null,
     // an error should be thrown with the correct message
     const accessCode = "INVALID";
-    const expectedError = new Error(
-      `No access code config found for access code "${accessCode}".`
+    const expectedError = new Error(`No access code config found for access code "${accessCode}".`);
+    expect(expectedError.message).toBe(
+      `No access code config found for access code "${accessCode}".`,
     );
-
-    assert.strictEqual(
-      expectedError.message,
-      `No access code config found for access code "${accessCode}".`
-    );
-    assert.ok(expectedError instanceof Error);
+    expect(expectedError).toBeInstanceOf(Error);
   });
 
   test("should propagate non-DBRowNotFoundError from getUser", () => {
@@ -77,8 +65,8 @@ describe("getOrCreateUser behavior", () => {
     // that error should be propagated
     const testError = new Error("Database connection failed");
 
-    assert.ok(testError instanceof Error);
-    assert.strictEqual(testError.message, "Database connection failed");
-    assert.ok(!(testError instanceof DBRowNotFoundError));
+    expect(testError).toBeInstanceOf(Error);
+    expect(testError.message).toBe("Database connection failed");
+    expect(testError).not.toBeInstanceOf(DBRowNotFoundError);
   });
 });

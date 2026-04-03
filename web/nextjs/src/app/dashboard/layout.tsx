@@ -2,7 +2,11 @@ import type React from "react";
 import Header from "@/components/Header";
 import { getUserAgent } from "@/lib/userAgent";
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const userAgent = await getUserAgent();
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden">

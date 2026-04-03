@@ -1,15 +1,15 @@
-import { DatabaseSync } from "node:sqlite";
+import { Database } from "bun:sqlite";
 import { seedUsers } from "./seeds/users";
 
-let dbInstance: DatabaseSync | null = null;
+let dbInstance: Database | null = null;
 
 /**
  * @description Get the database instance
  * @returns The database instance
  */
-export async function getDb(): Promise<DatabaseSync> {
+export async function getDb(): Promise<Database> {
   if (!dbInstance) {
-    dbInstance = new DatabaseSync(":memory:");
+    dbInstance = new Database(":memory:");
     // 1. Create tables
     dbInstance.exec(`
       CREATE TABLE users(id TEXT PRIMARY KEY, counsel_user_id UUID, name TEXT, email TEXT, info JSONB);

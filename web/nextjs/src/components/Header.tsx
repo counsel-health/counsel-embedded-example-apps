@@ -5,7 +5,12 @@ import { useMobile } from "@/hooks/useMobile";
 import { useState } from "react";
 import { Home, ShoppingBag, User, Menu, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -50,7 +55,9 @@ export default function Header({ userAgent }: HeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="p-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-primary">Embedded Corp Wellness</h1>
+        <h1 className="text-xl font-bold text-primary">
+          Embedded Corp Wellness
+        </h1>
         {/* Desktop Navigation */}
         {!isMobile && (
           <nav>
