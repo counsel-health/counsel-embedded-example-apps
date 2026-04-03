@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.describe("login smoke", () => {
   test("unknown access code shows error and stays on login", async ({

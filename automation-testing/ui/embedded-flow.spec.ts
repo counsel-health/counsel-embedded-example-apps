@@ -1,13 +1,8 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 const accessCode = process.env["E2E_ACCESS_CODE"];
 
 test.describe("embedded flow", () => {
-  test.skip(
-    !accessCode || accessCode.length !== 6,
-    "Set E2E_ACCESS_CODE (6 chars) to run full UI flow against a real Counsel-backed server"
-  );
-
   test("login, dashboard, chat iframe", async ({ page }) => {
     await page.goto("/login");
 
@@ -17,7 +12,9 @@ test.describe("embedded flow", () => {
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(
       page.getByRole("heading", { name: "Welcome back!" })
-    ).toBeVisible({ timeout: 15_000 });
+    ).toBeVisible({
+      timeout: 15_000,
+    });
 
     await page.goto("/dashboard/chat");
 

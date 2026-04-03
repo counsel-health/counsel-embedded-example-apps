@@ -42,7 +42,9 @@ test.describe("POST /user/signUp", () => {
     const body = await response.json();
     expect(body).toMatchObject({
       errors: {
-        message: expect.stringMatching(/Invalid request body|Missing request body/),
+        message: expect.stringMatching(
+          /Invalid request body|Missing request body/
+        ),
       },
     });
   });

@@ -4,8 +4,7 @@
 # - web: nextjs
 # - server: nodejs
 #
-# Requires: Doppler CLI and `doppler setup` at the repo root (or doppler.yaml).
-# See doppler.yaml.example and automation-testing/README.md.
+# Requires: Doppler CLI and `doppler setup` at the repo root.
 
 set -euo pipefail
 
@@ -18,9 +17,9 @@ echo "🔄 Copying .env.local to server/nodejs/.env.local"
 cp .env.local server/nodejs/.env.local
 
 echo "🐳 Stopping any existing containers..."
-docker compose down
+docker compose --env-file .env.local down
 
 echo "🚀 Starting services..."
-docker compose up --build
+doppler run -- docker compose --env-file .env.local up --build
 
 echo "✅ Services started successfully!"

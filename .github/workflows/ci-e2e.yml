@@ -16,6 +16,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build:
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Lint, format, typecheck (automation-testing)
+        working-directory: ./automation-testing
+        run: |
+          bun install --frozen-lockfile
+          bun run lint
+          bun run format:check
+          bun run typecheck
   e2e:
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
@@ -39,31 +55,10 @@ jobs:
       - name: Fetch secrets from Doppler
         uses: dopplerhq/secrets-fetch-action@v1.3.1
         with:
-          doppler-token: ${{ secrets.DOPPLER_DEV_CI_TOKEN }}
+          doppler-token: ${{ secrets.DOPPLER_CI_TOKEN }}
           doppler-project: ${{ vars.DOPPLER_PROJECT }}
           doppler-config: ${{ vars.DOPPLER_CONFIG }}
           inject-env-vars: true
-
-      - name: Write .env.local for Docker Compose
-        run: |
-          set -euo pipefail
-          umask 077
-          python3 << 'PY'
-          import os
-          import shlex
-
-          keys = (
-              "IRON_SESSION_PASSWORD",
-              "JWT_SECRET",
-              "COUNSEL_WEBHOOK_SECRET",
-              "ACCESS_CODE_CONFIGS",
-          )
-          with open(".env.local", "w", encoding="utf-8") as f:
-              for k in keys:
-                  v = os.environ.get(k)
-                  if v is not None and v != "":
-                      f.write(f"{k}={shlex.quote(v)}\n")
-          PY
 
       - name: Docker Compose up
         run: docker compose up --build -d
@@ -91,16 +86,11 @@ jobs:
 
       - name: Install Playwright Chromium
         working-directory: ./automation-testing
-        run: bunx playwright install chromium --with-deps
+        run: bun run playwright:install:ci
 
       - name: Run Playwright
         working-directory: ./automation-testing
-        env:
-          CI: "true"
-          USE_DOCKER_SERVICES: "true"
-          API_BASE_URL: http://127.0.0.1:4003
-          WEB_BASE_URL: http://127.0.0.1:3001
-        run: bun run test:e2e
+        run: bun run test:e2e:ci
 
       - name: Docker Compose down
         if: always()

@@ -1,45 +1,6 @@
-import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
-const repoRoot = path.join(__dirname, "..");
-
 const isCi = process.env["CI"] === "true";
-const useDockerServices = process.env["USE_DOCKER_SERVICES"] === "true";
-const startApiServer = process.env["PW_START_API_SERVER"] === "true";
-
-const defaultAccessCodeConfigs = JSON.stringify({
-  TST001: {
-    client: "local",
-    apiUrl: "https://example.com",
-    userType: "main",
-    apiKey: "local-placeholder-not-used-for-unknown-codes",
-  },
-});
-
-const webServer =
-  !isCi && !useDockerServices && startApiServer
-    ? {
-        command: "bun src/index.ts",
-        cwd: path.join(repoRoot, "server", "nodejs"),
-        url: "http://127.0.0.1:4003/health",
-        reuseExistingServer: true,
-        timeout: 120_000,
-        env: {
-          ...process.env,
-          PORT: "4003",
-          // production skips in-memory seeding that calls Counsel on startup (see server db.ts)
-          NODE_ENV: "production",
-          JWT_SECRET:
-            process.env["JWT_SECRET"] ??
-            "01234567890123456789012345678901",
-          COUNSEL_WEBHOOK_SECRET:
-            process.env["COUNSEL_WEBHOOK_SECRET"] ??
-            "whsec_test_webhook_secret_minimum_length_ok",
-          ACCESS_CODE_CONFIGS:
-            process.env["ACCESS_CODE_CONFIGS"] ?? defaultAccessCodeConfigs,
-        },
-      }
-    : undefined;
 
 export default defineConfig({
   timeout: 2 * 60 * 1000,
@@ -48,7 +9,6 @@ export default defineConfig({
   reporter: [["html", { outputFolder: "reports/html" }], ["list"]],
   workers: isCi ? 2 : 5,
   testDir: ".",
-  webServer,
   projects: [
     {
       name: "api",
