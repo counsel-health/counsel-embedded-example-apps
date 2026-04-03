@@ -1,9 +1,9 @@
 "use server";
 
-import { getSession } from "@/lib/session";
-import { redirect } from "next/navigation";
-import { revalidateTag } from "next/cache";
 import { getChatSignedAppUrlCacheKey, signOutCounselUser } from "@/lib/server";
+import { getSession } from "@/lib/session";
+import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function signOut() {
   const session = await getSession();
@@ -19,7 +19,7 @@ export async function signOut() {
   session.destroy();
   if (counselUserId) {
     // Invalidate the chat signed app url cache
-    revalidateTag(getChatSignedAppUrlCacheKey(counselUserId));
+    revalidateTag(getChatSignedAppUrlCacheKey(counselUserId), "max");
   }
   redirect("/login");
 }

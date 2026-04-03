@@ -1,16 +1,12 @@
-FROM node:24-alpine
-
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+FROM oven/bun:1.3.11 AS builder
 WORKDIR /workdir
-
-COPY package*.json ./
-
-RUN npm ci
-
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
 COPY . .
+RUN bun build --compile --minify src/index.ts --outfile ./server
 
+FROM oven/bun:1.3.11 AS runner
+WORKDIR /workdir
+COPY --from=builder /workdir/server ./server
 EXPOSE 4003
-
-CMD ["npm", "start"]
-
+CMD ["./server"]

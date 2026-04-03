@@ -12,7 +12,9 @@ export async function getOrCreateUser(userId: string, accessCode: string) {
   if (error instanceof DBRowNotFoundError) {
     const config = getAccessCodeConfig(accessCode);
     if (!config) {
-      throw new Error(`No access code config found for access code "${accessCode}".`);
+      throw new Error(
+        `No access code config found for access code "${accessCode}".`
+      );
     }
     return await createUser({ userId, accessCode, userType: config.userType });
   }
@@ -26,7 +28,11 @@ export async function getOrCreateUser(userId: string, accessCode: string) {
  * @description Get the signed app url for the user
  * @route POST /user/signedAppUrl
  */
-export default async function index(req: Request, res: Response, _next: NextFunction) {
+export default async function index(
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) {
   if (!isAuthenticatedRequest(req)) {
     res.status(401).json({ error: "Unauthorized" });
     return;

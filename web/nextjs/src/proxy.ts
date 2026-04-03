@@ -10,7 +10,7 @@ const shouldSkipMiddleware = (path: string) => {
   return path.startsWith("/.well-known");
 };
 
-export default async function middleware(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
   // 2. Check if the current route is protected or public
   const path = req.nextUrl.pathname;
   const isPublicRoute = publicRoutes.includes(path);

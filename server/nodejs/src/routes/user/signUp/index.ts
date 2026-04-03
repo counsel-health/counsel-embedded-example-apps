@@ -5,42 +5,25 @@ import { createJWTSession } from "@/lib/user-session";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { parseBody } from "@/lib/http";
+import { checkAccessCode } from "./accessCode";
+
 const SignUpBodySchema = z.object({
   userId: z.string().optional(),
   accessCode: z.string().length(6),
 });
 
-type AccessCodeCheck =
-  | {
-      success: true;
-      client: string;
-      accessCode: string;
-      userType: "main" | "onboarding";
-    }
-  | {
-      success: false;
-      error: string;
-    };
-
-export function checkAccessCode(accessCode: string): AccessCodeCheck {
-  const normalizedAccessCode = accessCode.trim().toUpperCase();
-  const config = getAccessCodeConfig(normalizedAccessCode);
-  if (!config) {
-    return { success: false, error: "Invalid access code" };
-  }
-  return {
-    success: true,
-    client: config.client,
-    accessCode: normalizedAccessCode,
-    userType: config.userType,
-  };
-}
+export { checkAccessCode } from "./accessCode";
+export type { AccessCodeCheck } from "./accessCode";
 
 /**
  * @description Sign up a new user with an access code
  * @route POST /user/signUp
  */
-export default async function index(req: Request, res: Response, _next: NextFunction) {
+export default async function index(
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) {
   const body = await parseBody(req, SignUpBodySchema);
 
   const accessCodeCheck = checkAccessCode(body.accessCode);

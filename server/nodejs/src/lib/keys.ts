@@ -24,12 +24,18 @@ export async function getPublicJwk() {
 async function getPrivateKey() {
   if (_privateKey) return _privateKey;
   const pem = env.COUNSEL_PRIVATE_KEY_PEM;
-  if (!pem) throw new Error("COUNSEL_PRIVATE_KEY_PEM is required for issuer-based auth");
+  if (!pem)
+    throw new Error(
+      "COUNSEL_PRIVATE_KEY_PEM is required for issuer-based auth"
+    );
   _privateKey = await importPKCS8(pem, JWT_ALG);
   return _privateKey;
 }
 
-export async function signCounselJwt(subject: string, issuer: string): Promise<string> {
+export async function signCounselJwt(
+  subject: string,
+  issuer: string
+): Promise<string> {
   const privateKey = await getPrivateKey();
   return new SignJWT({ sub: subject })
     .setProtectedHeader({ alg: JWT_ALG, kid: JWT_KID })

@@ -52,13 +52,6 @@ jobs:
           username: _json_key
           password: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS }}
 
-      - name: Create a dummy .env file to satisfy the build
-        run: |
-          touch .env
-          {
-            echo "IRON_SESSION_PASSWORD=<iron-session-password>"
-          } >> .env
-
       - name: Build and Push Container
         run: |
           docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE }}:${{ github.sha }}" ./

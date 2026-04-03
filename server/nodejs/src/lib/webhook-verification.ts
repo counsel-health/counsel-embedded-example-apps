@@ -2,7 +2,11 @@ import { Webhook } from "standardwebhooks";
 import { HttpError } from "./http";
 import { IncomingHttpHeaders } from "http";
 
-export function verifyWebhook(secret: string, body: unknown, headers: IncomingHttpHeaders) {
+export function verifyWebhook(
+  secret: string,
+  body: unknown,
+  headers: IncomingHttpHeaders
+) {
   const wh = new Webhook(secret);
   try {
     wh.verify(JSON.stringify(body), headers as Record<string, string>);

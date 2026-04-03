@@ -6,7 +6,11 @@ import { NextFunction, Request, Response } from "express";
  * @description Sign out a user from Counsel
  * @route POST /user/signOut
  */
-export default async function index(req: Request, res: Response, _next: NextFunction) {
+export default async function index(
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) {
   if (!isAuthenticatedRequest(req)) {
     res.status(401).json({ error: "Unauthorized" });
     return;

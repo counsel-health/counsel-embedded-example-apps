@@ -7,7 +7,9 @@ const router = Router();
  * @route GET /
  */
 router.get("/", (_req: Request, res: Response) => {
-  res.status(200).json({ message: "Welcome to the Example Counsel Node.js server!" });
+  res
+    .status(200)
+    .json({ message: "Welcome to the Example Counsel Node.js server!" });
 });
 
 export default router;

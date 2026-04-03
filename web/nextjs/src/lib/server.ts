@@ -32,7 +32,8 @@ function isCounselJwtValid(jwt: string): boolean {
   try {
     const payload = decodeJwt(jwt);
     return (
-      typeof payload.exp === "number" && Date.now() < payload.exp * 1000 - JWT_EXPIRY_BUFFER_MS
+      typeof payload.exp === "number" &&
+      Date.now() < payload.exp * 1000 - JWT_EXPIRY_BUFFER_MS
     );
   } catch {
     return false;
@@ -42,11 +43,16 @@ function isCounselJwtValid(jwt: string): boolean {
 async function fetchCounselJwt(sessionToken: string): Promise<string> {
   const resp = await fetchWithRetry(`${serverEnv.SERVER_HOST}/token`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...getAuthorizationHeader(sessionToken) },
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthorizationHeader(sessionToken),
+    },
     body: JSON.stringify({}),
   });
   if (!resp.ok) {
-    throw new Error(`Failed to fetch Counsel JWT: ${resp.status} ${resp.statusText}`);
+    throw new Error(
+      `Failed to fetch Counsel JWT: ${resp.status} ${resp.statusText}`
+    );
   }
   const { token } = CounselTokenResponseSchema.parse(await resp.json());
   return token;
@@ -57,7 +63,9 @@ async function fetchCounselJwt(sessionToken: string): Promise<string> {
  * Mutates session.counselJwt but does NOT call session.save() — the caller (handleLogin,
  * a Server Action) is responsible for saving.
  */
-export async function prewarmSessionJwt(session: IronSession<SessionData>): Promise<void> {
+export async function prewarmSessionJwt(
+  session: IronSession<SessionData>
+): Promise<void> {
   if (session.authType !== "jwt") return;
   session.counselJwt = await fetchCounselJwt(session.token);
 }
@@ -75,12 +83,16 @@ export async function prewarmSessionJwt(session: IronSession<SessionData>): Prom
  * - If the cached JWT is expired, a fresh one is fetched from /token and used in-memory only.
  * Cached in NextJS so the same URL is reused across navigations until invalidated.
  */
-export async function getCounselSignedAppUrl(session: IronSession<SessionData>) {
+export async function getCounselSignedAppUrl(
+  session: IronSession<SessionData>
+) {
   const { token, counselUserId, authType, counselJwt } = session;
 
   if (authType === "jwt") {
     const jwt =
-      counselJwt && isCounselJwtValid(counselJwt) ? counselJwt : await fetchCounselJwt(token);
+      counselJwt && isCounselJwtValid(counselJwt)
+        ? counselJwt
+        : await fetchCounselJwt(token);
 
     // jwt auth flow: calls the Counsel API directly (no demo server proxy)
     const resp = await fetchWithRetry(
@@ -93,28 +105,41 @@ export async function getCounselSignedAppUrl(session: IronSession<SessionData>) 
         },
         body: JSON.stringify({}),
         cache: "default",
-        next: { revalidate: 3600, tags: [getChatSignedAppUrlCacheKey(counselUserId)] },
+        next: {
+          revalidate: 3600,
+          tags: [getChatSignedAppUrlCacheKey(counselUserId)],
+        },
       }
     );
     if (!resp.ok) {
-      throw new Error(`Failed to get signed app url: ${resp.status} ${resp.statusText}`);
+      throw new Error(
+        `Failed to get signed app url: ${resp.status} ${resp.statusText}`
+      );
     }
     return SignedAppUrlResponseSchema.parse(await resp.json()).url;
   }
 
   // apiKey flow: demo server proxies the request using the API key
-  const resp = await fetchWithRetry(`${serverEnv.SERVER_HOST}/user/signedAppUrl`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthorizationHeader(token),
-    },
-    body: JSON.stringify({}),
-    cache: "default",
-    next: { revalidate: 3600, tags: [getChatSignedAppUrlCacheKey(counselUserId)] },
-  });
+  const resp = await fetchWithRetry(
+    `${serverEnv.SERVER_HOST}/user/signedAppUrl`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthorizationHeader(token),
+      },
+      body: JSON.stringify({}),
+      cache: "default",
+      next: {
+        revalidate: 3600,
+        tags: [getChatSignedAppUrlCacheKey(counselUserId)],
+      },
+    }
+  );
   if (!resp.ok) {
-    throw new Error(`Failed to get signed app url: ${resp.status} ${resp.statusText}`);
+    throw new Error(
+      `Failed to get signed app url: ${resp.status} ${resp.statusText}`
+    );
   }
   return SignedAppUrlResponseSchema.parse(await resp.json()).url;
 }
@@ -194,7 +219,9 @@ async function fetchFromCounselServer<T>(
     },
     body: JSON.stringify(body),
     cache: cache ? "default" : "no-store",
-    next: cache ? { revalidate: cache.revalidate, tags: cache.tags } : undefined,
+    next: cache
+      ? { revalidate: cache.revalidate, tags: cache.tags }
+      : undefined,
   });
 
   if (!response.ok) {

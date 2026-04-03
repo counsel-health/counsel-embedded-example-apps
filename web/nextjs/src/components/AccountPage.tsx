@@ -19,7 +19,9 @@ export function AccountPage({ user }: { user: User }) {
     <div className="space-y-6 pb-16">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Account</h1>
-        <p className="text-muted-foreground mt-2">Manage your account information</p>
+        <p className="text-muted-foreground mt-2">
+          Manage your account information
+        </p>
       </div>
 
       <Card>
@@ -29,7 +31,10 @@ export function AccountPage({ user }: { user: User }) {
         <CardContent>
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
             <Avatar className="h-24 w-24">
-              <AvatarImage src="/placeholder.svg?height=96&width=96" alt={user.name} />
+              <AvatarImage
+                src="/placeholder.svg?height=96&width=96"
+                alt={user.name}
+              />
               <AvatarFallback>AJ</AvatarFallback>
             </Avatar>
 
@@ -56,7 +61,12 @@ export function AccountPage({ user }: { user: User }) {
 
               <div className="pt-4 flex gap-2 max-w-20">
                 <Button size="sm">Edit Profile</Button>
-                <Button variant="outline" size="sm" onClick={handleSignOut} loading={isSigningOut}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSignOut}
+                  loading={isSigningOut}
+                >
                   Sign Out
                 </Button>
               </div>
@@ -72,7 +82,9 @@ export function AccountPage({ user }: { user: User }) {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-muted-foreground">Medical Conditions</p>
+              <p className="text-sm text-muted-foreground">
+                Medical Conditions
+              </p>
               <p>{user.medicalConditions}</p>
             </div>
             <div>
