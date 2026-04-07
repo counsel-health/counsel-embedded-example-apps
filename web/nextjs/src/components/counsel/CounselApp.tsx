@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import CounselLoading from "./CounselLoading";
+import type { CounselAppClientProps } from "./CounselAppClient";
 
 export type CounselAppProps = {
   signedAppUrl: string;
@@ -10,7 +11,7 @@ export type CounselAppProps = {
  * CounselApp is a dynamic import of CounselAppClient that is not server-side rendered.
  * This is because the signedAppUrl is a one-time use url and rendering on the server-side will not work.
  */
-export const CounselApp = dynamic<CounselAppProps>(
+export const CounselApp = dynamic<CounselAppClientProps>(
   () => {
     return import("./CounselAppClient");
   },
