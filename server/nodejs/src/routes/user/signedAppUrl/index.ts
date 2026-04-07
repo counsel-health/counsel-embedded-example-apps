@@ -44,9 +44,11 @@ export default async function index(
   const user = await getOrCreateUser(userId, accessCode);
 
   // 2. Call the Counsel API to get the signed app url
+  // Forward any session data (e.g. view.navigation) from the request body
   const { url } = await getCounselSignedAppUrl({
     userId: user.counsel_user_id,
     accessCode,
+    sessionData: req.body,
   });
 
   res.status(200).json({ url });

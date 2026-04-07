@@ -62,9 +62,11 @@ function getApiUrl(accessCode: string): string {
 export async function getCounselSignedAppUrl({
   userId,
   accessCode,
+  sessionData,
 }: {
   userId: string;
   accessCode: string;
+  sessionData?: Record<string, unknown>;
 }) {
   console.log("Getting signed app url for user", userId);
   const apiUrl = getApiUrl(accessCode);
@@ -73,8 +75,7 @@ export async function getCounselSignedAppUrl({
     {
       method: "POST",
       headers: await getRequestHeaders(accessCode),
-      // Empty body is required by Counsel
-      body: JSON.stringify({}),
+      body: JSON.stringify(sessionData ?? {}),
     }
   );
   if (!response.ok) {
@@ -87,6 +88,32 @@ export async function getCounselSignedAppUrl({
   }
   const data = await response.json();
   return SignedAppUrlResponse.parse(data);
+}
+
+export async function getCounselUserThreads({
+  userId,
+  accessCode,
+}: {
+  userId: string;
+  accessCode: string;
+}) {
+  const apiUrl = getApiUrl(accessCode);
+  const response = await fetchWithRetry(
+    getRequestUrl(apiUrl, `/v1/user/${userId}/threads`),
+    {
+      method: "GET",
+      headers: await getRequestHeaders(accessCode),
+    }
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(
+      `Request to get threads failed: ${response.status} ${
+        response.statusText
+      } ${JSON.stringify(error)}`
+    );
+  }
+  return await response.json();
 }
 
 export async function signOutCounselUser({

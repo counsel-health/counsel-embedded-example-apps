@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { CounselAppProps } from "./CounselApp";
 
 /**
@@ -60,17 +60,16 @@ export default function CounselAppClient({
   onError,
 }: CounselAppClientProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [iframeOrigin, setIframeOrigin] = useState<string | null>(null);
 
-  // Derive the iframe origin from the signedAppUrl
-  useEffect(() => {
+  // Derive the iframe origin synchronously so the message listener is
+  // registered on the very first render — avoids missing counsel:ready.
+  const iframeOrigin = (() => {
     try {
-      const url = new URL(signedAppUrl);
-      setIframeOrigin(url.origin);
+      return new URL(signedAppUrl).origin;
     } catch {
-      console.error("Invalid signedAppUrl:", signedAppUrl);
+      return null;
     }
-  }, [signedAppUrl]);
+  })();
 
   // Listen for messages from the Counsel iframe
   useEffect(() => {

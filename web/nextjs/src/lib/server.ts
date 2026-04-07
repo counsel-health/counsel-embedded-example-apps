@@ -84,7 +84,8 @@ export async function prewarmSessionJwt(
  * Cached in NextJS so the same URL is reused across navigations until invalidated.
  */
 export async function getCounselSignedAppUrl(
-  session: IronSession<SessionData>
+  session: IronSession<SessionData>,
+  sessionData?: Record<string, unknown>
 ) {
   const { token, counselUserId, authType, counselJwt } = session;
 
@@ -103,7 +104,7 @@ export async function getCounselSignedAppUrl(
           "Content-Type": "application/json",
           ...getAuthorizationHeader(jwt),
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(sessionData ?? {}),
         cache: "default",
         next: {
           revalidate: 3600,
@@ -128,7 +129,7 @@ export async function getCounselSignedAppUrl(
         "Content-Type": "application/json",
         ...getAuthorizationHeader(token),
       },
-      body: JSON.stringify({}),
+      body: JSON.stringify(sessionData ?? {}),
       cache: "default",
       next: {
         revalidate: 3600,
@@ -142,6 +143,63 @@ export async function getCounselSignedAppUrl(
     );
   }
   return SignedAppUrlResponseSchema.parse(await resp.json()).url;
+}
+
+/**
+ * @description Fetch the user's chat threads from the Counsel API.
+ * Uses the same auth flow pattern as getCounselSignedAppUrl:
+ * - "jwt" auth: calls the Counsel API directly with a JWT
+ * - "apiKey" auth: proxies through the demo server
+ */
+export async function getCounselThreads(
+  session: IronSession<SessionData>
+) {
+  const { token, counselUserId, authType, counselJwt } = session;
+  const { ThreadListResponseSchema } = await import("@/lib/schemas");
+
+  if (authType === "jwt") {
+    const jwt =
+      counselJwt && isCounselJwtValid(counselJwt)
+        ? counselJwt
+        : await fetchCounselJwt(token);
+
+    const resp = await fetchWithRetry(
+      `${serverEnv.COUNSEL_API_URL}/v1/user/${counselUserId}/threads`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthorizationHeader(jwt),
+        },
+        cache: "no-store",
+      }
+    );
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to get threads: ${resp.status} ${resp.statusText}`
+      );
+    }
+    return ThreadListResponseSchema.parse(await resp.json());
+  }
+
+  // apiKey flow: proxy through the demo server
+  const resp = await fetchWithRetry(
+    `${serverEnv.SERVER_HOST}/user/threads`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthorizationHeader(token),
+      },
+      cache: "no-store",
+    }
+  );
+  if (!resp.ok) {
+    throw new Error(
+      `Failed to get threads: ${resp.status} ${resp.statusText}`
+    );
+  }
+  return ThreadListResponseSchema.parse(await resp.json());
 }
 
 /**
