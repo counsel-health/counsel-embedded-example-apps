@@ -163,6 +163,7 @@ export async function signUpCounselUser(
         userType: UserType;
         counselUserId: string;
         authType: "apiKey" | "jwt";
+        handoffTrigger?: string;
       };
     }
   | { success: false; error: unknown }

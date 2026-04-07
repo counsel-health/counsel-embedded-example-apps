@@ -10,7 +10,8 @@ export const CounselTokenResponseSchema = z.object({
 
 export const SignUpResponseSchema = z.object({
   token: z.string(),
-  userType: z.enum(["main", "onboarding"]),
+  userType: z.enum(["main", "onboarding", "handoff"]),
   counselUserId: z.string(),
   authType: z.enum(["apiKey", "jwt"]),
+  handoffTrigger: z.string().optional(),
 });

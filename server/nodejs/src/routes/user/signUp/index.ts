@@ -56,5 +56,7 @@ export default async function index(
     counselUserId: user.counsel_user_id,
     // Tells the Next.js app which auth flow to use for Counsel API calls
     authType: config.apiKey ? "apiKey" : "jwt",
+    // Only present for handoff userType. Defaults to "I need a doctor" on the frontend.
+    handoffTrigger: config.handoffTrigger,
   });
 }

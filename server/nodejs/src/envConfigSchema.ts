@@ -9,7 +9,10 @@ export const AccessCodeConfigSchema = z
   .object({
     client: z.string(),
     apiUrl: z.string().url(),
-    userType: z.enum(["main", "onboarding"]).default("main"),
+    userType: z.enum(["main", "onboarding", "handoff"]).default("main"),
+  // Phrase that triggers the Counsel handoff card in the host chat UI.
+  // Only used when userType is "handoff". Defaults to "I need a doctor".
+  handoffTrigger: z.string().optional(),
     // API key for API key auth. When present, used as Bearer token.
     apiKey: z.string().optional(),
     // The iss claim put in JWTs for this access code's org.

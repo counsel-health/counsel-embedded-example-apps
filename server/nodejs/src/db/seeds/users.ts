@@ -12,16 +12,19 @@ export async function seedUsers(db: Database) {
     return;
   }
 
-  // Find all access codes for main and onboarding clients
+  // Find all access codes grouped by userType
   const mainConfigs = Object.entries(env.ACCESS_CODE_CONFIGS).filter(
     ([_, config]) => config.userType === "main"
   );
   const onboardingConfigs = Object.entries(env.ACCESS_CODE_CONFIGS).filter(
     ([_, config]) => config.userType === "onboarding"
   );
+  const handoffConfigs = Object.entries(env.ACCESS_CODE_CONFIGS).filter(
+    ([_, config]) => config.userType === "handoff"
+  );
 
   const seedPromises = [];
-  // Seed a user for each main userTypeaccess code
+  // Seed a user for each main userType access code
   for (const [accessCode] of mainConfigs) {
     seedPromises.push(
       createUser({
@@ -39,6 +42,17 @@ export async function seedUsers(db: Database) {
         userId: uuidv4(),
         accessCode,
         userType: "onboarding",
+        dbProvider: db,
+      })
+    );
+  }
+  // Seed a user for each handoff userType access code (creates a full user, same as main)
+  for (const [accessCode] of handoffConfigs) {
+    seedPromises.push(
+      createUser({
+        userId: uuidv4(),
+        accessCode,
+        userType: "handoff",
         dbProvider: db,
       })
     );
