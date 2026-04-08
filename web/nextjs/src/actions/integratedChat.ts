@@ -21,5 +21,5 @@ export async function getSignedUrlForThread(
  */
 export async function getSignedUrlForNewThread(): Promise<string> {
   const session = await getSession();
-  return getIntegratedSignedAppUrl(session);
+  return getIntegratedSignedAppUrl(session, { action: "create_thread" });
 }
