@@ -2,7 +2,6 @@ import ChatPage from "@/components/ChatPage";
 import IntegratedChatPage from "@/components/IntegratedChatPage";
 import {
   getCounselSignedAppUrl,
-  getIntegratedSignedAppUrl,
   getCounselThreads,
 } from "@/lib/server";
 import { getSession } from "@/lib/session";
@@ -18,14 +17,9 @@ export default async function Chat() {
   const session = await getSession();
 
   if (session.navMode === "integrated") {
-    const [signedAppUrl, { threads }] = await Promise.all([
-      getIntegratedSignedAppUrl(session),
-      getCounselThreads(session),
-    ]);
+    const { threads } = await getCounselThreads(session);
 
-    return (
-      <IntegratedChatPage signedAppUrl={signedAppUrl} threads={threads} />
-    );
+    return <IntegratedChatPage threads={threads} />;
   }
 
   const signedAppUrl = await getCounselSignedAppUrl(session);

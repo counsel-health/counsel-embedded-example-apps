@@ -63,8 +63,6 @@ type ActiveThread =
   | { type: "counsel"; id: string };
 
 type IntegratedChatPageProps = {
-  /** Initial signed URL for the integrated Counsel view (used if first click is Counsel). */
-  signedAppUrl: string;
   /** Counsel chat threads fetched server-side. */
   threads: ThreadItem[];
 };
@@ -78,7 +76,6 @@ type IntegratedChatPageProps = {
  * each thread switch fetches a fresh one-time-use URL.
  */
 export default function IntegratedChatPage({
-  signedAppUrl,
   threads: initialCounselThreads,
 }: IntegratedChatPageProps) {
   const defaultThread = createDefaultHostThread();
@@ -93,7 +90,7 @@ export default function IntegratedChatPage({
     type: "host",
     id: defaultThread.id,
   });
-  const [currentSignedUrl, setCurrentSignedUrl] = useState(signedAppUrl);
+  const [currentSignedUrl, setCurrentSignedUrl] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   // ---- Handlers -----------------------------------------------------------
@@ -111,7 +108,13 @@ export default function IntegratedChatPage({
       if (isPending) return;
       setActiveThread({ type: "counsel", id: threadId });
       startTransition(async () => {
-        const url = await getSignedUrlForThread(threadId);
+        // Placeholder threads (created locally via "Connect to Counsel") don't
+        // have a real Counsel thread ID yet — use create_thread to resume.
+        // Real threads from the API use open_thread with their UUID.
+        const isPlaceholder = threadId.startsWith("counsel-new-");
+        const url = isPlaceholder
+          ? await getSignedUrlForNewThread()
+          : await getSignedUrlForThread(threadId);
         setCurrentSignedUrl(url);
       });
     },
@@ -204,11 +207,15 @@ export default function IntegratedChatPage({
             onConnectCounsel={handleConnectCounsel}
             isConnecting={isPending}
           />
-        ) : activeThread.type === "counsel" ? (
+        ) : activeThread.type === "counsel" && currentSignedUrl ? (
           <CounselChatThread
             signedAppUrl={currentSignedUrl}
             isLoading={isPending}
           />
+        ) : activeThread.type === "counsel" ? (
+          <div className="flex h-full items-center justify-center">
+            <p className="text-sm text-gray-500">Loading...</p>
+          </div>
         ) : null}
       </div>
     </div>
