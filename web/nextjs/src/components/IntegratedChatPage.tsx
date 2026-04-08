@@ -6,8 +6,18 @@ import type { HostThread } from "./integrated/types";
 import ChatList from "./integrated/ChatList";
 import ChatThread from "./integrated/ChatThread";
 import CounselChatThread from "./integrated/CounselChatThread";
-import { getSignedUrlForThread } from "@/actions/integratedChat";
+import {
+  getSignedUrlForThread,
+  getSignedUrlForNewThread,
+} from "@/actions/integratedChat";
 import { signOut } from "@/actions/signOut";
+
+// ---------------------------------------------------------------------------
+// Trigger phrase — any message containing this (case-insensitive) will show
+// the "Connect to Counsel" card.
+// ---------------------------------------------------------------------------
+
+const COUNSEL_TRIGGER = "i need a doctor";
 
 // ---------------------------------------------------------------------------
 // Mock data — one hardcoded host thread as the default conversation
@@ -76,7 +86,9 @@ export default function IntegratedChatPage({
   const [hostThreads, setHostThreads] = useState<HostThread[]>([
     defaultThread,
   ]);
-  const [counselThreads] = useState<ThreadItem[]>(initialCounselThreads);
+  const [counselThreads, setCounselThreads] = useState<ThreadItem[]>(
+    initialCounselThreads
+  );
   const [activeThread, setActiveThread] = useState<ActiveThread>({
     type: "host",
     id: defaultThread.id,
@@ -115,6 +127,8 @@ export default function IntegratedChatPage({
 
   const handleSendMessage = useCallback(
     (threadId: string, text: string) => {
+      const isTrigger = text.toLowerCase().includes(COUNSEL_TRIGGER);
+
       setHostThreads((prev) =>
         prev.map((t) =>
           t.id === threadId
@@ -124,10 +138,14 @@ export default function IntegratedChatPage({
                 messages: [
                   ...t.messages,
                   { role: "user" as const, text },
-                  {
-                    role: "bot" as const,
-                    text: "Thanks for your message! This is a demo response.",
-                  },
+                  ...(isTrigger
+                    ? [{ role: "bot" as const, type: "counsel-card" as const }]
+                    : [
+                        {
+                          role: "bot" as const,
+                          text: "Thanks for your message! This is a demo response.",
+                        },
+                      ]),
                 ],
               }
             : t
@@ -136,6 +154,25 @@ export default function IntegratedChatPage({
     },
     []
   );
+
+  const handleConnectCounsel = useCallback(() => {
+    if (isPending) return;
+    startTransition(async () => {
+      const url = await getSignedUrlForNewThread();
+      setCurrentSignedUrl(url);
+
+      // Add a placeholder Counsel thread to the sidebar.
+      // In a real app this would come from the API after the thread is created.
+      const newCounselThread: ThreadItem = {
+        id: `counsel-new-${Date.now()}`,
+        display_name: "Counsel chat",
+        last_activity_time: new Date().toISOString(),
+        mode: "ai",
+      };
+      setCounselThreads((prev) => [newCounselThread, ...prev]);
+      setActiveThread({ type: "counsel", id: newCounselThread.id });
+    });
+  }, [isPending]);
 
   // ---- Render -------------------------------------------------------------
 
@@ -161,7 +198,12 @@ export default function IntegratedChatPage({
       {/* Main content area */}
       <div className="flex-1 min-w-0">
         {activeThread.type === "host" && activeHostThread ? (
-          <ChatThread thread={activeHostThread} onSendMessage={handleSendMessage} />
+          <ChatThread
+            thread={activeHostThread}
+            onSendMessage={handleSendMessage}
+            onConnectCounsel={handleConnectCounsel}
+            isConnecting={isPending}
+          />
         ) : activeThread.type === "counsel" ? (
           <CounselChatThread
             signedAppUrl={currentSignedUrl}

@@ -80,9 +80,13 @@ export default function ChatList({
           const isActive =
             activeThreadId === item.thread.id &&
             activeThreadType === item.type;
-          const displayName =
+          const rawName =
             item.thread.display_name ||
             (item.type === "counsel" ? "Counsel chat" : "New chat");
+          const displayName =
+            item.type === "counsel" && !rawName.startsWith("Counsel")
+              ? `Counsel — ${rawName}`
+              : rawName;
 
           return (
             <button

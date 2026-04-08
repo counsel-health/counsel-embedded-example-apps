@@ -2,19 +2,76 @@
 
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import type { HostThread } from "./types";
+import type { HostThread, ChatMessage } from "./types";
 
 type ChatThreadProps = {
   thread: HostThread;
   onSendMessage?: (threadId: string, text: string) => void;
+  onConnectCounsel?: () => void;
+  isConnecting?: boolean;
 };
+
+function CounselCard({
+  onConnect,
+  isConnecting,
+}: {
+  onConnect?: () => void;
+  isConnecting?: boolean;
+}) {
+  return (
+    <div className="max-w-[80%] rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <p className="text-sm font-medium text-gray-900">
+        It sounds like you need medical assistance.
+      </p>
+      <p className="mt-1 text-sm text-gray-600">
+        We can connect you with a Counsel doctor who can help right away.
+      </p>
+      <button
+        onClick={onConnect}
+        disabled={isConnecting}
+        className={cn(
+          "mt-3 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
+          isConnecting
+            ? "bg-blue-400 cursor-wait"
+            : "bg-blue-600 hover:bg-blue-700"
+        )}
+      >
+        {isConnecting ? "Connecting..." : "Connect to Counsel"}
+      </button>
+    </div>
+  );
+}
+
+function MessageBubble({ msg }: { msg: ChatMessage }) {
+  if ("type" in msg && msg.type === "counsel-card") {
+    // CounselCard is rendered separately by the parent with handlers
+    return null;
+  }
+  return (
+    <div
+      className={cn(
+        "max-w-[80%] rounded-lg px-3 py-2 text-sm",
+        msg.role === "user"
+          ? "ml-auto bg-blue-600 text-white"
+          : "bg-gray-100 text-gray-900"
+      )}
+    >
+      {msg.text}
+    </div>
+  );
+}
 
 /**
  * ChatThread renders a host app chat thread.
  * This is a mock/demo UI showing what a host application's own chat
  * experience might look like alongside the embedded Counsel chat.
  */
-export default function ChatThread({ thread, onSendMessage }: ChatThreadProps) {
+export default function ChatThread({
+  thread,
+  onSendMessage,
+  onConnectCounsel,
+  isConnecting,
+}: ChatThreadProps) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -40,19 +97,17 @@ export default function ChatThread({ thread, onSendMessage }: ChatThreadProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {thread.messages.map((msg, i) => (
-          <div
-            key={i}
-            className={cn(
-              "max-w-[80%] rounded-lg px-3 py-2 text-sm",
-              msg.role === "user"
-                ? "ml-auto bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-900"
-            )}
-          >
-            {msg.text}
-          </div>
-        ))}
+        {thread.messages.map((msg, i) =>
+          "type" in msg && msg.type === "counsel-card" ? (
+            <CounselCard
+              key={i}
+              onConnect={onConnectCounsel}
+              isConnecting={isConnecting}
+            />
+          ) : (
+            <MessageBubble key={i} msg={msg} />
+          )
+        )}
         <div ref={messagesEndRef} />
       </div>
 
