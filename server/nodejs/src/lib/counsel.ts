@@ -90,32 +90,6 @@ export async function getCounselSignedAppUrl({
   return SignedAppUrlResponse.parse(data);
 }
 
-export async function getCounselUserThreads({
-  userId,
-  accessCode,
-}: {
-  userId: string;
-  accessCode: string;
-}) {
-  const apiUrl = getApiUrl(accessCode);
-  const response = await fetchWithRetry(
-    getRequestUrl(apiUrl, `/v1/user/${userId}/threads`),
-    {
-      method: "GET",
-      headers: await getRequestHeaders(accessCode),
-    }
-  );
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(
-      `Request to get threads failed: ${response.status} ${
-        response.statusText
-      } ${JSON.stringify(error)}`
-    );
-  }
-  return await response.json();
-}
-
 export async function signOutCounselUser({
   userId,
   accessCode,

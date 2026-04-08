@@ -214,50 +214,29 @@ export async function getIntegratedSignedAppUrl(
 }
 
 /**
- * @description Fetch the user's chat threads from the Counsel API.
- * Uses the same auth flow pattern as getCounselSignedAppUrl:
- * - "jwt" auth: calls the Counsel API directly with a JWT
- * - "apiKey" auth: proxies through the demo server
+ * @description Fetch the user's chat threads directly from the Counsel API using JWT.
+ *
+ * This demonstrates that with JWT auth you can call the Counsel API directly
+ * from your frontend server — no backend proxy needed. This is faster and simpler.
  */
 export async function getCounselThreads(
   session: IronSession<SessionData>
 ) {
-  const { token, counselUserId, authType, counselJwt } = session;
+  const { token, counselUserId, counselJwt } = session;
   const { ThreadListResponseSchema } = await import("@/lib/schemas");
 
-  if (authType === "jwt") {
-    const jwt =
-      counselJwt && isCounselJwtValid(counselJwt)
-        ? counselJwt
-        : await fetchCounselJwt(token);
+  const jwt =
+    counselJwt && isCounselJwtValid(counselJwt)
+      ? counselJwt
+      : await fetchCounselJwt(token);
 
-    const resp = await fetchWithRetry(
-      `${serverEnv.COUNSEL_API_URL}/v1/user/${counselUserId}/threads`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthorizationHeader(jwt),
-        },
-        cache: "no-store",
-      }
-    );
-    if (!resp.ok) {
-      throw new Error(
-        `Failed to get threads: ${resp.status} ${resp.statusText}`
-      );
-    }
-    return ThreadListResponseSchema.parse(await resp.json());
-  }
-
-  // apiKey flow: proxy through the demo server
   const resp = await fetchWithRetry(
-    `${serverEnv.SERVER_HOST}/user/threads`,
+    `${serverEnv.COUNSEL_API_URL}/v1/user/${counselUserId}/threads`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        ...getAuthorizationHeader(token),
+        ...getAuthorizationHeader(jwt),
       },
       cache: "no-store",
     }
