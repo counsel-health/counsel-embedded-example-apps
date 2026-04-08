@@ -59,6 +59,32 @@ function getApiUrl(accessCode: string): string {
   return getConfig(accessCode).apiUrl;
 }
 
+export async function getCounselUserThreads({
+  userId,
+  accessCode,
+}: {
+  userId: string;
+  accessCode: string;
+}) {
+  const apiUrl = getApiUrl(accessCode);
+  const response = await fetchWithRetry(
+    getRequestUrl(apiUrl, `/v1/user/${userId}/threads`),
+    {
+      method: "GET",
+      headers: await getRequestHeaders(accessCode),
+    }
+  );
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(
+      `Request to get user threads failed: ${response.status} ${
+        response.statusText
+      } ${JSON.stringify(error)}`
+    );
+  }
+  return await response.json();
+}
+
 export async function getCounselSignedAppUrl({
   userId,
   accessCode,

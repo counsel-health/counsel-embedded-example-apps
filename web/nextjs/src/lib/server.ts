@@ -222,21 +222,43 @@ export async function getIntegratedSignedAppUrl(
 export async function getCounselThreads(
   session: IronSession<SessionData>
 ) {
-  const { token, counselUserId, counselJwt } = session;
+  const { token, counselUserId, authType, counselJwt } = session;
   const { ThreadListResponseSchema } = await import("@/lib/schemas");
 
-  const jwt =
-    counselJwt && isCounselJwtValid(counselJwt)
-      ? counselJwt
-      : await fetchCounselJwt(token);
+  if (authType === "jwt") {
+    // JWT flow: call Counsel API directly (no backend proxy needed)
+    const jwt =
+      counselJwt && isCounselJwtValid(counselJwt)
+        ? counselJwt
+        : await fetchCounselJwt(token);
 
+    const resp = await fetchWithRetry(
+      `${serverEnv.COUNSEL_API_URL}/v1/user/${counselUserId}/threads`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthorizationHeader(jwt),
+        },
+        cache: "no-store",
+      }
+    );
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to get threads: ${resp.status} ${resp.statusText}`
+      );
+    }
+    return ThreadListResponseSchema.parse(await resp.json());
+  }
+
+  // apiKey flow: proxy through demo server
   const resp = await fetchWithRetry(
-    `${serverEnv.COUNSEL_API_URL}/v1/user/${counselUserId}/threads`,
+    `${serverEnv.SERVER_HOST}/user/threads`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        ...getAuthorizationHeader(jwt),
+        ...getAuthorizationHeader(token),
       },
       cache: "no-store",
     }

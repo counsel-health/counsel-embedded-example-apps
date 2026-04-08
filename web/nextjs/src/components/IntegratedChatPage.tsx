@@ -112,6 +112,30 @@ export default function IntegratedChatPage({
     setActiveThread({ type: "host", id: newThread.id });
   }, [isPending]);
 
+  const handleSendMessage = useCallback(
+    (threadId: string, text: string) => {
+      setHostThreads((prev) =>
+        prev.map((t) =>
+          t.id === threadId
+            ? {
+                ...t,
+                last_activity_time: new Date().toISOString(),
+                messages: [
+                  ...t.messages,
+                  { role: "user" as const, text },
+                  {
+                    role: "bot" as const,
+                    text: "Thanks for your message! This is a demo response.",
+                  },
+                ],
+              }
+            : t
+        )
+      );
+    },
+    []
+  );
+
   // ---- Render -------------------------------------------------------------
 
   const activeHostThread =
@@ -135,7 +159,7 @@ export default function IntegratedChatPage({
       {/* Main content area */}
       <div className="flex-1 min-w-0">
         {activeThread.type === "host" && activeHostThread ? (
-          <ChatThread thread={activeHostThread} />
+          <ChatThread thread={activeHostThread} onSendMessage={handleSendMessage} />
         ) : activeThread.type === "counsel" ? (
           <CounselChatThread
             signedAppUrl={currentSignedUrl}
