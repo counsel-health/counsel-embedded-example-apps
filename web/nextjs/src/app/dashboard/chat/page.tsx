@@ -1,27 +1,13 @@
 import ChatPage from "@/components/ChatPage";
-import IntegratedChatPage from "@/components/IntegratedChatPage";
-import {
-  getCounselSignedAppUrl,
-  getCounselThreads,
-} from "@/lib/server";
+import { getCounselSignedAppUrl } from "@/lib/server";
 import { getSession } from "@/lib/session";
 
 /**
- * Chat page renders the Counsel app inside an iframe.
- *
- * Two integration patterns:
- * - "standalone" (default): full Counsel iframe with built-in sidebar
- * - "integrated": host-managed thread sidebar + Counsel integrated view
+ * Chat page renders the Counsel app inside an iframe (standalone pattern).
+ * The full Counsel experience with built-in sidebar.
  */
 export default async function Chat() {
   const session = await getSession();
-
-  if (session.navMode === "integrated") {
-    const { threads } = await getCounselThreads(session);
-
-    return <IntegratedChatPage threads={threads} />;
-  }
-
   const signedAppUrl = await getCounselSignedAppUrl(session);
   return <ChatPage signedAppUrl={signedAppUrl} />;
 }

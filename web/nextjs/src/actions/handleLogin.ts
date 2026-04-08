@@ -48,5 +48,5 @@ export async function handleLogin(_: unknown, formData: FormData) {
   await session.save();
 
   // redirect to the dashboard, user is now authenticated.
-  redirect(session.navMode === "integrated" ? "/dashboard/chat" : "/dashboard");
+  redirect(session.navMode === "integrated" ? "/integrated/chat" : "/dashboard");
 }

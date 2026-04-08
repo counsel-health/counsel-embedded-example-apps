@@ -1,15 +1,11 @@
 "use client";
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState } from "react";
 import type { ThreadItem } from "@/lib/schemas";
 import type { HostThread } from "./integrated/types";
 import ChatList from "./integrated/ChatList";
 import ChatThread from "./integrated/ChatThread";
 import CounselChatThread from "./integrated/CounselChatThread";
-import {
-  getSignedUrlForThread,
-  getSignedUrlForNewThread,
-} from "@/actions/integratedChat";
 import { signOut } from "@/actions/signOut";
 
 // ---------------------------------------------------------------------------
@@ -18,6 +14,27 @@ import { signOut } from "@/actions/signOut";
 // ---------------------------------------------------------------------------
 
 const COUNSEL_TRIGGER = "i need a doctor";
+
+// ---------------------------------------------------------------------------
+// API helpers — call the Next.js API route handlers directly from the browser
+// ---------------------------------------------------------------------------
+
+async function fetchSignedUrl(
+  action?:
+    | { action: "open_thread"; thread_id: string }
+    | { action: "create_thread" }
+): Promise<string> {
+  const resp = await fetch("/api/counsel/signedAppUrl", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action }),
+  });
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch signed URL: ${resp.status}`);
+  }
+  const { url } = await resp.json();
+  return url;
+}
 
 // ---------------------------------------------------------------------------
 // Mock data — one hardcoded host thread as the default conversation
@@ -91,42 +108,50 @@ export default function IntegratedChatPage({
     id: defaultThread.id,
   });
   const [currentSignedUrl, setCurrentSignedUrl] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
 
   // ---- Handlers -----------------------------------------------------------
 
   const handleHostThreadClick = useCallback(
     (threadId: string) => {
-      if (isPending) return;
+      if (isLoading) return;
       setActiveThread({ type: "host", id: threadId });
     },
-    [isPending]
+    [isLoading]
   );
 
   const handleCounselThreadClick = useCallback(
-    (threadId: string) => {
-      if (isPending) return;
+    async (threadId: string) => {
+      if (isLoading) return;
       setActiveThread({ type: "counsel", id: threadId });
-      startTransition(async () => {
+      setIsLoading(true);
+      try {
         // Placeholder threads (created locally via "Connect to Counsel") don't
         // have a real Counsel thread ID yet — use create_thread to resume.
         // Real threads from the API use open_thread with their UUID.
         const isPlaceholder = threadId.startsWith("counsel-new-");
         const url = isPlaceholder
-          ? await getSignedUrlForNewThread()
-          : await getSignedUrlForThread(threadId);
+          ? await fetchSignedUrl({ action: "create_thread" })
+          : await fetchSignedUrl({
+              action: "open_thread",
+              thread_id: threadId,
+            });
         setCurrentSignedUrl(url);
-      });
+      } catch (error) {
+        console.error("Failed to load Counsel thread:", error);
+      } finally {
+        setIsLoading(false);
+      }
     },
-    [isPending]
+    [isLoading]
   );
 
   const handleNewChat = useCallback(() => {
-    if (isPending) return;
+    if (isLoading) return;
     const newThread = createNewHostThread();
     setHostThreads((prev) => [newThread, ...prev]);
     setActiveThread({ type: "host", id: newThread.id });
-  }, [isPending]);
+  }, [isLoading]);
 
   const handleSendMessage = useCallback(
     (threadId: string, text: string) => {
@@ -158,10 +183,11 @@ export default function IntegratedChatPage({
     []
   );
 
-  const handleConnectCounsel = useCallback(() => {
-    if (isPending) return;
-    startTransition(async () => {
-      const url = await getSignedUrlForNewThread();
+  const handleConnectCounsel = useCallback(async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      const url = await fetchSignedUrl({ action: "create_thread" });
       setCurrentSignedUrl(url);
 
       // Add a placeholder Counsel thread to the sidebar.
@@ -174,8 +200,12 @@ export default function IntegratedChatPage({
       };
       setCounselThreads((prev) => [newCounselThread, ...prev]);
       setActiveThread({ type: "counsel", id: newCounselThread.id });
-    });
-  }, [isPending]);
+    } catch (error) {
+      console.error("Failed to connect to Counsel:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading]);
 
   // ---- Render -------------------------------------------------------------
 
@@ -195,7 +225,7 @@ export default function IntegratedChatPage({
         onCounselThreadClick={handleCounselThreadClick}
         onNewChat={handleNewChat}
         onSignOut={signOut}
-        isPending={isPending}
+        isPending={isLoading}
       />
 
       {/* Main content area */}
@@ -205,12 +235,12 @@ export default function IntegratedChatPage({
             thread={activeHostThread}
             onSendMessage={handleSendMessage}
             onConnectCounsel={handleConnectCounsel}
-            isConnecting={isPending}
+            isConnecting={isLoading}
           />
         ) : activeThread.type === "counsel" && currentSignedUrl ? (
           <CounselChatThread
             signedAppUrl={currentSignedUrl}
-            isLoading={isPending}
+            isLoading={isLoading}
           />
         ) : activeThread.type === "counsel" ? (
           <div className="flex h-full items-center justify-center">
