@@ -7,6 +7,7 @@ import ChatList from "./integrated/ChatList";
 import ChatThread from "./integrated/ChatThread";
 import CounselChatThread from "./integrated/CounselChatThread";
 import { getSignedUrlForThread } from "@/actions/integratedChat";
+import { signOut } from "@/actions/signOut";
 
 // ---------------------------------------------------------------------------
 // Mock data — one hardcoded host thread as the default conversation
@@ -153,6 +154,7 @@ export default function IntegratedChatPage({
         onHostThreadClick={handleHostThreadClick}
         onCounselThreadClick={handleCounselThreadClick}
         onNewChat={handleNewChat}
+        onSignOut={signOut}
         isPending={isPending}
       />
 

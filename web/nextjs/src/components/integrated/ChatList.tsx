@@ -31,6 +31,7 @@ type ChatListProps = {
   onHostThreadClick: (threadId: string) => void;
   onCounselThreadClick: (threadId: string) => void;
   onNewChat: () => void;
+  onSignOut: () => void;
   isPending: boolean;
 };
 
@@ -42,6 +43,7 @@ export default function ChatList({
   onHostThreadClick,
   onCounselThreadClick,
   onNewChat,
+  onSignOut,
   isPending,
 }: ChatListProps) {
   // Merge and sort all threads by last activity time (newest first)
@@ -117,6 +119,14 @@ export default function ChatList({
             </button>
           );
         })}
+      </div>
+      <div className="p-3 border-t">
+        <button
+          onClick={onSignOut}
+          className="w-full text-left text-sm text-gray-500 hover:text-gray-900 transition-colors px-2 py-1.5"
+        >
+          Sign out
+        </button>
       </div>
     </aside>
   );
