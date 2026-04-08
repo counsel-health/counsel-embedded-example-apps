@@ -23,8 +23,8 @@ export type ThreadItem = z.infer<typeof ThreadItemSchema>;
 
 export const SignUpResponseSchema = z.object({
   token: z.string(),
-  userType: z.enum(["main", "onboarding", "handoff"]),
+  userType: z.enum(["main", "onboarding"]),
   counselUserId: z.string(),
   authType: z.enum(["apiKey", "jwt"]),
-  handoffTrigger: z.string().optional(),
+  navMode: z.enum(["standalone", "integrated"]).default("standalone"),
 });

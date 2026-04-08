@@ -41,7 +41,7 @@ export async function handleLogin(_: unknown, formData: FormData) {
   session.userType = resp.data.userType;
   session.counselUserId = resp.data.counselUserId;
   session.authType = resp.data.authType;
-  session.handoffTrigger = resp.data.handoffTrigger;
+  session.navMode = resp.data.navMode;
   // Pre-warm the Counsel JWT for the jwt flow so the first chat page load is fast.
   // session.save() below persists it — allowed here because handleLogin is a Server Action.
   await prewarmSessionJwt(session);

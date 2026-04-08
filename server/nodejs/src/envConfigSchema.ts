@@ -9,10 +9,11 @@ export const AccessCodeConfigSchema = z
   .object({
     client: z.string(),
     apiUrl: z.string().url(),
-    userType: z.enum(["main", "onboarding", "handoff"]).default("main"),
-  // Phrase that triggers the Counsel handoff card in the host chat UI.
-  // Only used when userType is "handoff". Defaults to "I need a doctor".
-  handoffTrigger: z.string().optional(),
+    userType: z.enum(["main", "onboarding"]).default("main"),
+    // Navigation mode for the embedded chat experience.
+    // "standalone" (default): full Counsel iframe with built-in sidebar
+    // "integrated": host-managed sidebar with Counsel integrated view (no Counsel sidebar)
+    navMode: z.enum(["standalone", "integrated"]).default("standalone"),
     // API key for API key auth. When present, used as Bearer token.
     apiKey: z.string().optional(),
     // The iss claim put in JWTs for this access code's org.

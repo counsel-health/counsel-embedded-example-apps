@@ -146,6 +146,74 @@ export async function getCounselSignedAppUrl(
 }
 
 /**
+ * @description Get a signed app URL for the integrated navigation mode.
+ * Uses `view.navigation: "integrated"` and optionally an action to open a
+ * specific thread or create a new one. Always bypasses cache since each URL
+ * is one-time-use.
+ */
+export async function getIntegratedSignedAppUrl(
+  session: IronSession<SessionData>,
+  action?:
+    | { action: "open_thread"; thread_id: string }
+    | { action: "create_thread" }
+): Promise<string> {
+  const sessionData: Record<string, unknown> = {
+    view: { navigation: "integrated" },
+  };
+  if (action) {
+    sessionData.action = action;
+  }
+
+  const { token, counselUserId, authType, counselJwt } = session;
+
+  if (authType === "jwt") {
+    const jwt =
+      counselJwt && isCounselJwtValid(counselJwt)
+        ? counselJwt
+        : await fetchCounselJwt(token);
+
+    const resp = await fetchWithRetry(
+      `${serverEnv.COUNSEL_API_URL}/v1/user/${counselUserId}/signedAppUrl`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthorizationHeader(jwt),
+        },
+        body: JSON.stringify(sessionData),
+        cache: "no-store",
+      }
+    );
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to get integrated signed app url: ${resp.status} ${resp.statusText}`
+      );
+    }
+    return SignedAppUrlResponseSchema.parse(await resp.json()).url;
+  }
+
+  // apiKey flow: proxy through demo server
+  const resp = await fetchWithRetry(
+    `${serverEnv.SERVER_HOST}/user/signedAppUrl`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthorizationHeader(token),
+      },
+      body: JSON.stringify(sessionData),
+      cache: "no-store",
+    }
+  );
+  if (!resp.ok) {
+    throw new Error(
+      `Failed to get integrated signed app url: ${resp.status} ${resp.statusText}`
+    );
+  }
+  return SignedAppUrlResponseSchema.parse(await resp.json()).url;
+}
+
+/**
  * @description Fetch the user's chat threads from the Counsel API.
  * Uses the same auth flow pattern as getCounselSignedAppUrl:
  * - "jwt" auth: calls the Counsel API directly with a JWT
@@ -221,7 +289,7 @@ export async function signUpCounselUser(
         userType: UserType;
         counselUserId: string;
         authType: "apiKey" | "jwt";
-        handoffTrigger?: string;
+        navMode: "standalone" | "integrated";
       };
     }
   | { success: false; error: unknown }

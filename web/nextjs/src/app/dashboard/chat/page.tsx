@@ -1,33 +1,30 @@
 import ChatPage from "@/components/ChatPage";
-import HandOffChatPage from "@/components/HandOffChatPage";
+import IntegratedChatPage from "@/components/IntegratedChatPage";
 import {
   getCounselSignedAppUrl,
+  getIntegratedSignedAppUrl,
   getCounselThreads,
 } from "@/lib/server";
 import { getSession } from "@/lib/session";
 
 /**
  * Chat page renders the Counsel app inside an iframe.
- * For "handoff" userType, renders a host chat UI with a thread sidebar
- * and an inline trigger card for handoff to the Counsel integrated view.
+ *
+ * Two integration patterns:
+ * - "standalone" (default): full Counsel iframe with built-in sidebar
+ * - "integrated": host-managed thread sidebar + Counsel integrated view
  */
 export default async function Chat() {
   const session = await getSession();
 
-  if (session.userType === "handoff") {
+  if (session.navMode === "integrated") {
     const [signedAppUrl, { threads }] = await Promise.all([
-      getCounselSignedAppUrl(session, {
-        view: { navigation: "integrated" },
-      }),
+      getIntegratedSignedAppUrl(session),
       getCounselThreads(session),
     ]);
 
     return (
-      <HandOffChatPage
-        signedAppUrl={signedAppUrl}
-        handoffTrigger={session.handoffTrigger}
-        threads={threads}
-      />
+      <IntegratedChatPage signedAppUrl={signedAppUrl} threads={threads} />
     );
   }
 

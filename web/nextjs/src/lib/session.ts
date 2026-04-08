@@ -17,8 +17,8 @@ export interface SessionData {
   // from the chat page (Server Component can't write cookies in Next.js 15); after it expires
   // a fresh JWT is fetched per-request in memory only.
   counselJwt?: string;
-  // Only present for userType "handoff". The phrase that triggers the Counsel handoff card.
-  handoffTrigger?: string;
+  // Navigation mode: "standalone" (default) or "integrated" (host-managed sidebar)
+  navMode: "standalone" | "integrated";
 }
 
 export async function getSession() {

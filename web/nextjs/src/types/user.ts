@@ -9,4 +9,4 @@ export type User = {
   phone: string;
 };
 
-export type UserType = "main" | "onboarding" | "handoff";
+export type UserType = "main" | "onboarding";
