@@ -157,17 +157,18 @@ export default function IntegratedChatPage({
             ? {
                 ...t,
                 last_activity_time: new Date().toISOString(),
+                showCounselCard: isTrigger ? true : t.showCounselCard,
                 messages: [
                   ...t.messages,
                   { role: "user" as const, text },
-                  ...(isTrigger
-                    ? [{ role: "bot" as const, type: "counsel-card" as const }]
-                    : [
+                  ...(!isTrigger
+                    ? [
                         {
                           role: "bot" as const,
                           text: "Thanks for your message! This is a demo response.",
                         },
-                      ]),
+                      ]
+                    : []),
                 ],
               }
             : t
@@ -177,25 +178,34 @@ export default function IntegratedChatPage({
     []
   );
 
-  const handleConnectCounsel = useCallback(async () => {
-    if (isLoading) return;
-    try {
-      const url = await getSignedUrl({ action: "create_thread" });
+  const handleConnectCounsel = useCallback(
+    async (hostThreadId: string) => {
+      if (isLoading) return;
+      try {
+        const url = await getSignedUrl({ action: "create_thread" });
 
-      const newCounselThread: ThreadItem = {
-        id: `counsel-new-${Date.now()}`,
-        display_name: "Counsel chat",
-        last_activity_time: new Date().toISOString(),
-        mode: "ai",
-      };
-      pendingCounselPlaceholderRef.current = newCounselThread.id;
-      setCurrentSignedUrl(url);
-      addThread(newCounselThread);
-      setActiveThread({ type: "counsel", id: newCounselThread.id });
-    } catch (error) {
-      console.error("Failed to connect to Counsel:", error);
-    }
-  }, [isLoading, getSignedUrl, addThread]);
+        setHostThreads((prev) =>
+          prev.map((t) =>
+            t.id === hostThreadId ? { ...t, showCounselCard: false } : t
+          )
+        );
+
+        const newCounselThread: ThreadItem = {
+          id: `counsel-new-${Date.now()}`,
+          display_name: "Counsel chat",
+          last_activity_time: new Date().toISOString(),
+          mode: "ai",
+        };
+        pendingCounselPlaceholderRef.current = newCounselThread.id;
+        setCurrentSignedUrl(url);
+        addThread(newCounselThread);
+        setActiveThread({ type: "counsel", id: newCounselThread.id });
+      } catch (error) {
+        console.error("Failed to connect to Counsel:", error);
+      }
+    },
+    [isLoading, getSignedUrl, addThread]
+  );
 
   const handleCounselChatStarted = useCallback(
     (threadId: string, _convoId: string) => {

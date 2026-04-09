@@ -8,7 +8,7 @@ import MessageBubble from "./MessageBubble";
 type ChatThreadProps = {
   thread: HostThread;
   onSendMessage?: (threadId: string, text: string) => void;
-  onConnectCounsel?: () => void;
+  onConnectCounsel?: (threadId: string) => void;
   isConnecting?: boolean;
 };
 
@@ -59,7 +59,7 @@ export default function ChatThread({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [thread.messages.length]);
+  }, [thread.messages.length, thread.showCounselCard]);
 
   const handleSend = () => {
     const text = input.trim();
@@ -79,17 +79,15 @@ export default function ChatThread({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {thread.messages.map((msg, i) =>
-          "type" in msg && msg.type === "counsel-card" ? (
-            <CounselCard
-              key={i}
-              onConnect={onConnectCounsel}
-              isConnecting={isConnecting}
-            />
-          ) : (
-            <MessageBubble key={i} msg={msg} />
-          )
-        )}
+        {thread.messages.map((msg, i) => (
+          <MessageBubble key={i} msg={msg} />
+        ))}
+        {thread.showCounselCard ? (
+          <CounselCard
+            onConnect={() => onConnectCounsel?.(thread.id)}
+            isConnecting={isConnecting}
+          />
+        ) : null}
         <div ref={messagesEndRef} />
       </div>
 

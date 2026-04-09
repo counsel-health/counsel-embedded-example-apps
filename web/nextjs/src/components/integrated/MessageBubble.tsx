@@ -8,9 +8,6 @@ type MessageBubbleProps = {
 };
 
 export default function MessageBubble({ msg }: MessageBubbleProps) {
-  if ("type" in msg && msg.type === "counsel-card") {
-    return null;
-  }
   return (
     <div
       className={cn(
