@@ -214,6 +214,7 @@ export default function IntegratedChatPage({
       <div className="flex-1 min-w-0">
         {activeThread.type === "host" && activeHostThread ? (
           <ChatThread
+            key={activeHostThread.id}
             thread={activeHostThread}
             onSendMessage={handleSendMessage}
             onConnectCounsel={handleConnectCounsel}
