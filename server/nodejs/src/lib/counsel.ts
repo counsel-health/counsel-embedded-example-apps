@@ -59,6 +59,22 @@ function getApiUrl(accessCode: string): string {
   return getConfig(accessCode).apiUrl;
 }
 
+const ERROR_BODY_MAX_LEN = 500;
+
+/** Prefer JSON when the body parses; otherwise include truncated text (e.g. HTML from a gateway). */
+async function readHttpErrorDetail(response: Response): Promise<string> {
+  const text = await response.text();
+  if (!text) return "";
+  const trimmed = text.trim();
+  try {
+    return JSON.stringify(JSON.parse(trimmed));
+  } catch {
+    return trimmed.length > ERROR_BODY_MAX_LEN
+      ? `${trimmed.slice(0, ERROR_BODY_MAX_LEN)}…`
+      : trimmed;
+  }
+}
+
 export async function getCounselUserThreads({
   userId,
   accessCode,
@@ -75,11 +91,11 @@ export async function getCounselUserThreads({
     }
   );
   if (!response.ok) {
-    const error = await response.json();
+    const detail = await readHttpErrorDetail(response);
     throw new Error(
       `Request to get user threads failed: ${response.status} ${
         response.statusText
-      } ${JSON.stringify(error)}`
+      }${detail ? ` ${detail}` : ""}`
     );
   }
   return await response.json();
@@ -105,11 +121,11 @@ export async function getCounselSignedAppUrl({
     }
   );
   if (!response.ok) {
-    const error = await response.json();
+    const detail = await readHttpErrorDetail(response);
     throw new Error(
       `Request to get signed app url failed: ${response.status} ${
         response.statusText
-      } ${JSON.stringify(error)}`
+      }${detail ? ` ${detail}` : ""}`
     );
   }
   const data = await response.json();
@@ -134,9 +150,11 @@ export async function signOutCounselUser({
     }
   );
   if (!response.ok) {
-    const error = await response.json();
+    const detail = await readHttpErrorDetail(response);
     throw new Error(
-      `Request to sign out user failed: ${response.status} ${response.statusText} ${JSON.stringify(error)}`
+      `Request to sign out user failed: ${response.status} ${response.statusText}${
+        detail ? ` ${detail}` : ""
+      }`
     );
   }
 }
@@ -159,11 +177,11 @@ export async function createCounselUser(user: User, accessCode: string) {
       });
     }
 
-    const error = await response.json();
+    const detail = await readHttpErrorDetail(response);
     throw new Error(
       `Request to create user failed: ${response.status} ${
         response.statusText
-      } ${JSON.stringify(error)}`
+      }${detail ? ` ${detail}` : ""}`
     );
   }
   const data = await response.json();
@@ -216,11 +234,11 @@ export async function createCounselDraftUser(user: User, accessCode: string) {
         id: user.id,
       });
     }
-    const error = await response.json();
+    const detail = await readHttpErrorDetail(response);
     throw new Error(
       `Request to create draft user failed: ${response.status} ${
         response.statusText
-      } ${JSON.stringify(error)}`
+      }${detail ? ` ${detail}` : ""}`
     );
   }
   const data = await response.json();
