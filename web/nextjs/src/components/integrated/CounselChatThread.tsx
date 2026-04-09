@@ -17,11 +17,6 @@ export default function CounselChatThread({
 }: CounselChatThreadProps) {
   return (
     <div className="relative h-full w-full">
-      {isLoading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60">
-          <div className="text-sm text-gray-500">Loading…</div>
-        </div>
-      )}
       <CounselApp
         key={signedAppUrl}
         signedAppUrl={signedAppUrl}
