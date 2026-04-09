@@ -89,7 +89,7 @@ export default function ChatList({
             item.thread.display_name ||
             (item.type === "counsel" ? "Counsel chat" : "New chat");
           const displayName =
-            item.type === "counsel" && !rawName.startsWith("Counsel")
+            item.type === "counsel"
               ? `\uD83E\uDDD1\u200D\u2695\uFE0F — ${rawName}`
               : rawName;
 
