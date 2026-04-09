@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import type { HostThread, ChatMessage } from "./types";
+import type { HostThread } from "./types";
+import MessageBubble from "./MessageBubble";
 
 type ChatThreadProps = {
   thread: HostThread;
@@ -38,25 +39,6 @@ function CounselCard({
       >
         {isConnecting ? "Connecting..." : "Connect to Counsel"}
       </button>
-    </div>
-  );
-}
-
-function MessageBubble({ msg }: { msg: ChatMessage }) {
-  if ("type" in msg && msg.type === "counsel-card") {
-    // CounselCard is rendered separately by the parent with handlers
-    return null;
-  }
-  return (
-    <div
-      className={cn(
-        "max-w-[80%] rounded-lg px-3 py-2 text-sm",
-        msg.role === "user"
-          ? "ml-auto bg-blue-600 text-white"
-          : "bg-gray-100 text-gray-900"
-      )}
-    >
-      {msg.text}
     </div>
   );
 }
