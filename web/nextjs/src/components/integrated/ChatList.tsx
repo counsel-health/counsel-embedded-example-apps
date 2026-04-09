@@ -33,7 +33,7 @@ type ChatListProps = {
   onNewChat: () => void;
   onSignOut: () => void;
   isPending: boolean;
-  areThreadsLoading?: boolean;
+  isThreadsLoading?: boolean;
 };
 
 export default function ChatList({
@@ -46,7 +46,7 @@ export default function ChatList({
   onNewChat,
   onSignOut,
   isPending,
-  areThreadsLoading,
+  isThreadsLoading,
 }: ChatListProps) {
   // Merge and sort all threads by last activity time (newest first)
   const allThreads: UnifiedThread[] = [
@@ -75,10 +75,10 @@ export default function ChatList({
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {areThreadsLoading && (
+        {isThreadsLoading && (
           <p className="p-3 text-xs text-gray-400">Loading threads...</p>
         )}
-        {!areThreadsLoading && allThreads.length === 0 && (
+        {!isThreadsLoading && allThreads.length === 0 && (
           <p className="p-3 text-xs text-gray-400">No conversations yet</p>
         )}
         {allThreads.map((item) => {
@@ -90,7 +90,7 @@ export default function ChatList({
             (item.type === "counsel" ? "Counsel chat" : "New chat");
           const displayName =
             item.type === "counsel" && !rawName.startsWith("Counsel")
-              ? `Counsel — ${rawName}`
+              ? `\uD83E\uDDD1\u200D\u2695\uFE0F — ${rawName}`
               : rawName;
 
           return (
@@ -114,9 +114,6 @@ export default function ChatList({
                     "inline-block w-1.5 h-1.5 rounded-full shrink-0",
                     item.type === "counsel" ? "bg-blue-400" : "bg-gray-300"
                   )}
-                  title={
-                    item.type === "counsel" ? "Counsel thread" : "App thread"
-                  }
                 />
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {displayName}
