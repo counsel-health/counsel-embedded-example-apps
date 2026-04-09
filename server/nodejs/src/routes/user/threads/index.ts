@@ -18,12 +18,17 @@ export default async function index(
   }
   const { userId, accessCode } = req.user;
 
-  const user = await getOrCreateUser(userId, accessCode);
+  try {
+    const user = await getOrCreateUser(userId, accessCode);
 
-  const threads = await getCounselUserThreads({
-    userId: user.counsel_user_id,
-    accessCode,
-  });
+    const threads = await getCounselUserThreads({
+      userId: user.counsel_user_id,
+      accessCode,
+    });
 
-  res.status(200).json(threads);
+    res.status(200).json(threads);
+  } catch (error) {
+    console.error("Failed to fetch Counsel threads:", error);
+    res.status(500).json({ error: "Failed to fetch threads" });
+  }
 }
