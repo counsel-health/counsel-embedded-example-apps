@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ThreadItem } from "@/lib/schemas";
 import type { HostThread } from "./integrated/types";
 import ChatList from "./integrated/ChatList";
@@ -14,27 +14,6 @@ import { signOut } from "@/actions/signOut";
 // ---------------------------------------------------------------------------
 
 const COUNSEL_TRIGGER = "i need a doctor";
-
-// ---------------------------------------------------------------------------
-// API helpers — call the Next.js API route handlers directly from the browser
-// ---------------------------------------------------------------------------
-
-async function fetchSignedUrl(
-  action?:
-    | { action: "open_thread"; thread_id: string }
-    | { action: "create_thread" }
-): Promise<string> {
-  const resp = await fetch("/api/counsel/signedAppUrl", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action }),
-  });
-  if (!resp.ok) {
-    throw new Error(`Failed to fetch signed URL: ${resp.status}`);
-  }
-  const { url } = await resp.json();
-  return url;
-}
 
 // ---------------------------------------------------------------------------
 // Mock data — one hardcoded host thread as the default conversation
@@ -72,43 +51,113 @@ function createNewHostThread(): HostThread {
 }
 
 // ---------------------------------------------------------------------------
-// Component
+// Types
 // ---------------------------------------------------------------------------
 
 type ActiveThread =
   | { type: "host"; id: string }
   | { type: "counsel"; id: string };
 
-type IntegratedChatPageProps = {
-  /** Counsel chat threads fetched server-side. */
-  threads: ThreadItem[];
+type CounselApiConfig = {
+  /** Demo server URL (e.g. http://localhost:4003) */
+  serverHost: string;
+  /** Session token for Bearer auth against the demo server */
+  token: string;
+  /** Counsel user ID */
+  counselUserId: string;
 };
+
+type IntegratedChatPageProps = {
+  /** Credentials for calling the demo server directly from the browser. */
+  counselApiConfig: CounselApiConfig;
+};
+
+// ---------------------------------------------------------------------------
+// API helpers — call the demo server directly from the browser
+// ---------------------------------------------------------------------------
+
+async function fetchSignedUrl(
+  config: CounselApiConfig,
+  action?:
+    | { action: "open_thread"; thread_id: string }
+    | { action: "create_thread" }
+): Promise<string> {
+  const sessionData: Record<string, unknown> = {
+    view: { navigation: "integrated" },
+  };
+  if (action) {
+    sessionData.action = action;
+  }
+
+  const resp = await fetch(`${config.serverHost}/user/signedAppUrl`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${config.token}`,
+    },
+    body: JSON.stringify(sessionData),
+  });
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch signed URL: ${resp.status}`);
+  }
+  const { url } = await resp.json();
+  return url;
+}
+
+async function fetchThreads(
+  config: CounselApiConfig
+): Promise<ThreadItem[]> {
+  const resp = await fetch(`${config.serverHost}/user/threads`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${config.token}`,
+    },
+  });
+  if (!resp.ok) {
+    throw new Error(`Failed to fetch threads: ${resp.status}`);
+  }
+  const data = await resp.json();
+  return data.threads ?? [];
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 
 /**
  * IntegratedChatPage demonstrates the "integrated" navigation pattern:
  * the host app manages the thread sidebar and renders either its own chat
  * UI (host threads) or the Counsel iframe (Counsel threads).
  *
- * Thread navigation for Counsel threads is done via signed app URLs —
- * each thread switch fetches a fresh one-time-use URL.
+ * All API calls (threads, signed URLs) go directly from the browser to
+ * the demo server — no Next.js server middleman.
  */
 export default function IntegratedChatPage({
-  threads: initialCounselThreads,
+  counselApiConfig,
 }: IntegratedChatPageProps) {
   const defaultThread = createDefaultHostThread();
 
   const [hostThreads, setHostThreads] = useState<HostThread[]>([
     defaultThread,
   ]);
-  const [counselThreads, setCounselThreads] = useState<ThreadItem[]>(
-    initialCounselThreads
-  );
+  const [counselThreads, setCounselThreads] = useState<ThreadItem[]>([]);
+  const [threadsLoading, setThreadsLoading] = useState(true);
   const [activeThread, setActiveThread] = useState<ActiveThread>({
     type: "host",
     id: defaultThread.id,
   });
   const [currentSignedUrl, setCurrentSignedUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // ---- Fetch threads on mount ---------------------------------------------
+
+  useEffect(() => {
+    fetchThreads(counselApiConfig)
+      .then((threads) => setCounselThreads(threads))
+      .catch((error) => console.error("Failed to load threads:", error))
+      .finally(() => setThreadsLoading(false));
+  }, [counselApiConfig]);
 
   // ---- Handlers -----------------------------------------------------------
 
@@ -131,8 +180,8 @@ export default function IntegratedChatPage({
         // Real threads from the API use open_thread with their UUID.
         const isPlaceholder = threadId.startsWith("counsel-new-");
         const url = isPlaceholder
-          ? await fetchSignedUrl({ action: "create_thread" })
-          : await fetchSignedUrl({
+          ? await fetchSignedUrl(counselApiConfig, { action: "create_thread" })
+          : await fetchSignedUrl(counselApiConfig, {
               action: "open_thread",
               thread_id: threadId,
             });
@@ -143,7 +192,7 @@ export default function IntegratedChatPage({
         setIsLoading(false);
       }
     },
-    [isLoading]
+    [isLoading, counselApiConfig]
   );
 
   const handleNewChat = useCallback(() => {
@@ -187,7 +236,9 @@ export default function IntegratedChatPage({
     if (isLoading) return;
     setIsLoading(true);
     try {
-      const url = await fetchSignedUrl({ action: "create_thread" });
+      const url = await fetchSignedUrl(counselApiConfig, {
+        action: "create_thread",
+      });
       setCurrentSignedUrl(url);
 
       // Add a placeholder Counsel thread to the sidebar.
@@ -205,7 +256,7 @@ export default function IntegratedChatPage({
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading]);
+  }, [isLoading, counselApiConfig]);
 
   // ---- Render -------------------------------------------------------------
 
@@ -226,6 +277,7 @@ export default function IntegratedChatPage({
         onNewChat={handleNewChat}
         onSignOut={signOut}
         isPending={isLoading}
+        areThreadsLoading={threadsLoading}
       />
 
       {/* Main content area */}

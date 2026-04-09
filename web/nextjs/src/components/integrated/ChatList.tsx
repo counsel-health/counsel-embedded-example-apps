@@ -33,6 +33,7 @@ type ChatListProps = {
   onNewChat: () => void;
   onSignOut: () => void;
   isPending: boolean;
+  areThreadsLoading?: boolean;
 };
 
 export default function ChatList({
@@ -45,6 +46,7 @@ export default function ChatList({
   onNewChat,
   onSignOut,
   isPending,
+  areThreadsLoading,
 }: ChatListProps) {
   // Merge and sort all threads by last activity time (newest first)
   const allThreads: UnifiedThread[] = [
@@ -73,7 +75,10 @@ export default function ChatList({
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {allThreads.length === 0 && (
+        {areThreadsLoading && (
+          <p className="p-3 text-xs text-gray-400">Loading threads...</p>
+        )}
+        {!areThreadsLoading && allThreads.length === 0 && (
           <p className="p-3 text-xs text-gray-400">No conversations yet</p>
         )}
         {allThreads.map((item) => {

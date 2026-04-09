@@ -1,14 +1,22 @@
 import IntegratedChatPage from "@/components/IntegratedChatPage";
-import { getCounselThreads } from "@/lib/server";
 import { getSession } from "@/lib/session";
+import { serverEnv } from "@/envConfig";
 
 /**
- * Integrated chat page — top-level route for the host-managed
- * thread sidebar + Counsel integrated view pattern.
+ * Integrated chat page — thin shell that reads session credentials
+ * and passes them to the client. All API calls (threads, signed URLs)
+ * happen directly from the browser to the demo server.
  */
 export default async function IntegratedChat() {
   const session = await getSession();
-  const { threads } = await getCounselThreads(session);
 
-  return <IntegratedChatPage threads={threads} />;
+  return (
+    <IntegratedChatPage
+      counselApiConfig={{
+        serverHost: serverEnv.SERVER_HOST,
+        token: session.token,
+        counselUserId: session.counselUserId,
+      }}
+    />
+  );
 }
