@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import type { ThreadItem } from "@/lib/schemas";
 import type { HostThread } from "./integrated/types";
 import ChatList from "./integrated/ChatList";
@@ -93,8 +93,6 @@ export default function IntegratedChatPage({
     id: defaultThread.id,
   });
   const [currentSignedUrl, setCurrentSignedUrl] = useState<string | null>(null);
-  /** Sidebar id for the iframe session that used `create_thread` — replaced on `counsel:chatStarted`. */
-  const pendingCounselPlaceholderRef = useRef<string | null>(null);
 
   const {
     threads: counselThreads,
@@ -121,11 +119,6 @@ export default function IntegratedChatPage({
       setActiveThread({ type: "counsel", id: threadId });
       try {
         const isPlaceholder = threadId.startsWith("counsel-new-");
-        if (isPlaceholder) {
-          pendingCounselPlaceholderRef.current = threadId;
-        } else {
-          pendingCounselPlaceholderRef.current = null;
-        }
         const url = isPlaceholder
           ? await getSignedUrl({ action: "create_thread" })
           : await getSignedUrl({
@@ -196,7 +189,6 @@ export default function IntegratedChatPage({
           last_activity_time: new Date().toISOString(),
           mode: "ai",
         };
-        pendingCounselPlaceholderRef.current = newCounselThread.id;
         setCurrentSignedUrl(url);
         addThread(newCounselThread);
         setActiveThread({ type: "counsel", id: newCounselThread.id });
@@ -208,8 +200,7 @@ export default function IntegratedChatPage({
   );
 
   const handleCounselChatStarted = useCallback(
-    (threadId: string, _convoId: string) => {
-      const placeholderId = pendingCounselPlaceholderRef.current;
+    (placeholderId: string | null, threadId: string, _convoId: string) => {
       if (!placeholderId?.startsWith("counsel-new-")) return;
       replaceThreadId(placeholderId, threadId);
       setActiveThread((a) =>
@@ -217,7 +208,6 @@ export default function IntegratedChatPage({
           ? { type: "counsel", id: threadId }
           : a
       );
-      pendingCounselPlaceholderRef.current = null;
     },
     [replaceThreadId]
   );
@@ -258,6 +248,11 @@ export default function IntegratedChatPage({
           <CounselChatThread
             signedAppUrl={currentSignedUrl}
             isLoading={isLoading}
+            placeholderThreadId={
+              activeThread.id.startsWith("counsel-new-")
+                ? activeThread.id
+                : null
+            }
             onChatStarted={handleCounselChatStarted}
           />
         ) : activeThread.type === "counsel" ? (

@@ -3,7 +3,13 @@ import { CounselApp } from "@/components/counsel/CounselApp";
 type CounselChatThreadProps = {
   signedAppUrl: string;
   isLoading?: boolean;
-  onChatStarted?: (threadId: string, convoId: string) => void;
+  /** Sidebar id for sessions minted with `create_thread` (e.g. `counsel-new-*`); forwarded to `onChatStarted`. */
+  placeholderThreadId?: string | null;
+  onChatStarted?: (
+    placeholderThreadId: string | null,
+    threadId: string,
+    convoId: string
+  ) => void;
 };
 
 /**
@@ -13,6 +19,7 @@ type CounselChatThreadProps = {
 export default function CounselChatThread({
   signedAppUrl,
   isLoading,
+  placeholderThreadId,
   onChatStarted,
 }: CounselChatThreadProps) {
   return (
@@ -21,7 +28,12 @@ export default function CounselChatThread({
         key={signedAppUrl}
         signedAppUrl={signedAppUrl}
         className="h-full w-full"
-        onChatStarted={onChatStarted}
+        onChatStarted={
+          onChatStarted
+            ? (threadId, convoId) =>
+                onChatStarted(placeholderThreadId ?? null, threadId, convoId)
+            : undefined
+        }
       />
     </div>
   );
