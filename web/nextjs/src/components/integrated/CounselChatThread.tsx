@@ -3,6 +3,7 @@ import { CounselApp } from "@/components/counsel/CounselApp";
 type CounselChatThreadProps = {
   signedAppUrl: string;
   isLoading?: boolean;
+  onChatStarted?: (threadId: string, convoId: string) => void;
 };
 
 /**
@@ -12,6 +13,7 @@ type CounselChatThreadProps = {
 export default function CounselChatThread({
   signedAppUrl,
   isLoading,
+  onChatStarted,
 }: CounselChatThreadProps) {
   return (
     <div className="relative h-full w-full">
@@ -24,6 +26,7 @@ export default function CounselChatThread({
         key={signedAppUrl}
         signedAppUrl={signedAppUrl}
         className="h-full w-full"
+        onChatStarted={onChatStarted}
       />
     </div>
   );

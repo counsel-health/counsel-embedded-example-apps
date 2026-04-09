@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { ThreadItem } from "@/lib/schemas";
 import type { HostThread } from "./integrated/types";
 import ChatList from "./integrated/ChatList";
@@ -93,11 +93,14 @@ export default function IntegratedChatPage({
     id: defaultThread.id,
   });
   const [currentSignedUrl, setCurrentSignedUrl] = useState<string | null>(null);
+  /** Sidebar id for the iframe session that used `create_thread` — replaced on `counsel:chatStarted`. */
+  const pendingCounselPlaceholderRef = useRef<string | null>(null);
 
   const {
     threads: counselThreads,
     isLoading: isThreadsLoading,
     addThread,
+    replaceThreadId,
   } = useCounselThreads(counselApiConfig);
   const { getSignedUrl, isPending: isLoading } =
     useCounselSignedUrl(counselApiConfig);
@@ -118,6 +121,11 @@ export default function IntegratedChatPage({
       setActiveThread({ type: "counsel", id: threadId });
       try {
         const isPlaceholder = threadId.startsWith("counsel-new-");
+        if (isPlaceholder) {
+          pendingCounselPlaceholderRef.current = threadId;
+        } else {
+          pendingCounselPlaceholderRef.current = null;
+        }
         const url = isPlaceholder
           ? await getSignedUrl({ action: "create_thread" })
           : await getSignedUrl({
@@ -173,7 +181,6 @@ export default function IntegratedChatPage({
     if (isLoading) return;
     try {
       const url = await getSignedUrl({ action: "create_thread" });
-      setCurrentSignedUrl(url);
 
       const newCounselThread: ThreadItem = {
         id: `counsel-new-${Date.now()}`,
@@ -181,12 +188,29 @@ export default function IntegratedChatPage({
         last_activity_time: new Date().toISOString(),
         mode: "ai",
       };
+      pendingCounselPlaceholderRef.current = newCounselThread.id;
+      setCurrentSignedUrl(url);
       addThread(newCounselThread);
       setActiveThread({ type: "counsel", id: newCounselThread.id });
     } catch (error) {
       console.error("Failed to connect to Counsel:", error);
     }
   }, [isLoading, getSignedUrl, addThread]);
+
+  const handleCounselChatStarted = useCallback(
+    (threadId: string, _convoId: string) => {
+      const placeholderId = pendingCounselPlaceholderRef.current;
+      if (!placeholderId?.startsWith("counsel-new-")) return;
+      replaceThreadId(placeholderId, threadId);
+      setActiveThread((a) =>
+        a.type === "counsel" && a.id === placeholderId
+          ? { type: "counsel", id: threadId }
+          : a
+      );
+      pendingCounselPlaceholderRef.current = null;
+    },
+    [replaceThreadId]
+  );
 
   // ---- Render -------------------------------------------------------------
 
@@ -224,6 +248,7 @@ export default function IntegratedChatPage({
           <CounselChatThread
             signedAppUrl={currentSignedUrl}
             isLoading={isLoading}
+            onChatStarted={handleCounselChatStarted}
           />
         ) : activeThread.type === "counsel" ? (
           <div className="flex h-full items-center justify-center">
