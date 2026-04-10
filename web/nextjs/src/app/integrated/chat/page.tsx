@@ -5,7 +5,7 @@ import { serverEnv } from "@/envConfig";
 /**
  * Integrated chat page — thin shell that reads session credentials
  * and passes them to the client. All API calls (threads, signed URLs)
- * happen directly from the browser to the demo server.
+ * happen directly from the browser to the Counsel API using JWT auth.
  */
 export default async function IntegratedChat() {
   const session = await getSession();
@@ -13,8 +13,8 @@ export default async function IntegratedChat() {
   return (
     <IntegratedChatPage
       counselApiConfig={{
-        serverHost: serverEnv.SERVER_HOST,
-        token: session.token,
+        counselApiUrl: serverEnv.COUNSEL_API_URL,
+        counselJwt: session.counselJwt ?? "",
         counselUserId: session.counselUserId,
       }}
     />

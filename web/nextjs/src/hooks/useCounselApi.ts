@@ -6,10 +6,10 @@ import type { ThreadItem } from "@/lib/schemas";
 // ---------------------------------------------------------------------------
 
 export type CounselApiConfig = {
-  /** Demo server URL (e.g. http://localhost:4003) */
-  serverHost: string;
-  /** Session token for Bearer auth against the demo server */
-  token: string;
+  /** Counsel API URL (e.g. http://localhost:4002) */
+  counselApiUrl: string;
+  /** Counsel JWT for Bearer auth against the Counsel API */
+  counselJwt: string;
   /** Counsel user ID */
   counselUserId: string;
 };
@@ -25,13 +25,17 @@ type SignedUrlAction =
 async function fetchThreadsFromServer(
   config: CounselApiConfig
 ): Promise<ThreadItem[]> {
-  const resp = await fetch(`${config.serverHost}/user/threads`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.token}`,
-    },
-  });
+  const resp = await fetch(
+    `${config.counselApiUrl}/v1/user/${config.counselUserId}/threads`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.counselJwt}`,
+        "Idempotency-Key": crypto.randomUUID(),
+      },
+    }
+  );
   if (!resp.ok) {
     throw new Error(`Failed to fetch threads: ${resp.status}`);
   }
@@ -50,14 +54,18 @@ async function fetchSignedUrlFromServer(
     sessionData.action = action;
   }
 
-  const resp = await fetch(`${config.serverHost}/user/signedAppUrl`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.token}`,
-    },
-    body: JSON.stringify(sessionData),
-  });
+  const resp = await fetch(
+    `${config.counselApiUrl}/v1/user/${config.counselUserId}/signedAppUrl`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.counselJwt}`,
+        "Idempotency-Key": crypto.randomUUID(),
+      },
+      body: JSON.stringify(sessionData),
+    }
+  );
   if (!resp.ok) {
     throw new Error(`Failed to fetch signed URL: ${resp.status}`);
   }

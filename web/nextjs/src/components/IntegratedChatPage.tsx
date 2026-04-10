@@ -64,7 +64,7 @@ type ActiveThread =
   | { type: "counsel"; id: string };
 
 type IntegratedChatPageProps = {
-  /** Credentials for calling the demo server directly from the browser. */
+  /** Credentials for calling the Counsel API directly from the browser. */
   counselApiConfig: CounselApiConfig;
 };
 
@@ -78,7 +78,7 @@ type IntegratedChatPageProps = {
  * UI (host threads) or the Counsel iframe (Counsel threads).
  *
  * All API calls (threads, signed URLs) go directly from the browser to
- * the demo server — no Next.js server middleman.
+ * the Counsel API using JWT auth — no demo server or Next.js middleman.
  */
 export default function IntegratedChatPage({
   counselApiConfig,
