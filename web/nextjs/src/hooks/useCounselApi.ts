@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ThreadItem } from "@/lib/schemas";
+import { counselQueryKeys } from "./counselQueryKeys";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -78,55 +80,50 @@ async function fetchSignedUrlFromServer(
 // ---------------------------------------------------------------------------
 
 /**
- * Fetches Counsel threads on mount and provides an `addThread` helper
- * for optimistic sidebar updates.
+ * Fetches Counsel threads via react-query and provides optimistic update
+ * helpers for sidebar management.
  */
 export function useCounselThreads(config: CounselApiConfig) {
-  const [threads, setThreads] = useState<ThreadItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
+  const queryKey = counselQueryKeys.threads(config.counselUserId);
 
-  useEffect(() => {
-    fetchThreadsFromServer(config)
-      .then(setThreads)
-      .catch((err) => {
-        console.error("Failed to load threads:", err);
-        setError(err);
-      })
-      .finally(() => setIsLoading(false));
-  }, [config]);
+  const { data: threads = [], isLoading, error } = useQuery({
+    queryKey,
+    queryFn: () => fetchThreadsFromServer(config),
+    enabled: !!config.counselJwt && !!config.counselUserId,
+  });
 
-  const addThread = useCallback((thread: ThreadItem) => {
-    setThreads((prev) => [thread, ...prev]);
-  }, []);
+  const addThread = useCallback(
+    (thread: ThreadItem) => {
+      queryClient.setQueryData<ThreadItem[]>(queryKey, (old = []) => [
+        thread,
+        ...old,
+      ]);
+    },
+    [queryClient, queryKey]
+  );
 
-  const replaceThreadId = useCallback((fromId: string, toId: string) => {
-    setThreads((prev) =>
-      prev.map((t) => (t.id === fromId ? { ...t, id: toId } : t))
-    );
-  }, []);
+  const replaceThreadId = useCallback(
+    (fromId: string, toId: string) => {
+      queryClient.setQueryData<ThreadItem[]>(queryKey, (old = []) =>
+        old.map((t) => (t.id === fromId ? { ...t, id: toId } : t))
+      );
+    },
+    [queryClient, queryKey]
+  );
 
   return { threads, isLoading, error, addThread, replaceThreadId };
 }
 
 /**
- * Returns a `getSignedUrl` function that fetches a one-time-use signed
- * app URL from the demo server, along with an `isPending` flag.
+ * Returns a `getSignedUrl` function backed by react-query's useMutation,
+ * along with an `isPending` flag.
  */
 export function useCounselSignedUrl(config: CounselApiConfig) {
-  const [isPending, setIsPending] = useState(false);
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (action?: SignedUrlAction) =>
+      fetchSignedUrlFromServer(config, action),
+  });
 
-  const getSignedUrl = useCallback(
-    async (action?: SignedUrlAction): Promise<string> => {
-      setIsPending(true);
-      try {
-        return await fetchSignedUrlFromServer(config, action);
-      } finally {
-        setIsPending(false);
-      }
-    },
-    [config]
-  );
-
-  return { getSignedUrl, isPending };
+  return { getSignedUrl: mutateAsync, isPending };
 }
