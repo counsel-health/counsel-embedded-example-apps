@@ -54,7 +54,17 @@ async function fetchSignedUrlFromServer(
     view: { navigation: "integrated" },
   };
   if (action) {
-    sessionData.action = action;
+    // Counsel signedAppUrl expects a single `action` object. For create_thread,
+    // initial_messages and agent_context must live on that object (not on sessionData).
+    if (action.action === "create_thread") {
+      sessionData.action = {
+        action: "create_thread",
+        initial_messages: action.initial_messages,
+        agent_context: action.agent_context,
+      };
+    } else {
+      sessionData.action = action;
+    }
   }
 
   const resp = await fetch(`${config.counselApiUrl}/v1/user/${config.counselUserId}/signedAppUrl`, {
