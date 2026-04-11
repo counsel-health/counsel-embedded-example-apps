@@ -12,7 +12,7 @@ export async function seedUsers(db: Database) {
     return;
   }
 
-  // Find all access codes for main and onboarding clients
+  // Find all access codes grouped by userType
   const mainConfigs = Object.entries(env.ACCESS_CODE_CONFIGS).filter(
     ([_, config]) => config.userType === "main"
   );
@@ -21,7 +21,7 @@ export async function seedUsers(db: Database) {
   );
 
   const seedPromises = [];
-  // Seed a user for each main userTypeaccess code
+  // Seed a user for each main userType access code
   for (const [accessCode] of mainConfigs) {
     seedPromises.push(
       createUser({

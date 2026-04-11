@@ -50,8 +50,11 @@ async function fetchCounselJwt(sessionToken: string): Promise<string> {
     body: JSON.stringify({}),
   });
   if (!resp.ok) {
+    const detail = await readHttpErrorDetail(resp);
     throw new Error(
-      `Failed to fetch Counsel JWT: ${resp.status} ${resp.statusText}`
+      `Failed to fetch Counsel JWT: ${resp.status} ${resp.statusText}${
+        detail ? ` ${detail}` : ""
+      }`
     );
   }
   const { token } = CounselTokenResponseSchema.parse(await resp.json());
@@ -84,7 +87,8 @@ export async function prewarmSessionJwt(
  * Cached in NextJS so the same URL is reused across navigations until invalidated.
  */
 export async function getCounselSignedAppUrl(
-  session: IronSession<SessionData>
+  session: IronSession<SessionData>,
+  sessionData?: Record<string, unknown>
 ) {
   const { token, counselUserId, authType, counselJwt } = session;
 
@@ -103,7 +107,7 @@ export async function getCounselSignedAppUrl(
           "Content-Type": "application/json",
           ...getAuthorizationHeader(jwt),
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(sessionData ?? {}),
         cache: "default",
         next: {
           revalidate: 3600,
@@ -112,8 +116,11 @@ export async function getCounselSignedAppUrl(
       }
     );
     if (!resp.ok) {
+      const detail = await readHttpErrorDetail(resp);
       throw new Error(
-        `Failed to get signed app url: ${resp.status} ${resp.statusText}`
+        `Failed to get signed app url: ${resp.status} ${resp.statusText}${
+          detail ? ` ${detail}` : ""
+        }`
       );
     }
     return SignedAppUrlResponseSchema.parse(await resp.json()).url;
@@ -128,7 +135,7 @@ export async function getCounselSignedAppUrl(
         "Content-Type": "application/json",
         ...getAuthorizationHeader(token),
       },
-      body: JSON.stringify({}),
+      body: JSON.stringify(sessionData ?? {}),
       cache: "default",
       next: {
         revalidate: 3600,
@@ -137,8 +144,11 @@ export async function getCounselSignedAppUrl(
     }
   );
   if (!resp.ok) {
+    const detail = await readHttpErrorDetail(resp);
     throw new Error(
-      `Failed to get signed app url: ${resp.status} ${resp.statusText}`
+      `Failed to get signed app url: ${resp.status} ${resp.statusText}${
+        detail ? ` ${detail}` : ""
+      }`
     );
   }
   return SignedAppUrlResponseSchema.parse(await resp.json()).url;
@@ -163,6 +173,7 @@ export async function signUpCounselUser(
         userType: UserType;
         counselUserId: string;
         authType: "apiKey" | "jwt";
+        navMode: "standalone" | "integrated";
       };
     }
   | { success: false; error: unknown }
@@ -190,11 +201,18 @@ export async function signOutCounselUser(token: string) {
 // Helper Functions
 //================================================================================
 
-async function safeParseJson<T>(response: Response): Promise<T | null> {
+const ERROR_BODY_MAX_LEN = 500;
+
+async function readHttpErrorDetail(response: Response): Promise<string> {
+  const text = await response.text();
+  if (!text) return "";
+  const trimmed = text.trim();
   try {
-    return await response.json();
+    return JSON.stringify(JSON.parse(trimmed));
   } catch {
-    return null;
+    return trimmed.length > ERROR_BODY_MAX_LEN
+      ? `${trimmed.slice(0, ERROR_BODY_MAX_LEN)}…`
+      : trimmed;
   }
 }
 
@@ -225,13 +243,16 @@ async function fetchFromCounselServer<T>(
   });
 
   if (!response.ok) {
-    const error = await safeParseJson(response);
-    console.error("Failed to fetch from counsel server", error, {
+    const detail = await readHttpErrorDetail(response);
+    console.error("Failed to fetch from counsel server", {
       responseStatus: response.status,
       responseStatusText: response.statusText,
+      detail,
     });
     throw new Error(
-      `Failed to fetch from counsel server: ${response.status} ${response.statusText}`
+      `Failed to fetch from counsel server: ${response.status} ${response.statusText}${
+        detail ? ` ${detail}` : ""
+      }`
     );
   }
 

@@ -56,5 +56,6 @@ export default async function index(
     counselUserId: user.counsel_user_id,
     // Tells the Next.js app which auth flow to use for Counsel API calls
     authType: config.apiKey ? "apiKey" : "jwt",
+    navMode: config.navMode,
   });
 }

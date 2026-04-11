@@ -1,18 +1,57 @@
-import type { CounselAppProps } from "./CounselApp";
+"use client";
+
+import { useEffect, useRef } from "react";
+import { useCounselAppMessageHandler } from "@/hooks/useCounselAppMessageHandler";
+
+export type CounselAppClientProps = {
+  signedAppUrl: string;
+  className?: string;
+  /**
+   * When this changes after initial mount, sends a `switch_thread` postMessage
+   * to the iframe so it navigates without a full reload.
+   * Must be a real Counsel thread UUID — not a client-side placeholder ID.
+   */
+  currentThreadId?: string;
+};
 
 /**
- * CounselApp is a component that renders a Counsel app inside an iframe.
+ * CounselAppClient renders the Counsel app inside an iframe.
+ * Use the `currentThreadId` prop to switch between threads without reloading.
  */
-export default function CounselAppClient({ signedAppUrl, className }: CounselAppProps) {
+export default function CounselAppClient({
+  signedAppUrl,
+  className,
+  currentThreadId,
+}: CounselAppClientProps) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const isFirstRender = useRef(true);
+
+  const iframeOrigin = (() => {
+    try {
+      return new URL(signedAppUrl).origin;
+    } catch {
+      return null;
+    }
+  })();
+
+  const { switchThread } = useCounselAppMessageHandler({ iframeRef, iframeOrigin });
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!currentThreadId) return;
+    switchThread(currentThreadId);
+  }, [currentThreadId, switchThread]);
+
   return (
     <iframe
+      ref={iframeRef}
       title="Counsel App"
       src={signedAppUrl}
       className={className}
-      onError={(error) => {
-        console.error("Failed to load Counsel app", error);
-      }}
-      // If you want to sandbox our iFrame, please add the following:
+      // If you want to sandbox the iFrame, add:
       // sandbox="allow-storage-access-by-user-activation allow-same-origin allow-scripts allow-forms"
     />
   );

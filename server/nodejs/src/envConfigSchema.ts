@@ -10,6 +10,10 @@ export const AccessCodeConfigSchema = z
     client: z.string(),
     apiUrl: z.string().url(),
     userType: z.enum(["main", "onboarding"]).default("main"),
+    // Navigation mode for the embedded chat experience.
+    // "standalone" (default): full Counsel iframe with built-in sidebar
+    // "integrated": host-managed sidebar with Counsel integrated view (no Counsel sidebar)
+    navMode: z.enum(["standalone", "integrated"]).default("standalone"),
     // API key for API key auth. When present, used as Bearer token.
     apiKey: z.string().optional(),
     // The iss claim put in JWTs for this access code's org.
