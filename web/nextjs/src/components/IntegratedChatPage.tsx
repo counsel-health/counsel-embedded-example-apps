@@ -67,7 +67,7 @@ function createNewHostThread(): HostThread {
 type ActiveThread = { type: "host"; id: string } | { type: "counsel"; id: string };
 
 type IntegratedChatPageProps = {
-  /** Credentials for calling the Counsel API directly from the browser. */
+  /** Counsel API routing: JWT calls Counsel directly; API key sessions use `/api/counsel/*` proxies. */
   counselApiConfig: CounselApiConfig;
 };
 
@@ -80,8 +80,8 @@ type IntegratedChatPageProps = {
  * the host app manages the thread sidebar and renders either its own chat
  * UI (host threads) or the Counsel iframe (Counsel threads).
  *
- * All API calls (threads, signed URLs) go directly from the browser to
- * the Counsel API using JWT auth — no demo server or Next.js middleman.
+ * JWT sessions call the Counsel API from the browser; API key sessions use
+ * Next.js route handlers that proxy to the demo server (same as dashboard chat).
  */
 export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatPageProps) {
   const defaultThread = createDefaultHostThread();
@@ -188,7 +188,23 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
     async (hostThreadId: string) => {
       if (isLoading) return;
       try {
-        const url = await getSignedUrl({ action: "create_thread" });
+        const thread = hostThreads.find((t) => t.id === hostThreadId);
+        const messages = thread?.messages ?? [];
+
+        const initial_messages = messages.map((m) => ({
+          body: m.text,
+          role: m.role === "user" ? ("patient" as const) : ("model" as const),
+        }));
+
+        const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
+        const reason_for_handoff =
+          lastUserMessage?.text ?? "Agent detected a need for medical assistance";
+
+        const url = await getSignedUrl({
+          action: "create_thread",
+          initial_messages,
+          agent_context: { reason_for_handoff },
+        });
 
         setHostThreads((prev) =>
           prev.map((t) => (t.id === hostThreadId ? { ...t, showCounselCard: false } : t)),
@@ -209,7 +225,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
         console.error("Failed to connect to Counsel:", error);
       }
     },
-    [isLoading, getSignedUrl, addThread, invalidateThreads],
+    [isLoading, getSignedUrl, addThread, invalidateThreads, hostThreads],
   );
 
   // ---- Shared sidebar props -----------------------------------------------

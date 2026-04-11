@@ -17,7 +17,7 @@ bun run playwright:install
 bun run test:e2e
 ```
 
-`test:e2e` uses **`doppler run`**, so secrets like **`E2E_ACCESS_CODE`** reach Playwright. Doppler finds **`doppler.yaml`** in a parent directory.
+`test:e2e` uses **`doppler run`**, so secrets like **`E2E_ACCESS_CODE`** and **`E2E_ACCESS_CODE_INTEGRATED`** reach Playwright. Doppler finds **`doppler.yaml`** in a parent directory.
 
 ## Other local runs
 
@@ -38,10 +38,11 @@ bun run test:e2e:api   # or test:e2e:ui / test:e2e
 | `CI`              | Set by CI (workers, retries, headless) | —                       |
 | `HEADLESS`        | `true` → headless browser (local UI)   | —                       |
 | `E2E_ACCESS_CODE` | Required for embedded-flow login test  | —                       |
+| `E2E_ACCESS_CODE_INTEGRATED` | Optional; access code with `navMode: integrated` for [integrated-handoff](ui/integrated-handoff.spec.ts). If unset, falls back to `E2E_ACCESS_CODE` (CI) then `AICHAT` | — |
 
 ## CI
 
-Workflow: [.github/workflows/ci-e2e.yml](../.github/workflows/ci-e2e.yml). It fetches secrets with **`dopplerhq/secrets-fetch-action`** (**`inject-env-vars: true`** puts them on the job environment). **`docker compose up`** starts the stack; Compose resolves **`${VAR}`** in [docker-compose.yml](../docker-compose.yml) from that environment first (so web/server containers receive Doppler values). Playwright (**`test:e2e:ci`**) only runs tests against those URLs and sees the same job env (e.g. **`E2E_ACCESS_CODE`**). Blacksmith **stickydisk** caches `automation-testing/node_modules` and `~/.cache/ms-playwright`; the cleanup job’s **delete-key** values must match the mount keys in the workflow.
+Workflow: [.github/workflows/ci-e2e.yml](../.github/workflows/ci-e2e.yml). It fetches secrets with **`dopplerhq/secrets-fetch-action`** (**`inject-env-vars: true`** puts them on the job environment). **`docker compose up`** starts the stack; Compose resolves **`${VAR}`** in [docker-compose.yml](../docker-compose.yml) from that environment first (so web/server containers receive Doppler values). Playwright (**`test:e2e:ci`**) only runs tests against those URLs and sees the same job env (e.g. **`E2E_ACCESS_CODE`**, **`E2E_ACCESS_CODE_INTEGRATED`**). Blacksmith **stickydisk** caches `automation-testing/node_modules` and `~/.cache/ms-playwright`; the cleanup job’s **delete-key** values must match the mount keys in the workflow.
 
 **Repo settings:** secret **`DOPPLER_CI_TOKEN`**; variables **`DOPPLER_PROJECT`** and **`DOPPLER_CONFIG`** if your token needs them.
 

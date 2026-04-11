@@ -5,8 +5,8 @@ import { getValidCounselJwt } from "@/lib/server";
 
 /**
  * Integrated chat page — thin shell that reads session credentials
- * and passes them to the client. All API calls (threads, signed URLs)
- * happen directly from the browser to the Counsel API using JWT auth.
+ * and passes them to the client. JWT auth calls Counsel from the browser;
+ * API key auth uses `/api/counsel/*` proxies with the session cookie.
  */
 export default async function IntegratedChat() {
   const session = await getSession();
@@ -15,7 +15,7 @@ export default async function IntegratedChat() {
   return (
     <IntegratedChatPage
       counselApiConfig={{
-        counselApiUrl: serverEnv.COUNSEL_API_URL,
+        counselDirectApiBase: `${serverEnv.COUNSEL_API_URL}/v1/user/${session.counselUserId}`,
         counselJwt: counselJwt ?? "",
         counselUserId: session.counselUserId,
       }}
