@@ -18,7 +18,7 @@ export async function GET() {
 
   if (session.authType === "jwt" && counselJwt) {
     const resp = await fetchWithRetry(
-      `${serverEnv.COUNSEL_API_URL}/v1/user/${session.counselUserId}/threads`,
+      `${session.counselApiUrl}/v1/user/${session.counselUserId}/threads`,
       {
         method: "GET",
         headers: {

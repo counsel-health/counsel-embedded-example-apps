@@ -26,22 +26,12 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Create env file
-        run: |
-          # Pretty-printed JSON breaks .env (one var per line). Minify to a single line; write
-          # from JS so JSON quotes never go through shell quoting.
-          bun -e '
-          const { writeFileSync } = require("node:fs");
-          const compact = JSON.stringify(JSON.parse(process.env.ACCESS_CODE_CONFIGS ?? ""));
-          writeFileSync(
-            ".env",
-            `JWT_SECRET=${process.env.JWT_SECRET}\nCOUNSEL_WEBHOOK_SECRET=${process.env.COUNSEL_WEBHOOK_SECRET}\nACCESS_CODE_CONFIGS=${compact}\n`,
-          );
-          '
-          cat .env
+        run: bun run ci:write-env
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           COUNSEL_WEBHOOK_SECRET: ${{ secrets.COUNSEL_WEBHOOK_SECRET }}
           ACCESS_CODE_CONFIGS: ${{ secrets.ACCESS_CODE_CONFIGS }}
+          COUNSEL_PRIVATE_KEY_PEM: ${{ secrets.COUNSEL_PRIVATE_KEY_PEM }}
 
       - name: Lint
         run: bun run lint

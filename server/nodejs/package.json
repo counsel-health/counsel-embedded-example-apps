@@ -18,6 +18,7 @@
     "test:watch": "vitest",
     "verify": "bun run lint && bun run test && bun run typecheck && bun run compile",
     "ci": "bun install --production && bun run compile",
+    "ci:write-env": "bun scripts/write-ci-env.ts",
     "healthcheck": "sh ./healthcheck.sh"
   },
   "dependencies": {

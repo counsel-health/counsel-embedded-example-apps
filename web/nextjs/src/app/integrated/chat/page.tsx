@@ -1,7 +1,6 @@
 import IntegratedChatPage from "@/components/IntegratedChatPage";
-import { getSession } from "@/lib/session";
-import { serverEnv } from "@/envConfig";
 import { getValidCounselJwt } from "@/lib/server";
+import { getSession } from "@/lib/session";
 
 /**
  * Integrated chat page — thin shell that reads session credentials
@@ -15,7 +14,7 @@ export default async function IntegratedChat() {
   return (
     <IntegratedChatPage
       counselApiConfig={{
-        counselDirectApiBase: `${serverEnv.COUNSEL_API_URL}/v1/user/${session.counselUserId}`,
+        counselDirectApiBase: `${session.counselApiUrl}/v1/user/${session.counselUserId}`,
         counselJwt: counselJwt ?? "",
         counselUserId: session.counselUserId,
       }}

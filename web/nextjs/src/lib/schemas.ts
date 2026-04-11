@@ -27,4 +27,5 @@ export const SignUpResponseSchema = z.object({
   counselUserId: z.string(),
   authType: z.enum(["apiKey", "jwt"]),
   navMode: z.enum(["standalone", "integrated"]).default("standalone"),
+  counselApiUrl: z.url(),
 });

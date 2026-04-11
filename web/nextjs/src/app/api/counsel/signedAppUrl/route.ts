@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
   if (session.authType === "jwt" && counselJwt) {
     const resp = await fetchWithRetry(
-      `${serverEnv.COUNSEL_API_URL}/v1/user/${session.counselUserId}/signedAppUrl`,
+      `${session.counselApiUrl}/v1/user/${session.counselUserId}/signedAppUrl`,
       {
         method: "POST",
         headers: {

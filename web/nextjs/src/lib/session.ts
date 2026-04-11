@@ -1,7 +1,7 @@
-import { getIronSession, SessionOptions } from "iron-session";
-import { cookies } from "next/headers";
 import { serverEnv } from "@/envConfig";
 import { UserType } from "@/types/user";
+import { getIronSession, SessionOptions } from "iron-session";
+import { cookies } from "next/headers";
 
 export interface SessionData {
   // The JWT token for the user, used to authenticate the user in the demo app.
@@ -19,6 +19,8 @@ export interface SessionData {
   counselJwt?: string;
   // Navigation mode: "standalone" (default) or "integrated" (host-managed sidebar)
   navMode: "standalone" | "integrated";
+  // The base URL for the Counsel API, comes from the server when we validate the JWT
+  counselApiUrl: string;
 }
 
 export async function getSession() {

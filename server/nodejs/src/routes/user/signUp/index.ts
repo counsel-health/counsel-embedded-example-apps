@@ -18,6 +18,7 @@ export const SignUpResponseSchema = z.object({
   counselUserId: z.string(),
   authType: z.enum(["apiKey", "jwt"]),
   navMode: z.enum(["standalone", "integrated"]),
+  counselApiUrl: z.url(),
 });
 
 export { checkAccessCode } from "./accessCode";
@@ -54,6 +55,7 @@ export async function signUpHandler({
     client,
     counselUserId: user.counsel_user_id,
     authType: config.apiKey ? "apiKey" : "jwt",
-    navMode: config.navMode,
+    navMode: config.navMode ?? "standalone",
+    counselApiUrl: config.apiUrl,
   };
 }
