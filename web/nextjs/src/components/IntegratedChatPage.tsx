@@ -7,6 +7,12 @@ import {
   type CounselApiConfig,
 } from "@/hooks/useCounselApi";
 import { useCallback, useState } from "react";
+import { PanelLeftOpen } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import ChatList from "./integrated/ChatList";
 import ChatThread from "./integrated/ChatThread";
 import CounselChatThread from "./integrated/CounselChatThread";
@@ -85,6 +91,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
     type: "host",
     id: defaultThread.id,
   });
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   // The signed URL currently loaded in the Counsel iframe. Kept stable so the
   // iframe is not reloaded unnecessarily — switching threads uses switch_thread.
   const [counselSessionUrl, setCounselSessionUrl] = useState<string | null>(null);
@@ -115,16 +122,12 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
       setActiveThread({ type: "counsel", id: threadId });
 
       if (counselSessionUrl) {
-        // Session already active — navigate within the existing iframe.
-        // For real thread IDs, send switch_thread. For placeholders, just
-        // reveal the iframe (it's already showing that thread).
         if (!threadId.startsWith("counsel-new-")) {
           setActiveCounselThreadId(threadId);
         }
         return;
       }
 
-      // No session yet — fetch the initial signed URL.
       try {
         const isPlaceholder = threadId.startsWith("counsel-new-");
         const url = isPlaceholder
@@ -140,9 +143,17 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
 
   const handleNewChat = useCallback(() => {
     if (isLoading) return;
-    const newThread = createNewHostThread();
-    setHostThreads((prev) => [newThread, ...prev]);
-    setActiveThread({ type: "host", id: newThread.id });
+    // Reuse an existing empty host thread (only the initial bot message, no user messages)
+    setHostThreads((prev) => {
+      const empty = prev.find((t) => t.messages.every((m) => m.role === "bot"));
+      if (empty) {
+        setActiveThread({ type: "host", id: empty.id });
+        return prev;
+      }
+      const newThread = createNewHostThread();
+      setActiveThread({ type: "host", id: newThread.id });
+      return [newThread, ...prev];
+    });
   }, [isLoading]);
 
   const handleSendMessage = useCallback((threadId: string, text: string) => {
@@ -183,8 +194,6 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
           prev.map((t) => (t.id === hostThreadId ? { ...t, showCounselCard: false } : t)),
         );
 
-        // Add a placeholder immediately so the sidebar shows something while
-        // the Counsel backend creates the real thread.
         const placeholderId = `counsel-new-${Date.now()}`;
         addThread({
           id: placeholderId,
@@ -203,6 +212,21 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
     [isLoading, getSignedUrl, addThread, invalidateThreads],
   );
 
+  // ---- Shared sidebar props -----------------------------------------------
+
+  const chatListProps = {
+    hostThreads,
+    counselThreads,
+    activeThreadId: activeThread.id,
+    activeThreadType: activeThread.type,
+    onHostThreadClick: handleHostThreadClick,
+    onCounselThreadClick: handleCounselThreadClick,
+    onNewChat: handleNewChat,
+    onSignOut: signOut,
+    isPending: isLoading,
+    isThreadsLoading,
+  };
+
   // ---- Render -------------------------------------------------------------
 
   const activeHostThread =
@@ -210,41 +234,54 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
 
   return (
     <div className="flex h-full w-full">
-      <ChatList
-        hostThreads={hostThreads}
-        counselThreads={counselThreads}
-        activeThreadId={activeThread.id}
-        activeThreadType={activeThread.type}
-        onHostThreadClick={handleHostThreadClick}
-        onCounselThreadClick={handleCounselThreadClick}
-        onNewChat={handleNewChat}
-        onSignOut={signOut}
-        isPending={isLoading}
-        isThreadsLoading={isThreadsLoading}
-      />
+      {/* Desktop sidebar */}
+      <div className="hidden sm:flex w-72 shrink-0 h-full">
+        <ChatList {...chatListProps} />
+      </div>
+
+      {/* Mobile sidebar — Sheet drawer */}
+      <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+        <SheetContent side="left" className="p-0 w-72 [&>button:last-child]:hidden">
+          <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <div className="h-full">
+            <ChatList {...chatListProps} onClose={() => setIsMobileOpen(false)} />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Main content area */}
-      <div className="flex-1 min-w-0">
-        {/* Host thread — rendered on top when active */}
-        {activeThread.type === "host" && activeHostThread && (
-          <ChatThread
-            key={activeHostThread.id}
-            thread={activeHostThread}
-            onSendMessage={handleSendMessage}
-            onConnectCounsel={handleConnectCounsel}
-            isConnecting={isLoading}
-          />
-        )}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Mobile-only top bar — always visible above both host chat and Counsel iframe */}
+        <div className="sm:hidden flex items-center px-3 h-11 border-b border-zinc-100 dark:border-zinc-800 shrink-0 bg-white dark:bg-zinc-950">
+          <button
+            onClick={() => setIsMobileOpen(true)}
+            aria-label="Open menu"
+            className="flex items-center justify-center size-9 rounded-lg text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          >
+            <PanelLeftOpen className="size-5" />
+          </button>
+        </div>
 
-        {/* Counsel iframe — kept mounted once a session exists so switch_thread
-            works even after navigating away to a host thread and back. */}
-        {counselSessionUrl && (
-          <CounselChatThread
-            hidden={activeThread.type !== "counsel"}
-            signedAppUrl={counselSessionUrl}
-            currentThreadId={activeCounselThreadId ?? undefined}
-          />
-        )}
+        {/* Chat content */}
+        <div className="flex-1 min-h-0 relative">
+          {activeThread.type === "host" && activeHostThread && (
+            <ChatThread
+              key={activeHostThread.id}
+              thread={activeHostThread}
+              onSendMessage={handleSendMessage}
+              onConnectCounsel={handleConnectCounsel}
+              isConnecting={isLoading}
+            />
+          )}
+
+          {counselSessionUrl && (
+            <CounselChatThread
+              hidden={activeThread.type !== "counsel"}
+              signedAppUrl={counselSessionUrl}
+              currentThreadId={activeCounselThreadId ?? undefined}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

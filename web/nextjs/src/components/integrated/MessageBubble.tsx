@@ -8,16 +8,19 @@ type MessageBubbleProps = {
 };
 
 export default function MessageBubble({ msg }: MessageBubbleProps) {
+  const isUser = msg.role === "user";
   return (
-    <div
-      className={cn(
-        "max-w-[80%] rounded-lg px-3 py-2 text-sm",
-        msg.role === "user"
-          ? "ml-auto bg-blue-600 text-white"
-          : "bg-gray-100 text-gray-900"
-      )}
-    >
-      {msg.text}
+    <div className={cn("flex", isUser ? "flex-row-reverse" : "flex-row")}>
+      <div
+        className={cn(
+          "max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap",
+          isUser
+            ? "bg-blue-600 text-white"
+            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100",
+        )}
+      >
+        {msg.text}
+      </div>
     </div>
   );
 }
