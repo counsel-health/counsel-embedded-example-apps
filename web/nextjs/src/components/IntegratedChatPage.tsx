@@ -185,7 +185,9 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
           role: m.role === "user" ? ("patient" as const) : ("model" as const),
         }));
 
-        const reason_for_handoff = "Agent detected a need for medical assistance";
+        const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
+        const reason_for_handoff =
+          lastUserMessage?.text ?? "Agent detected a need for medical assistance";
 
         const url = await getSignedUrl({
           action: "create_thread",

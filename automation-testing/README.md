@@ -38,7 +38,7 @@ bun run test:e2e:api   # or test:e2e:ui / test:e2e
 | `CI`              | Set by CI (workers, retries, headless) | —                       |
 | `HEADLESS`        | `true` → headless browser (local UI)   | —                       |
 | `E2E_ACCESS_CODE` | Required for embedded-flow login test  | —                       |
-| `E2E_ACCESS_CODE_INTEGRATED` | Access code with `navMode: integrated` for [integrated-handoff](ui/integrated-handoff.spec.ts) (hits real Counsel API; defaults to `AICHAT` if unset) | — |
+| `E2E_ACCESS_CODE_INTEGRATED` | Optional; access code with `navMode: integrated` for [integrated-handoff](ui/integrated-handoff.spec.ts). If unset, falls back to `E2E_ACCESS_CODE` (CI) then `AICHAT` | — |
 
 ## CI
 
