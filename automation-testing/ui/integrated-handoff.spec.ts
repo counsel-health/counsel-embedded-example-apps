@@ -2,7 +2,9 @@ import { expect, test } from "@playwright/test";
 
 // Prefer a code with navMode: integrated; otherwise use the same JWT code as embedded-flow (CI sets E2E_ACCESS_CODE).
 const accessCode =
-  process.env["E2E_ACCESS_CODE_INTEGRATED"] ?? process.env["E2E_ACCESS_CODE"] ?? "AICHAT";
+  process.env["E2E_ACCESS_CODE_INTEGRATED"] ??
+  process.env["E2E_ACCESS_CODE"] ??
+  "AICHAT";
 
 test.describe("integrated chat - connect to care handoff", () => {
   test("real Counsel API: signedAppUrl succeeds and Counsel iframe loads", async ({
