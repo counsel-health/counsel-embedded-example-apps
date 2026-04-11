@@ -5,6 +5,7 @@ import { User } from "@/db/schemas/user";
 import { parseName } from "@/lib/name";
 import { fetchWithRetry } from "@/lib/http";
 import { signCounselJwt } from "./keys";
+import { counselLogger } from "@/lib/logger";
 
 export const UserTypeSchema = z.enum(["main", "onboarding"]);
 export type UserType = z.infer<typeof UserTypeSchema>;
@@ -110,7 +111,7 @@ export async function getCounselSignedAppUrl({
   accessCode: string;
   sessionData?: Record<string, unknown>;
 }) {
-  console.log("Getting signed app url for user", userId);
+  counselLogger.debug({ userId }, "Getting signed app url for user");
   const apiUrl = getApiUrl(accessCode);
   const response = await fetchWithRetry(
     getRequestUrl(apiUrl, `/v1/user/${userId}/signedAppUrl`),
@@ -170,7 +171,7 @@ export async function createCounselUser(user: User, accessCode: string) {
   if (!response.ok) {
     // Handle duplicate user case (this can happen on server restarts where the in-memory DB is reset)
     if (response.status === 409) {
-      console.log("User already exists, returning existing user", user.id);
+      counselLogger.info({ userId: user.id }, "User already exists, returning existing user");
       // User already exists, return the existing user
       return UserResponse.parse({
         id: user.id,
@@ -228,7 +229,7 @@ export async function createCounselDraftUser(user: User, accessCode: string) {
   if (!response.ok) {
     // Handle duplicate user case (this can happen on server restarts where the in-memory DB is reset)
     if (response.status === 409) {
-      console.log("User already exists, returning existing user", user.id);
+      counselLogger.info({ userId: user.id }, "User already exists, returning existing user");
       // User already exists, return the existing user
       return UserResponse.parse({
         id: user.id,

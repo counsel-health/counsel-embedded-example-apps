@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { v4 as uuidv4 } from "uuid";
+import { httpLogger } from "@/lib/logger";
 
 /**
  * Elysia plugin that logs all incoming requests and their responses.
@@ -12,18 +13,18 @@ export const observabilityPlugin = new Elysia({ name: "observability" })
   }))
   .onBeforeHandle({ as: "global" }, ({ request, requestId, body }) => {
     const path = new URL(request.url).pathname;
-    console.info(`Incoming request - ${requestId}`, {
-      method: request.method,
-      path,
-      body,
-    });
+    httpLogger.info({ method: request.method, path, body, requestId }, "Incoming request");
   })
   .onAfterHandle({ as: "global" }, ({ request, set, requestId, requestStart }) => {
     const path = new URL(request.url).pathname;
-    console.info(`Request finished - ${requestId}`, {
-      method: request.method,
-      path,
-      statusCode: set.status,
-      duration: `${(performance.now() - requestStart).toFixed(2)}ms`,
-    });
+    httpLogger.info(
+      {
+        method: request.method,
+        path,
+        statusCode: set.status,
+        duration: `${(performance.now() - requestStart).toFixed(2)}ms`,
+        requestId,
+      },
+      "Request finished",
+    );
   });

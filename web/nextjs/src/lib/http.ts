@@ -1,3 +1,5 @@
+import { httpLogger } from "@/lib/logger";
+
 /**
  * @description Fetch with retry
  */
@@ -11,7 +13,7 @@ export async function fetchWithRetry(
     try {
       return await fetch(url, options);
     } catch (error) {
-      console.warn(`Request to ${url} failed, retrying in ${delay}ms`, error);
+      httpLogger.warn({ url, delay, error }, "Request failed, retrying");
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }

@@ -9,6 +9,7 @@ import {
   CounselTokenResponseSchema,
   SignUpResponseSchema,
 } from "@/lib/schemas";
+import { serverLogger } from "@/lib/logger";
 
 //================================================================================
 // Counsel Demo Server API Calls
@@ -208,7 +209,7 @@ export async function signUpCounselUser(
  * @description Sign out a user from the demo server
  */
 export async function signOutCounselUser(token: string) {
-  console.log("Signing out user", token);
+  serverLogger.debug("Signing out user");
   await fetchFromCounselServer("user/signOut", "POST", {}, token);
 }
 
@@ -243,7 +244,7 @@ async function fetchFromCounselServer<T>(
   }
 ): Promise<T> {
   const url = `${serverEnv.SERVER_HOST}/${path}`;
-  console.log("Fetching from counsel server", url);
+  serverLogger.debug({ url }, "Fetching from counsel server");
   const response = await fetchWithRetry(url, {
     method,
     headers: {
@@ -259,11 +260,10 @@ async function fetchFromCounselServer<T>(
 
   if (!response.ok) {
     const detail = await readHttpErrorDetail(response);
-    console.error("Failed to fetch from counsel server", {
-      responseStatus: response.status,
-      responseStatusText: response.statusText,
-      detail,
-    });
+    serverLogger.error(
+      { responseStatus: response.status, responseStatusText: response.statusText, detail },
+      "Failed to fetch from counsel server",
+    );
     throw new Error(
       `Failed to fetch from counsel server: ${response.status} ${response.statusText}${
         detail ? ` ${detail}` : ""
@@ -272,6 +272,6 @@ async function fetchFromCounselServer<T>(
   }
 
   const data = await response.json();
-  console.log("Fetched from counsel server", data);
+  serverLogger.debug({ data }, "Fetched from counsel server");
   return data;
 }

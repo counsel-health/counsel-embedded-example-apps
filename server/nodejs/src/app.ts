@@ -3,6 +3,7 @@ import { observabilityPlugin } from "@/lib/observability";
 import { MainPlugin } from "@/routes";
 import { cors } from "@elysiajs/cors";
 import { Elysia, ValidationError } from "elysia";
+import { httpLogger } from "@/lib/logger";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
@@ -46,12 +47,7 @@ const app = new Elysia()
 
     const logCompletion = (statusCode: number) => {
       const duration = requestStart ? `${(performance.now() - requestStart).toFixed(2)}ms` : "unknown";
-      console.info(`Request finished - ${requestId ?? "no-id"}`, {
-        method,
-        path,
-        statusCode,
-        duration,
-      });
+      httpLogger.info({ method, path, statusCode, duration, requestId: requestId ?? "no-id" }, "Request finished");
     };
 
     if (code === "VALIDATION") {
@@ -60,9 +56,9 @@ const app = new Elysia()
 
       if (!(error instanceof ValidationError) || isResponseFailure) {
         set.status = 500;
-        console.error(
-          `Response or unknown validation failure on ${method} ${path} (${requestId ?? "no-id"})`,
-          error instanceof Error ? error.message : error,
+        httpLogger.error(
+          { method, path, requestId: requestId ?? "no-id", error: error instanceof Error ? error.message : error },
+          "Response or unknown validation failure",
         );
         logCompletion(500);
         return { errors: { message: "Internal Server Error" } };
@@ -70,7 +66,7 @@ const app = new Elysia()
 
       const clientMessage =
         error.type === "body" ? "Invalid request body" : "Invalid request";
-      console.warn(`Validation error (${error.type}) on ${method} ${path}`, error.message);
+      httpLogger.warn({ method, path, validationType: error.type, error: error.message }, "Validation error");
       set.status = 422;
       logCompletion(422);
       return { errors: { message: clientMessage } };
@@ -82,7 +78,7 @@ const app = new Elysia()
     // This preserves the client contract that auth and input errors use a flat shape.
     if (err instanceof UserFacingError) {
       set.status = err.status;
-      console.warn(`UserFacingError ${err.status} on ${method} ${path}: ${err.message}`);
+      httpLogger.warn({ method, path, status: err.status, error: err.message }, "UserFacingError");
       logCompletion(err.status);
       return { error: err.message };
     }
@@ -91,10 +87,10 @@ const app = new Elysia()
     set.status = httpStatus;
 
     if (httpStatus >= 500) {
-      console.error(`Error ${httpStatus} on ${method} ${path}`, err);
+      httpLogger.error({ method, path, status: httpStatus, error: err }, "Server error");
     } else {
       // 4xx from HttpError (e.g. 404 catch-all) — not a server fault
-      console.warn(`Error ${httpStatus} on ${method} ${path}: ${err.message}`);
+      httpLogger.warn({ method, path, status: httpStatus, error: err.message }, "Client error");
     }
 
     logCompletion(httpStatus);

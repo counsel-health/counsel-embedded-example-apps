@@ -42,6 +42,8 @@ export function isHttpError(error: Error): error is HttpError {
   );
 }
 
+import { httpLogger } from "@/lib/logger";
+
 export async function fetchWithRetry(
   url: string,
   options: RequestInit,
@@ -52,7 +54,7 @@ export async function fetchWithRetry(
     try {
       return await fetch(url, options);
     } catch (error) {
-      console.warn(`Request to ${url} failed, retrying in ${delay}ms`, error);
+      httpLogger.warn({ url, delay, error }, "Request failed, retrying");
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }

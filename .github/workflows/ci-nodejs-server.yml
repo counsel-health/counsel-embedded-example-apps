@@ -27,10 +27,16 @@ jobs:
 
       - name: Create env file
         run: |
-          touch .env
-          echo JWT_SECRET=${JWT_SECRET} >> .env
-          echo COUNSEL_WEBHOOK_SECRET=${COUNSEL_WEBHOOK_SECRET} >> .env
-          printf 'ACCESS_CODE_CONFIGS=%s\n' "${ACCESS_CODE_CONFIGS}" >> .env
+          # Pretty-printed JSON breaks .env (one var per line). Minify to a single line; write
+          # from JS so JSON quotes never go through shell quoting.
+          bun -e '
+          const { writeFileSync } = require("node:fs");
+          const compact = JSON.stringify(JSON.parse(process.env.ACCESS_CODE_CONFIGS ?? ""));
+          writeFileSync(
+            ".env",
+            `JWT_SECRET=${process.env.JWT_SECRET}\nCOUNSEL_WEBHOOK_SECRET=${process.env.COUNSEL_WEBHOOK_SECRET}\nACCESS_CODE_CONFIGS=${compact}\n`,
+          );
+          '
           cat .env
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}

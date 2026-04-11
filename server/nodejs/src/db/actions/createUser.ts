@@ -2,6 +2,7 @@ import { Database } from "bun:sqlite";
 import { createCounselDraftUser, createCounselUser } from "@/lib/counsel";
 import { getDb } from "../db";
 import { UserDBSchema } from "../schemas/user";
+import { dbLogger } from "@/lib/logger";
 
 const demoUser = (id: string) => ({
   id,
@@ -55,7 +56,7 @@ export async function createUser({
     newUser.email,
     JSON.stringify(newUser.info)
   );
-  console.log("Created user in DB", userId);
+  dbLogger.info({ userId }, "Created user in DB");
   return UserDBSchema.parse({
     id: userId,
     counsel_user_id: user.id,

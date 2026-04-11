@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { signUpCounselUser, prewarmSessionJwt } from "@/lib/server";
+import { authLogger } from "@/lib/logger";
 
 const FormDataSchema = z.object({
   accessCode: z.string().length(6),
@@ -16,7 +17,7 @@ export async function handleLogin(_: unknown, formData: FormData) {
   });
 
   if (!parsedResponse.success) {
-    console.error("Invalid input", parsedResponse.error);
+    authLogger.error({ error: parsedResponse.error }, "Invalid input");
     return { message: "Invalid access code" };
   }
 
@@ -25,13 +26,13 @@ export async function handleLogin(_: unknown, formData: FormData) {
   // Generate a random user id each time someone logs in
   const userId = uuidv4();
 
-  console.log("Attempting to sign up user", userId);
+  authLogger.info({ userId }, "Attempting to sign up user");
 
   // Create a user in the counsel app
 
   const resp = await signUpCounselUser(userId, accessCode);
   if (!resp.success) {
-    console.warn("Failed to sign up user", resp.error);
+    authLogger.warn({ error: resp.error }, "Failed to sign up user");
     return { message: "Invalid access code" };
   }
 
