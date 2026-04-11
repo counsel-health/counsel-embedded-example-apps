@@ -177,7 +177,21 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
     async (hostThreadId: string) => {
       if (isLoading) return;
       try {
-        const url = await getSignedUrl({ action: "create_thread" });
+        const thread = hostThreads.find((t) => t.id === hostThreadId);
+        const messages = thread?.messages ?? [];
+
+        const initial_messages = messages.map((m) => ({
+          body: m.text,
+          role: m.role === "user" ? ("patient" as const) : ("model" as const),
+        }));
+
+        const reason_for_handoff = "Agent detected a need for medical assistance";
+
+        const url = await getSignedUrl({
+          action: "create_thread",
+          initial_messages,
+          agent_context: { reason_for_handoff },
+        });
 
         setHostThreads((prev) =>
           prev.map((t) => (t.id === hostThreadId ? { ...t, showCounselCard: false } : t)),
@@ -200,7 +214,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
         console.error("Failed to connect to Counsel:", error);
       }
     },
-    [isLoading, getSignedUrl, addThread, invalidateThreads],
+    [isLoading, getSignedUrl, addThread, invalidateThreads, hostThreads],
   );
 
   // ---- Render -------------------------------------------------------------
