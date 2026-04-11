@@ -1,3 +1,5 @@
+import { useCallback, useMemo } from "react";
+import { Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ThreadItem } from "@/lib/schemas";
@@ -48,18 +50,28 @@ export default function ChatList({
   isPending,
   isThreadsLoading,
 }: ChatListProps) {
-  // Merge and sort all threads by last activity time (newest first)
-  const allThreads: UnifiedThread[] = [
-    ...hostThreads.map(
-      (thread) => ({ type: "host", thread }) as UnifiedThread
-    ),
-    ...counselThreads.map(
-      (thread) => ({ type: "counsel", thread }) as UnifiedThread
-    ),
-  ].sort(
-    (a, b) =>
-      new Date(b.thread.last_activity_time).getTime() -
-      new Date(a.thread.last_activity_time).getTime()
+  const allThreads = useMemo<UnifiedThread[]>(
+    () =>
+      [
+        ...hostThreads.map((thread): UnifiedThread => ({ type: "host", thread })),
+        ...counselThreads.map((thread): UnifiedThread => ({ type: "counsel", thread })),
+      ].sort(
+        (a, b) =>
+          new Date(b.thread.last_activity_time).getTime() -
+          new Date(a.thread.last_activity_time).getTime(),
+      ),
+    [hostThreads, counselThreads],
+  );
+
+  const handleSelectThread = useCallback(
+    (item: UnifiedThread) => {
+      if (item.type === "host") {
+        onHostThreadClick(item.thread.id);
+      } else {
+        onCounselThreadClick(item.thread.id);
+      }
+    },
+    [onHostThreadClick, onCounselThreadClick],
   );
 
   return (
@@ -83,41 +95,29 @@ export default function ChatList({
         )}
         {allThreads.map((item) => {
           const isActive =
-            activeThreadId === item.thread.id &&
-            activeThreadType === item.type;
-          const rawName =
+            activeThreadId === item.thread.id && activeThreadType === item.type;
+          const displayName =
             item.thread.display_name ||
             (item.type === "counsel" ? "Counsel chat" : "New chat");
-          const displayName =
-            item.type === "counsel"
-              ? `\uD83E\uDDD1\u200D\u2695\uFE0F — ${rawName}`
-              : rawName;
 
           return (
             <button
               key={`${item.type}-${item.thread.id}`}
-              onClick={() =>
-                item.type === "host"
-                  ? onHostThreadClick(item.thread.id)
-                  : onCounselThreadClick(item.thread.id)
-              }
+              onClick={() => handleSelectThread(item)}
               disabled={isPending}
               className={cn(
                 "w-full text-left px-3 py-2.5 border-b border-gray-100 hover:bg-gray-100 transition-colors",
                 isActive && "bg-gray-100",
-                isPending && "opacity-50 cursor-wait"
+                isPending && "opacity-50 cursor-wait",
               )}
             >
               <div className="flex items-center gap-1.5">
-                <span
-                  className={cn(
-                    "inline-block w-1.5 h-1.5 rounded-full shrink-0",
-                    item.type === "counsel" ? "bg-blue-400" : "bg-gray-300"
-                  )}
-                />
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {displayName}
-                </p>
+                {item.type === "counsel" ? (
+                  <Stethoscope className="w-3 h-3 text-blue-400 shrink-0" />
+                ) : (
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0" />
+                )}
+                <p className="text-sm font-medium text-gray-900 truncate">{displayName}</p>
               </div>
               <p className="text-xs text-gray-400 mt-0.5 ml-3">
                 {formatRelativeTime(item.thread.last_activity_time)}

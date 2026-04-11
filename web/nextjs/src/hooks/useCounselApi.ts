@@ -1,6 +1,6 @@
-import { useCallback } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ThreadItem } from "@/lib/schemas";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { counselQueryKeys } from "./counselQueryKeys";
 
 // ---------------------------------------------------------------------------
@@ -16,28 +16,21 @@ export type CounselApiConfig = {
   counselUserId: string;
 };
 
-type SignedUrlAction =
-  | { action: "open_thread"; thread_id: string }
-  | { action: "create_thread" };
+type SignedUrlAction = { action: "open_thread"; thread_id: string } | { action: "create_thread" };
 
 // ---------------------------------------------------------------------------
 // Raw fetch helpers
 // ---------------------------------------------------------------------------
 
-async function fetchThreadsFromServer(
-  config: CounselApiConfig
-): Promise<ThreadItem[]> {
-  const resp = await fetch(
-    `${config.counselApiUrl}/v1/user/${config.counselUserId}/threads`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${config.counselJwt}`,
-        "Idempotency-Key": crypto.randomUUID(),
-      },
-    }
-  );
+async function fetchThreadsFromServer(config: CounselApiConfig): Promise<ThreadItem[]> {
+  const resp = await fetch(`${config.counselApiUrl}/v1/user/${config.counselUserId}/threads`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${config.counselJwt}`,
+      "Idempotency-Key": crypto.randomUUID(),
+    },
+  });
   if (!resp.ok) {
     throw new Error(`Failed to fetch threads: ${resp.status}`);
   }
@@ -47,7 +40,7 @@ async function fetchThreadsFromServer(
 
 async function fetchSignedUrlFromServer(
   config: CounselApiConfig,
-  action?: SignedUrlAction
+  action?: SignedUrlAction,
 ): Promise<string> {
   const sessionData: Record<string, unknown> = {
     view: { navigation: "integrated" },
@@ -56,18 +49,15 @@ async function fetchSignedUrlFromServer(
     sessionData.action = action;
   }
 
-  const resp = await fetch(
-    `${config.counselApiUrl}/v1/user/${config.counselUserId}/signedAppUrl`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${config.counselJwt}`,
-        "Idempotency-Key": crypto.randomUUID(),
-      },
-      body: JSON.stringify(sessionData),
-    }
-  );
+  const resp = await fetch(`${config.counselApiUrl}/v1/user/${config.counselUserId}/signedAppUrl`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${config.counselJwt}`,
+      "Idempotency-Key": crypto.randomUUID(),
+    },
+    body: JSON.stringify(sessionData),
+  });
   if (!resp.ok) {
     throw new Error(`Failed to fetch signed URL: ${resp.status}`);
   }
@@ -87,7 +77,11 @@ export function useCounselThreads(config: CounselApiConfig) {
   const queryClient = useQueryClient();
   const queryKey = counselQueryKeys.threads(config.counselUserId);
 
-  const { data: threads = [], isLoading, error } = useQuery({
+  const {
+    data: threads = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey,
     queryFn: () => fetchThreadsFromServer(config),
     enabled: !!config.counselJwt && !!config.counselUserId,
@@ -95,24 +89,17 @@ export function useCounselThreads(config: CounselApiConfig) {
 
   const addThread = useCallback(
     (thread: ThreadItem) => {
-      queryClient.setQueryData<ThreadItem[]>(queryKey, (old = []) => [
-        thread,
-        ...old,
-      ]);
+      queryClient.setQueryData<ThreadItem[]>(queryKey, (old = []) => [thread, ...old]);
     },
-    [queryClient, queryKey]
+    [queryClient, queryKey],
   );
 
-  const replaceThreadId = useCallback(
-    (fromId: string, toId: string) => {
-      queryClient.setQueryData<ThreadItem[]>(queryKey, (old = []) =>
-        old.map((t) => (t.id === fromId ? { ...t, id: toId } : t))
-      );
-    },
-    [queryClient, queryKey]
-  );
+  /** Marks the threads query stale and triggers a background refetch. */
+  const invalidateThreads = useCallback(() => {
+    return queryClient.invalidateQueries({ queryKey });
+  }, [queryClient, queryKey]);
 
-  return { threads, isLoading, error, addThread, replaceThreadId };
+  return { threads, isLoading, error, addThread, invalidateThreads };
 }
 
 /**
@@ -121,8 +108,7 @@ export function useCounselThreads(config: CounselApiConfig) {
  */
 export function useCounselSignedUrl(config: CounselApiConfig) {
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: (action?: SignedUrlAction) =>
-      fetchSignedUrlFromServer(config, action),
+    mutationFn: (action?: SignedUrlAction) => fetchSignedUrlFromServer(config, action),
   });
 
   return { getSignedUrl: mutateAsync, isPending };

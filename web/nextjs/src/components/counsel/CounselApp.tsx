@@ -2,10 +2,7 @@ import dynamic from "next/dynamic";
 import CounselLoading from "./CounselLoading";
 import type { CounselAppClientProps } from "./CounselAppClient";
 
-export type CounselAppProps = {
-  signedAppUrl: string;
-  className?: string;
-};
+export type { CounselAppClientProps as CounselAppProps };
 
 /**
  * CounselApp is a dynamic import of CounselAppClient that is not server-side rendered.

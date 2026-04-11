@@ -1,15 +1,11 @@
 import { CounselApp } from "@/components/counsel/CounselApp";
+import { cn } from "@/lib/utils";
 
 type CounselChatThreadProps = {
+  hidden?: boolean;
   signedAppUrl: string;
-  isLoading?: boolean;
-  /** Sidebar id for sessions minted with `create_thread` (e.g. `counsel-new-*`); forwarded to `onChatStarted`. */
-  placeholderThreadId?: string | null;
-  onChatStarted?: (
-    placeholderThreadId: string | null,
-    threadId: string,
-    convoId: string
-  ) => void;
+  /** Real Counsel thread ID to switch to without reloading the iframe. */
+  currentThreadId?: string;
 };
 
 /**
@@ -17,23 +13,17 @@ type CounselChatThreadProps = {
  * in the integrated navigation mode.
  */
 export default function CounselChatThread({
+  hidden,
   signedAppUrl,
-  isLoading,
-  placeholderThreadId,
-  onChatStarted,
+  currentThreadId,
 }: CounselChatThreadProps) {
   return (
-    <div className="relative h-full w-full">
+    <div className={cn("relative h-full w-full", hidden ? "hidden" : "")}>
       <CounselApp
         key={signedAppUrl}
         signedAppUrl={signedAppUrl}
         className="h-full w-full"
-        onChatStarted={
-          onChatStarted
-            ? (threadId, convoId) =>
-                onChatStarted(placeholderThreadId ?? null, threadId, convoId)
-            : undefined
-        }
+        currentThreadId={currentThreadId}
       />
     </div>
   );
