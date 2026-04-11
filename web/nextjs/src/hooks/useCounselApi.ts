@@ -54,14 +54,7 @@ async function fetchSignedUrlFromServer(
     view: { navigation: "integrated" },
   };
   if (action) {
-    if (action.action === "create_thread") {
-      const { initial_messages, agent_context, ...actionBase } = action;
-      sessionData.action = actionBase;
-      if (initial_messages) Object.assign(actionBase, { initial_messages });
-      if (agent_context) Object.assign(actionBase, { agent_context });
-    } else {
-      sessionData.action = action;
-    }
+    sessionData.action = action;
   }
 
   const resp = await fetch(`${config.counselApiUrl}/v1/user/${config.counselUserId}/signedAppUrl`, {
