@@ -8,12 +8,15 @@ import { counselQueryKeys } from "./counselQueryKeys";
 // ---------------------------------------------------------------------------
 
 export type CounselApiConfig = {
-  /** Counsel API URL (e.g. http://localhost:4002) */
-  counselApiUrl: string;
-  /** Counsel JWT for Bearer auth against the Counsel API */
-  counselJwt: string;
   /** Counsel user ID */
   counselUserId: string;
+  /**
+   * When set, calls `${counselDirectApiBase}/…` with Bearer auth (JWT flow).
+   * When empty, calls same-origin `/api/counsel/…` with session cookies (API key flow via demo server proxy).
+   */
+  counselJwt: string;
+  /** `${COUNSEL_API_URL}/v1/user/${counselUserId}` — used only when counselJwt is set */
+  counselDirectApiBase: string;
 };
 
 export type InitialMessage = { body: string; role: "patient" | "model" };
@@ -31,13 +34,21 @@ type SignedUrlAction =
 // ---------------------------------------------------------------------------
 
 async function fetchThreadsFromServer(config: CounselApiConfig): Promise<ThreadItem[]> {
-  const resp = await fetch(`${config.counselApiUrl}/v1/user/${config.counselUserId}/threads`, {
+  const direct = config.counselJwt.length > 0;
+  const url = direct
+    ? `${config.counselDirectApiBase}/threads`
+    : "/api/counsel/threads";
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Idempotency-Key": crypto.randomUUID(),
+  };
+  if (direct) {
+    headers.Authorization = `Bearer ${config.counselJwt}`;
+  }
+  const resp = await fetch(url, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.counselJwt}`,
-      "Idempotency-Key": crypto.randomUUID(),
-    },
+    headers,
+    credentials: direct ? "omit" : "include",
   });
   if (!resp.ok) {
     throw new Error(`Failed to fetch threads: ${resp.status}`);
@@ -67,13 +78,21 @@ async function fetchSignedUrlFromServer(
     }
   }
 
-  const resp = await fetch(`${config.counselApiUrl}/v1/user/${config.counselUserId}/signedAppUrl`, {
+  const direct = config.counselJwt.length > 0;
+  const signedUrlEndpoint = direct
+    ? `${config.counselDirectApiBase}/signedAppUrl`
+    : "/api/counsel/signedAppUrl";
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Idempotency-Key": crypto.randomUUID(),
+  };
+  if (direct) {
+    headers.Authorization = `Bearer ${config.counselJwt}`;
+  }
+  const resp = await fetch(signedUrlEndpoint, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.counselJwt}`,
-      "Idempotency-Key": crypto.randomUUID(),
-    },
+    headers,
+    credentials: direct ? "omit" : "include",
     body: JSON.stringify(sessionData),
   });
   if (!resp.ok) {
@@ -102,7 +121,7 @@ export function useCounselThreads(config: CounselApiConfig) {
   } = useQuery({
     queryKey,
     queryFn: () => fetchThreadsFromServer(config),
-    enabled: !!config.counselJwt && !!config.counselUserId,
+    enabled: !!config.counselUserId,
   });
 
   const addThread = useCallback(
