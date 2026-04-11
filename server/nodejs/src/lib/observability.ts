@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 export const observabilityPlugin = new Elysia({ name: "observability" })
   .derive({ as: "global" }, () => ({
     requestId: uuidv4(),
-    requestStart: Date.now(),
+    requestStart: performance.now(),
   }))
   .onBeforeHandle({ as: "global" }, ({ request, requestId, body }) => {
     const path = new URL(request.url).pathname;
@@ -18,15 +18,12 @@ export const observabilityPlugin = new Elysia({ name: "observability" })
       body,
     });
   })
-  .onAfterHandle(
-    { as: "global" },
-    ({ request, set, requestId, requestStart }) => {
-      const path = new URL(request.url).pathname;
-      console.info(`Request finished - ${requestId}`, {
-        method: request.method,
-        path,
-        statusCode: set.status,
-        duration: `${Date.now() - requestStart}ms`,
-      });
-    }
-  );
+  .onAfterHandle({ as: "global" }, ({ request, set, requestId, requestStart }) => {
+    const path = new URL(request.url).pathname;
+    console.info(`Request finished - ${requestId}`, {
+      method: request.method,
+      path,
+      statusCode: set.status,
+      duration: `${(performance.now() - requestStart).toFixed(2)}ms`,
+    });
+  });

@@ -1,6 +1,29 @@
 import { expect, test } from "@playwright/test";
 
 /**
+ * Elysia may return `{ error }` as JSON or as plain text when route `response` schema
+ * only describes the success shape. Normalize so assertions work for both.
+ */
+function userFacingErrorMessage(raw: string): string {
+  const text = raw.trim();
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "error" in parsed &&
+      typeof (parsed as { error: unknown }).error === "string"
+    ) {
+      return (parsed as { error: string }).error;
+    }
+  } catch {
+    // not JSON — treat whole body as the message
+  }
+  return text;
+}
+
+/**
  * Verifies that all JWT-protected endpoints correctly reject unauthorized requests.
  * These tests require no live Counsel API — they all fail at the auth layer.
  */
@@ -20,7 +43,9 @@ test.describe("auth middleware — no token", () => {
           ? await request.get(path)
           : await request.post(path, { data: {} });
       expect(resp.status()).toBe(401);
-      expect(await resp.json()).toEqual({ error: "No token provided" });
+      expect(userFacingErrorMessage(await resp.text())).toBe(
+        "No token provided"
+      );
     });
   }
 });
@@ -34,7 +59,7 @@ test.describe("auth middleware — invalid token", () => {
           ? await request.get(path, { headers })
           : await request.post(path, { data: {}, headers });
       expect(resp.status()).toBe(401);
-      expect(await resp.json()).toEqual({ error: "Invalid token" });
+      expect(userFacingErrorMessage(await resp.text())).toBe("Invalid token");
     });
   }
 });
@@ -48,7 +73,8 @@ test.describe("auth middleware — malformed header", () => {
       headers: { Authorization: "not-a-bearer-token" },
     });
     expect(resp.status()).toBe(401);
-    const body = await resp.json();
-    expect(body).toMatchObject({ error: expect.any(String) });
+    const msg = userFacingErrorMessage(await resp.text());
+    expect(msg).toEqual(expect.any(String));
+    expect(msg.length).toBeGreaterThan(0);
   });
 });

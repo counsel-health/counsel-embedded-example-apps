@@ -11,6 +11,8 @@ import { z } from "zod";
 // Accepts any JSON object; unknown values pass through to Counsel unchanged.
 export const SessionDataSchema = z.record(z.string(), z.unknown());
 
+export const SignedAppUrlResponseSchema = z.object({ url: z.string() });
+
 export async function getOrCreateUser(userId: string, accessCode: string) {
   const [user, error] = await safePromise(getUser(userId));
   if (error instanceof DBRowNotFoundError) {

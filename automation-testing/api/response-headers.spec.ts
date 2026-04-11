@@ -18,7 +18,8 @@ test.describe("CORS headers", () => {
     request,
   }) => {
     const resp = await request.post("/user/signUp", { data: {} });
-    // The request fails (400) but CORS headers should still be present
+    // The request fails (422 — body validation rejects missing accessCode)
+    // but CORS headers must still be present on error responses.
     expect(resp.headers()["access-control-allow-origin"]).toBe("*");
   });
 

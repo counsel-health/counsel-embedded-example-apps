@@ -1,5 +1,6 @@
 import { createUser } from "@/db/actions/createUser";
 import { getAccessCodeConfig } from "@/envConfig";
+import { UserFacingError } from "@/lib/http";
 import { createJWTSession } from "@/lib/user-session";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -8,6 +9,15 @@ import { checkAccessCode } from "./accessCode";
 export const SignUpBodySchema = z.object({
   userId: z.string().optional(),
   accessCode: z.string().length(6),
+});
+
+export const SignUpResponseSchema = z.object({
+  token: z.string(),
+  userType: z.enum(["main", "onboarding"]),
+  client: z.string(),
+  counselUserId: z.string(),
+  authType: z.enum(["apiKey", "jwt"]),
+  navMode: z.enum(["standalone", "integrated"]),
 });
 
 export { checkAccessCode } from "./accessCode";
@@ -19,14 +29,12 @@ export type { AccessCodeCheck } from "./accessCode";
  */
 export async function signUpHandler({
   body,
-  error,
 }: {
   body: z.infer<typeof SignUpBodySchema>;
-  error: (status: number, data: unknown) => unknown;
-}) {
+}): Promise<z.infer<typeof SignUpResponseSchema>> {
   const accessCodeCheck = checkAccessCode(body.accessCode);
   if (!accessCodeCheck.success) {
-    return error(400, { error: accessCodeCheck.error });
+    throw new UserFacingError(accessCodeCheck.error, 400);
   }
 
   const { client, accessCode, userType } = accessCodeCheck;
@@ -45,7 +53,6 @@ export async function signUpHandler({
     userType,
     client,
     counselUserId: user.counsel_user_id,
-    // Tells the Next.js app which auth flow to use for Counsel API calls
     authType: config.apiKey ? "apiKey" : "jwt",
     navMode: config.navMode,
   };

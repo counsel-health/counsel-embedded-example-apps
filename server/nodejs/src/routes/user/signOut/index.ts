@@ -5,7 +5,11 @@ import type { User } from "@/lib/user-session";
  * @description Sign out a user from Counsel
  * @route POST /user/signOut
  */
-export async function signOutHandler({ user }: { user: User }) {
+export async function signOutHandler({
+  user,
+}: {
+  user: User;
+}): Promise<{ status: "ok" }> {
   await signOutCounselUser({
     userId: user.userId,
     accessCode: user.accessCode,

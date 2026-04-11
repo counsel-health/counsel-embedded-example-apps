@@ -1,3 +1,17 @@
+/**
+ * A route-level error formatted by onError as `{ error: "..." }`.
+ * Use for client-visible validation/business errors (bad input, wrong state).
+ * Distinct from HttpError, which produces the infrastructure `{ errors: { message } }` shape.
+ */
+export class UserFacingError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+    this.name = "UserFacingError";
+  }
+}
+
 export class HttpError extends Error {
   /**
    * @description The HTTP status code

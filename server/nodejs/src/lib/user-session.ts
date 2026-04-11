@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import jwt from "jsonwebtoken";
 import ms from "ms";
 import { env } from "@/envConfig";
+import { UserFacingError } from "@/lib/http";
 
 export type User = {
   userId: string;
@@ -32,16 +33,16 @@ export const createJWTSession = ({
 
 /**
  * Elysia plugin that verifies the Bearer JWT and injects a typed `user`
- * into the request context. Uses `return error(...)` to preserve the
- * existing `{ error: "..." }` response shape (not the global error wrapper).
+ * into the request context. Throws UserFacingError on auth failure so the
+ * global onError handler can log and format the response consistently.
  */
 export const withAuth = new Elysia({ name: "withAuth" }).derive(
   { as: "scoped" },
-  ({ headers, status }) => {
+  ({ headers }) => {
     const token = headers["authorization"]?.split(" ")[1];
 
     if (!token) {
-      return status(401, { error: "No token provided" });
+      throw new UserFacingError("No token provided", 401);
     }
 
     try {
@@ -55,11 +56,9 @@ export const withAuth = new Elysia({ name: "withAuth" }).derive(
       };
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
-        console.log("Token expired", { error: e });
-        return status(400, { error: "Token expired" });
+        throw new UserFacingError("Token expired", 400);
       }
-      console.error("Token verification failed", { error: e });
-      return status(401, { error: "Invalid token" });
+      throw new UserFacingError("Invalid token", 401);
     }
   }
 );

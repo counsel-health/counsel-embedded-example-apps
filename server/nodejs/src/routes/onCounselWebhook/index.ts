@@ -18,5 +18,8 @@ export const OnCounselWebhookPlugin = new Elysia().post(
     console.log("Webhook received", body);
     return { message: "ok" };
   },
-  { body: WebhookBodySchema }
+  {
+    body: WebhookBodySchema,
+    response: z.object({ message: z.string() }),
+  }
 );
