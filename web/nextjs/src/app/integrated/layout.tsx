@@ -8,7 +8,7 @@ export default function IntegratedLayout({
 }) {
   return (
     <QueryProvider>
-      <div className="flex flex-col h-screen w-screen overflow-hidden">
+      <div className="flex flex-col h-dvh w-screen overflow-hidden">
         <main className="flex-1 h-full min-h-0">{children}</main>
       </div>
     </QueryProvider>
