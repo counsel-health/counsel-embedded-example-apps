@@ -1,5 +1,5 @@
 # syntax=docker.io/docker/dockerfile:1
-# Pattern aligned with counsel-self-hosted demo (Bun + Next standalone).
+# Bun for install/build (bun.lock); Node for serving the Next standalone output.
 
 FROM oven/bun:1.3.11 AS base
 
@@ -21,7 +21,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN bun run build
 
-FROM oven/bun:1.3.11 AS runner
+FROM node:24-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -37,4 +37,4 @@ USER nextjs
 
 EXPOSE 3001
 
-CMD ["bun", "server.js"]
+CMD ["node", "server.js"]

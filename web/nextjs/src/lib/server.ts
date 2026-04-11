@@ -62,6 +62,21 @@ async function fetchCounselJwt(sessionToken: string): Promise<string> {
 }
 
 /**
+ * Returns a valid Counsel JWT for the session.
+ * Uses the cached session JWT if still valid; otherwise fetches a fresh one in-memory.
+ * Returns null if the session is not using JWT auth.
+ */
+export async function getValidCounselJwt(
+  session: IronSession<SessionData>
+): Promise<string | null> {
+  if (session.authType !== "jwt") return null;
+  if (session.counselJwt && isCounselJwtValid(session.counselJwt)) {
+    return session.counselJwt;
+  }
+  return fetchCounselJwt(session.token);
+}
+
+/**
  * Pre-warms the Counsel JWT into the session at login so the first chat page load is fast.
  * Mutates session.counselJwt but does NOT call session.save() — the caller (handleLogin,
  * a Server Action) is responsible for saving.

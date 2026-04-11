@@ -3,14 +3,15 @@
 ## Getting Started
 
 1. Install dependencies:
+
 ```bash
-npm install
+bun install
 ```
 
 2. Run the development server:
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 Open [http://localhost:3001](http://localhost:3001) to see the demo app.
@@ -20,10 +21,11 @@ Reach out to a member of the Counsel Health team to get an access code.
 
 ## Secret Management
 
-The server uses [Doppler](https://docs.doppler.com/) to manage secrets. This makes it easy to manage secrets for different environments and to keep them private. 
+The server uses [Doppler](https://docs.doppler.com/) to manage secrets. This makes it easy to manage secrets for different environments and to keep them private.
 
 You can remove the doppler dependency and set custom environment variables in the `.env.local` file.
 Just change the `dev` script in `package.json` to:
+
 ```json
 "dev": "next dev -p 3001 --turbo",
 ```
@@ -33,6 +35,10 @@ To get started, run:
 ```bash
 doppler setup
 ```
+
+## Node vs. Bun runtime
+
+The demo app is built using Bun. However, the server is built using Node.js. This is because its been shown that Bun is far slower than Node.js for serving Next.js applications. https://blog.platformatic.dev/bun-is-fast-until-latency-matters-for-nextjs-workloads
 
 ## Important Notes
 
@@ -63,16 +69,3 @@ docker push "us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-n
 
 gcloud run deploy embedded-demo-nextjs-web --image=us-east1-docker.pkg.dev/${PROJECT_ID}/embedded-demo/embedded-demo-nextjs-web:latest --project=${PROJECT_ID} --region=us-east1 --allow-unauthenticated --port=3001 --set-env-vars <ALL_ENV_VARS>
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
