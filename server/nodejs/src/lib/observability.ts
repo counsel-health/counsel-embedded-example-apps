@@ -1,36 +1,32 @@
-import { Request, Response, NextFunction } from "express";
+import { Elysia } from "elysia";
 import { v4 as uuidv4 } from "uuid";
 
 /**
- * @description Observability middleware
- * Tracks request & responses in logs
+ * Elysia plugin that logs all incoming requests and their responses.
+ * Replaces the Express res.on("finish") pattern with Elysia lifecycle hooks.
  */
-export default function observabilityMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const start = Date.now();
-  const requestId = uuidv4();
-
-  // Log when the request starts
-  console.info(`Incoming request - ${requestId}`, {
-    method: req.method,
-    path: "path" in req ? req.path : null,
-    query: "query" in req ? JSON.stringify(req.query) : null,
-    body: "body" in req ? req.body : null,
-    ip: "ip" in req ? req.ip : null,
-  });
-
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    console.info(`Request finished - ${requestId}`, {
-      method: req.method,
-      path: req.path,
-      statusCode: res.statusCode,
-      duration: `${duration}ms`,
+export const observabilityPlugin = new Elysia({ name: "observability" })
+  .derive({ as: "global" }, () => ({
+    requestId: uuidv4(),
+    requestStart: Date.now(),
+  }))
+  .onBeforeHandle({ as: "global" }, ({ request, requestId, body }) => {
+    const path = new URL(request.url).pathname;
+    console.info(`Incoming request - ${requestId}`, {
+      method: request.method,
+      path,
+      body,
     });
-  });
-
-  next();
-}
+  })
+  .onAfterHandle(
+    { as: "global" },
+    ({ request, set, requestId, requestStart }) => {
+      const path = new URL(request.url).pathname;
+      console.info(`Request finished - ${requestId}`, {
+        method: request.method,
+        path,
+        statusCode: set.status,
+        duration: `${Date.now() - requestStart}ms`,
+      });
+    }
+  );

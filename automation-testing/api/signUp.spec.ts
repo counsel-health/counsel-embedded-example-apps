@@ -25,7 +25,8 @@ test.describe("POST /user/signUp", () => {
         userId: randomUUID(),
       },
     });
-    expect(response.status()).toBe(400);
+    // 422 Unprocessable Entity — Elysia Zod schema validation failure
+    expect(response.status()).toBe(422);
     const body = await response.json();
     expect(body).toMatchObject({
       errors: {
@@ -38,14 +39,32 @@ test.describe("POST /user/signUp", () => {
     const response = await request.post("/user/signUp", {
       data: {},
     });
-    expect(response.status()).toBe(400);
+    // 422 Unprocessable Entity — missing required accessCode field
+    expect(response.status()).toBe(422);
     const body = await response.json();
     expect(body).toMatchObject({
       errors: {
-        message: expect.stringMatching(
-          /Invalid request body|Missing request body/
-        ),
+        message: "Invalid request body",
       },
+    });
+  });
+
+  test("valid access code → 200 with expected fields", async ({ request }) => {
+    test.skip(
+      !process.env["E2E_ACCESS_CODE"],
+      "E2E_ACCESS_CODE not set — skipping success path test"
+    );
+    const response = await request.post("/user/signUp", {
+      data: { accessCode: process.env["E2E_ACCESS_CODE"] },
+    });
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body).toMatchObject({
+      token: expect.any(String),
+      counselUserId: expect.any(String),
+      userType: expect.stringMatching(/^(main|onboarding)$/),
+      authType: expect.stringMatching(/^(apiKey|jwt)$/),
+      navMode: expect.stringMatching(/^(standalone|integrated)$/),
     });
   });
 });

@@ -26,10 +26,14 @@ describe("envConfig", () => {
 
       expect(result.MAIN01.client).toBe("main");
       expect(result.MAIN01.apiUrl).toBe("https://test-api.counselhealth.com");
-      expect(result.MAIN01.issuer).toBe("https://local-test-partner.example.com/main");
+      expect(result.MAIN01.issuer).toBe(
+        "https://local-test-partner.example.com/main"
+      );
       expect(result.ONBR01.client).toBe("onboarding");
       expect(result.ONBR01.apiUrl).toBe("https://test-api.counselhealth.com");
-      expect(result.ONBR01.issuer).toBe("https://local-test-partner.example.com/onboarding");
+      expect(result.ONBR01.issuer).toBe(
+        "https://local-test-partner.example.com/onboarding"
+      );
       expect(result.MAIN01.userType).toBe("main");
       expect(result.ONBR01.userType).toBe("onboarding");
     });
@@ -43,20 +47,24 @@ describe("envConfig", () => {
         },
       });
 
-      const result = envConfig.shape.ACCESS_CODE_CONFIGS.parse(configWithoutUserType);
+      const result = envConfig.shape.ACCESS_CODE_CONFIGS.parse(
+        configWithoutUserType
+      );
 
       expect(result.MAIN01.client).toBe("main");
       expect(result.MAIN01.apiUrl).toBe("https://test-api.counselhealth.com");
-      expect(result.MAIN01.issuer).toBe("https://local-test-partner.example.com/main");
+      expect(result.MAIN01.issuer).toBe(
+        "https://local-test-partner.example.com/main"
+      );
       expect(result.MAIN01.userType).toBe("main");
     });
 
     test("should reject invalid JSON", () => {
       const invalidJson = '{"invalid": json}';
 
-      expect(() => envConfig.shape.ACCESS_CODE_CONFIGS.parse(invalidJson)).toThrow(
-        "ACCESS_CODE_CONFIGS must be valid JSON",
-      );
+      expect(() =>
+        envConfig.shape.ACCESS_CODE_CONFIGS.parse(invalidJson)
+      ).toThrow("ACCESS_CODE_CONFIGS must be valid JSON");
     });
 
     test("should parse config with apiKey (API key auth)", () => {
@@ -85,17 +93,17 @@ describe("envConfig", () => {
         },
       });
 
-      expect(() => envConfig.shape.ACCESS_CODE_CONFIGS.parse(invalidConfig)).toThrow(
-        /apiKey or issuer/,
-      );
+      expect(() =>
+        envConfig.shape.ACCESS_CODE_CONFIGS.parse(invalidConfig)
+      ).toThrow(/apiKey or issuer/);
     });
 
     test("should reject empty ACCESS_CODE_CONFIGS", () => {
       const emptyConfig = JSON.stringify({});
 
-      expect(() => envConfig.shape.ACCESS_CODE_CONFIGS.parse(emptyConfig)).toThrow(
-        "At least one access code configuration is required",
-      );
+      expect(() =>
+        envConfig.shape.ACCESS_CODE_CONFIGS.parse(emptyConfig)
+      ).toThrow("At least one access code configuration is required");
     });
 
     test("should accept multiple clients with same apiUrl", () => {
@@ -124,13 +132,19 @@ describe("envConfig", () => {
 
       expect(result.MAIN01.client).toBe("main");
       expect(result.MAIN01.apiUrl).toBe("https://test-api.counselhealth.com");
-      expect(result.MAIN01.issuer).toBe("https://local-test-partner.example.com/main");
+      expect(result.MAIN01.issuer).toBe(
+        "https://local-test-partner.example.com/main"
+      );
       expect(result.CLNT02.client).toBe("client2");
       expect(result.CLNT02.apiUrl).toBe("https://test-api.counselhealth.com");
-      expect(result.CLNT02.issuer).toBe("https://local-test-partner.example.com/client2");
+      expect(result.CLNT02.issuer).toBe(
+        "https://local-test-partner.example.com/client2"
+      );
       expect(result.CLNT01.client).toBe("client1");
       expect(result.CLNT01.apiUrl).toBe("https://test-api.counselhealth.com");
-      expect(result.CLNT01.issuer).toBe("https://local-test-partner.example.com/client1");
+      expect(result.CLNT01.issuer).toBe(
+        "https://local-test-partner.example.com/client1"
+      );
       expect(Object.keys(result).length).toBe(3);
       expect(result.MAIN01.userType).toBe("main");
       expect(result.CLNT01.userType).toBe("main");

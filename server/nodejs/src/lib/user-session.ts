@@ -1,40 +1,15 @@
-import { NextFunction, Request, Response } from "express";
+import { Elysia } from "elysia";
 import jwt from "jsonwebtoken";
 import ms from "ms";
 import { env } from "@/envConfig";
 
-export type AuthenticatedRequest = Request & {
-  user: {
-    userId: string;
-    client: string;
-    accessCode: string;
-  };
-};
-
-export const isAuthenticatedRequest = (
-  req: Request
-): req is AuthenticatedRequest => {
-  return (
-    "user" in req &&
-    typeof req.user === "object" &&
-    req.user !== null &&
-    "userId" in req.user &&
-    typeof req.user.userId === "string" &&
-    "client" in req.user &&
-    typeof req.user.client === "string" &&
-    "accessCode" in req.user &&
-    typeof req.user.accessCode === "string" &&
-    req.user.accessCode.length === 6
-  );
-};
-
-type CustomJwtPayloadData = {
+export type User = {
   userId: string;
   client: string;
   accessCode: string;
 };
 
-type JWTPayload = jwt.JwtPayload & CustomJwtPayloadData;
+type JWTPayload = jwt.JwtPayload & User;
 
 export const createJWTSession = ({
   userId,
@@ -51,43 +26,40 @@ export const createJWTSession = ({
   accessCode: string;
   expiresIn?: ms.StringValue;
 }) => {
-  const payload: CustomJwtPayloadData = {
-    userId,
-    client,
-    accessCode,
-  };
+  const payload: User = { userId, client, accessCode };
   return jwt.sign(payload, env.JWT_SECRET, { expiresIn });
 };
 
-// Middleware to verify JWT token
-export const verifyJWTSession = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const token = req.headers.authorization?.split(" ")[1];
+/**
+ * Elysia plugin that verifies the Bearer JWT and injects a typed `user`
+ * into the request context. Uses `return error(...)` to preserve the
+ * existing `{ error: "..." }` response shape (not the global error wrapper).
+ */
+export const withAuth = new Elysia({ name: "withAuth" }).derive(
+  { as: "scoped" },
+  ({ headers, status }) => {
+    const token = headers["authorization"]?.split(" ")[1];
 
     if (!token) {
-      res.status(401).json({ error: "No token provided" });
-      return;
+      return status(401, { error: "No token provided" });
     }
 
-    const decoded = jwt.verify(token, env.JWT_SECRET) as JWTPayload;
-    (req as AuthenticatedRequest).user = {
-      userId: decoded.userId,
-      client: decoded.client,
-      accessCode: decoded.accessCode,
-    };
-    next();
-  } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      console.log("Token expired", { error });
-      res.status(400).json({ error: "Token expired" });
-      return;
+    try {
+      const decoded = jwt.verify(token, env.JWT_SECRET) as JWTPayload;
+      return {
+        user: {
+          userId: decoded.userId,
+          client: decoded.client,
+          accessCode: decoded.accessCode,
+        },
+      };
+    } catch (e) {
+      if (e instanceof jwt.TokenExpiredError) {
+        console.log("Token expired", { error: e });
+        return status(400, { error: "Token expired" });
+      }
+      console.error("Token verification failed", { error: e });
+      return status(401, { error: "Invalid token" });
     }
-    console.error("Token verification failed", { error });
-    res.status(401).json({ error: "Invalid token" });
-    return;
   }
-};
+);

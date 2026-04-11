@@ -19,8 +19,14 @@ describe("keys", () => {
 
     test("should produce different JWTs for different subjects", async () => {
       const { signCounselJwt } = await import("../keys");
-      const jwt1 = await signCounselJwt("user-1", "https://local-test-partner.example.com");
-      const jwt2 = await signCounselJwt("user-2", "https://local-test-partner.example.com");
+      const jwt1 = await signCounselJwt(
+        "user-1",
+        "https://local-test-partner.example.com"
+      );
+      const jwt2 = await signCounselJwt(
+        "user-2",
+        "https://local-test-partner.example.com"
+      );
       expect(jwt1).not.toBe(jwt2);
     });
   });

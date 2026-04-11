@@ -31,7 +31,12 @@ export const envConfig = z
     JWT_SECRET: z.string().min(32),
     COUNSEL_WEBHOOK_SECRET: z.string(),
     // RSA private key PEM for signing JWTs. Required when any access code uses issuer-based auth.
-    COUNSEL_PRIVATE_KEY_PEM: z.string().optional(),
+    // Normalise literal \n sequences → real newlines so the value works whether it's stored
+    // in a .env file without quotes, a cloud secret manager, or a shell export.
+    COUNSEL_PRIVATE_KEY_PEM: z
+      .string()
+      .transform((pem) => pem.replace(/\\n/g, "\n"))
+      .optional(),
     // JSON string mapping access codes to client/environment configs
     // Format: {"ACCESS_CODE_CONFIGS": {"MAIN01": {"client": "main", "apiUrl": "https://test-api.counselhealth.com", "userType": "main"}, ...}}
     ACCESS_CODE_CONFIGS: z

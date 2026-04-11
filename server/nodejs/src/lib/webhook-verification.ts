@@ -1,11 +1,10 @@
 import { Webhook } from "standardwebhooks";
 import { HttpError } from "./http";
-import { IncomingHttpHeaders } from "http";
 
 export function verifyWebhook(
   secret: string,
   body: unknown,
-  headers: IncomingHttpHeaders
+  headers: Record<string, string | string[] | undefined>
 ) {
   const wh = new Webhook(secret);
   try {

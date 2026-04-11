@@ -1,13 +1,9 @@
-import { Router } from "express";
-
-const router = Router();
+import { Elysia } from "elysia";
 
 /**
  * @description Check the server is running
  * @route GET /health
  */
-router.get("/", (_req, res) => {
-  res.status(200).json({ message: "ok" });
-});
-
-export default router;
+export const HealthPlugin = new Elysia().get("/health", () => ({
+  message: "ok",
+}));
