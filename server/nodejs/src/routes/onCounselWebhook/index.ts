@@ -1,22 +1,26 @@
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { env } from "@/envConfig";
 import { verifyWebhook } from "@/lib/webhook-verification";
-import { Router } from "express";
+import { webhookLogger } from "@/lib/logger";
 
-const router = Router();
+// Webhook payloads are JSON objects whose shape is defined by Counsel.
+// We validate that it's a JSON record; signature verification handles authenticity.
+const WebhookBodySchema = z.record(z.string(), z.unknown());
 
 /**
  * @description Webhooks
- * @route POST /webhooks
+ * @route POST /onCounselWebhook
  */
-router.post("/", (req, res) => {
-  // Verify the webhook signature using the standardwebhooks library
-  verifyWebhook(env.COUNSEL_WEBHOOK_SECRET, req.body, req.headers);
-
-  // Process the webhook
-  console.log("Webhook received", req.body);
-
-  // Return back 200 to the webhook sender to ack
-  res.status(200).json({ message: "ok" });
-});
-
-export default router;
+export const OnCounselWebhookPlugin = new Elysia().post(
+  "/onCounselWebhook",
+  ({ body, headers }) => {
+    verifyWebhook(env.COUNSEL_WEBHOOK_SECRET, body, headers);
+    webhookLogger.info({ body }, "Webhook received");
+    return { message: "ok" };
+  },
+  {
+    body: WebhookBodySchema,
+    response: z.object({ message: z.string() }),
+  }
+);

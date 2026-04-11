@@ -13,7 +13,8 @@ describe("access code config lookup", () => {
     });
 
     test("should return undefined when access code not found", () => {
-      const config = mockAccessCodeConfigs["INVALID" as keyof typeof mockAccessCodeConfigs];
+      const config =
+        mockAccessCodeConfigs["INVALID" as keyof typeof mockAccessCodeConfigs];
 
       expect(config).toBeUndefined();
     });
@@ -29,7 +30,9 @@ describe("access code config lookup", () => {
       expect(onboardingLocal).toBeTruthy();
       expect(client1Local).toBeTruthy();
       expect(mainDev.apiUrl).toBe("https://test-api.counselhealth.com");
-      expect(onboardingLocal.apiUrl).toBe("https://local-api.counselhealth.com");
+      expect(onboardingLocal.apiUrl).toBe(
+        "https://local-api.counselhealth.com"
+      );
       expect(client1Local.apiUrl).toBe("https://local.counselhealth.com");
       expect(mainDev.apiUrl).not.toBe(onboardingLocal.apiUrl);
       expect(onboardingLocal.apiUrl).not.toBe(client1Local.apiUrl);
@@ -97,22 +100,29 @@ describe("counsel API functions", () => {
       let capturedAuth: string | undefined;
       vi.stubGlobal(
         "fetch",
-        vi.fn().mockImplementation(async (_: RequestInfo | URL, init?: RequestInit) => {
-          capturedAuth = init?.headers
-            ? (init.headers as Record<string, string>)["Authorization"]
-            : undefined;
-          return new Response(
-            JSON.stringify({
-              url: "https://embed.counsel.test/signed",
-              expiry: "2025-01-01T00:00:00Z",
-            }),
-            { status: 200, headers: { "Content-Type": "application/json" } }
-          );
-        })
+        vi
+          .fn()
+          .mockImplementation(
+            async (_: RequestInfo | URL, init?: RequestInit) => {
+              capturedAuth = init?.headers
+                ? (init.headers as Record<string, string>)["Authorization"]
+                : undefined;
+              return new Response(
+                JSON.stringify({
+                  url: "https://embed.counsel.test/signed",
+                  expiry: "2025-01-01T00:00:00Z",
+                }),
+                { status: 200, headers: { "Content-Type": "application/json" } }
+              );
+            }
+          )
       );
 
       const { getCounselSignedAppUrl } = await import("../counsel");
-      await getCounselSignedAppUrl({ userId: "counsel-user-123", accessCode: "APIK01" });
+      await getCounselSignedAppUrl({
+        userId: "counsel-user-123",
+        accessCode: "APIK01",
+      });
 
       expect(capturedAuth).toMatch(/^Bearer /);
       expect(capturedAuth).toBe("Bearer sk_test_api_key_123");
@@ -153,7 +163,10 @@ describe("counsel API functions", () => {
           zip: "94101",
         },
         phone: "+18007006000",
-        medicalProfile: { conditions: ["diabetes"], medications: ["metformin"] },
+        medicalProfile: {
+          conditions: ["diabetes"],
+          medications: ["metformin"],
+        },
       },
     };
 
@@ -190,13 +203,19 @@ describe("counsel API functions", () => {
       let capturedBody: unknown = null;
       vi.stubGlobal(
         "fetch",
-        vi.fn().mockImplementation(async (_: RequestInfo | URL, init?: RequestInit) => {
-          capturedBody = init?.body ? JSON.parse(init.body as string) : null;
-          return new Response(JSON.stringify({ id: "test-user-id" }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
-        })
+        vi
+          .fn()
+          .mockImplementation(
+            async (_: RequestInfo | URL, init?: RequestInit) => {
+              capturedBody = init?.body
+                ? JSON.parse(init.body as string)
+                : null;
+              return new Response(JSON.stringify({ id: "test-user-id" }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
+          )
       );
 
       const { createCounselUser } = await import("../counsel");
@@ -209,7 +228,13 @@ describe("counsel API functions", () => {
       expect(body.last_name).toBe("Doe");
       expect(body.email).toBe("john@example.com");
       expect(body.addresses).toEqual([
-        { line1: "123 Main St", line2: "Apt 1", city: "San Francisco", state: "CA", zip: "94101" },
+        {
+          line1: "123 Main St",
+          line2: "Apt 1",
+          city: "San Francisco",
+          state: "CA",
+          zip: "94101",
+        },
       ]);
     });
   });
@@ -222,7 +247,12 @@ describe("counsel API functions", () => {
       info: {
         dob: "1985-05-15",
         sex: "Female",
-        address: { line1: "456 Oak Ave", city: "Oakland", state: "CA", zip: "94601" },
+        address: {
+          line1: "456 Oak Ave",
+          city: "Oakland",
+          state: "CA",
+          zip: "94601",
+        },
         phone: "+18005551234",
         medicalProfile: { conditions: [], medications: [] },
       },
@@ -249,13 +279,19 @@ describe("counsel API functions", () => {
       let capturedBody: unknown = null;
       vi.stubGlobal(
         "fetch",
-        vi.fn().mockImplementation(async (_: RequestInfo | URL, init?: RequestInit) => {
-          capturedBody = init?.body ? JSON.parse(init.body as string) : null;
-          return new Response(JSON.stringify({ id: "draft-user-id" }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
-        })
+        vi
+          .fn()
+          .mockImplementation(
+            async (_: RequestInfo | URL, init?: RequestInit) => {
+              capturedBody = init?.body
+                ? JSON.parse(init.body as string)
+                : null;
+              return new Response(JSON.stringify({ id: "draft-user-id" }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
+          )
       );
 
       const { createCounselDraftUser } = await import("../counsel");

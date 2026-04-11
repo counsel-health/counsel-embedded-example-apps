@@ -2,13 +2,14 @@ import { Database } from "bun:sqlite";
 import { createUser } from "@/db/actions/createUser";
 import { v4 as uuidv4 } from "uuid";
 import { env } from "@/envConfig";
+import { dbLogger } from "@/lib/logger";
 
 export async function seedUsers(db: Database) {
   // Seed an initial user for each access code, grouped by userType (main or onboarding)
   // We need accessCode to fetch apiKey and apiUrl to create the user
   const accessCodes = Object.keys(env.ACCESS_CODE_CONFIGS);
   if (accessCodes.length === 0) {
-    console.log("No access codes configured, skipping user seeding");
+    dbLogger.info("No access codes configured, skipping user seeding");
     return;
   }
 

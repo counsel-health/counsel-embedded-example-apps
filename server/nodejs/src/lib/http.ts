@@ -1,5 +1,16 @@
-import { Request } from "express";
-import { z } from "zod";
+/**
+ * A route-level error formatted by onError as `{ error: "..." }`.
+ * Use for client-visible validation/business errors (bad input, wrong state).
+ * Distinct from HttpError, which produces the infrastructure `{ errors: { message } }` shape.
+ */
+export class UserFacingError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+    this.name = "UserFacingError";
+  }
+}
 
 export class HttpError extends Error {
   /**
@@ -31,25 +42,7 @@ export function isHttpError(error: Error): error is HttpError {
   );
 }
 
-/**
- * @description Get the body of an incoming request
- * @param request - The incoming request
- * @param schema - The schema to validate the body against
- * @returns A promise that resolves to the body of the request
- */
-export async function parseBody<S extends z.ZodSchema>(
-  request: Request,
-  schema: S
-): Promise<z.infer<S>> {
-  if (!request.body) {
-    throw new HttpError("Missing request body", 400);
-  }
-  const result = schema.safeParse(request.body);
-  if (!result.success) {
-    throw new HttpError("Invalid request body", 400, result.error.format());
-  }
-  return result.data;
-}
+import { httpLogger } from "@/lib/logger";
 
 export async function fetchWithRetry(
   url: string,
@@ -61,7 +54,7 @@ export async function fetchWithRetry(
     try {
       return await fetch(url, options);
     } catch (error) {
-      console.warn(`Request to ${url} failed, retrying in ${delay}ms`, error);
+      httpLogger.warn({ url, delay, error }, "Request failed, retrying");
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }

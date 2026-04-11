@@ -12,7 +12,12 @@ describe("getOrCreateUser behavior", () => {
       info: {
         dob: "1990-01-01",
         sex: "Male",
-        address: { line1: "123 Main St", city: "San Francisco", state: "CA", zip: "94101" },
+        address: {
+          line1: "123 Main St",
+          city: "San Francisco",
+          state: "CA",
+          zip: "94101",
+        },
         phone: "+18007006000",
         medicalProfile: { conditions: [], medications: [] },
       },
@@ -53,9 +58,11 @@ describe("getOrCreateUser behavior", () => {
     // When getUser throws DBRowNotFoundError and getAccessCodeConfig returns null,
     // an error should be thrown with the correct message
     const accessCode = "INVALID";
-    const expectedError = new Error(`No access code config found for access code "${accessCode}".`);
+    const expectedError = new Error(
+      `No access code config found for access code "${accessCode}".`
+    );
     expect(expectedError.message).toBe(
-      `No access code config found for access code "${accessCode}".`,
+      `No access code config found for access code "${accessCode}".`
     );
     expect(expectedError).toBeInstanceOf(Error);
   });

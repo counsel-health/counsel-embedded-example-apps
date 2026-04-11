@@ -1,30 +1,31 @@
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { signCounselJwt } from "@/lib/keys";
-import { isAuthenticatedRequest, verifyJWTSession } from "@/lib/user-session";
+import { UserFacingError } from "@/lib/http";
+import { withAuth } from "@/lib/user-session";
 import { getAccessCodeConfig } from "@/envConfig";
-import { Router } from "express";
-const router = Router();
+
+const TokenResponseSchema = z.object({ token: z.string() });
 
 // Returns a short-lived Counsel JWT for the authenticated user.
 // The Next.js app uses this to call Counsel APIs directly.
-router.post("/", verifyJWTSession, async (req, res) => {
-  if (!isAuthenticatedRequest(req)) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-  const config = getAccessCodeConfig(req.user.accessCode);
-  if (!config) {
-    res.status(400).json({ error: "Invalid access code" });
-    return;
-  }
-  if (!config.issuer) {
-    res.status(400).json({
-      error:
-        "This access code uses API key auth. Use the server's /user/signedAppUrl endpoint instead of /token.",
-    });
-    return;
-  }
-  const jwt = await signCounselJwt(req.user.userId, config.issuer);
-  res.json({ token: jwt });
-});
-
-export default router;
+export const TokenPlugin = new Elysia({ prefix: "/token" })
+  .use(withAuth)
+  .post(
+    "/",
+    async ({ user }): Promise<{ token: string }> => {
+      const config = getAccessCodeConfig(user.accessCode);
+      if (!config) {
+        throw new UserFacingError("Invalid access code", 400);
+      }
+      if (!config.issuer) {
+        throw new UserFacingError(
+          "This access code uses API key auth. Use the server's /user/signedAppUrl endpoint instead of /token.",
+          400
+        );
+      }
+      const token = await signCounselJwt(user.userId, config.issuer);
+      return { token };
+    },
+    { response: TokenResponseSchema }
+  );

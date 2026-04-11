@@ -26,16 +26,12 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Create env file
-        run: |
-          touch .env
-          echo JWT_SECRET=${JWT_SECRET} >> .env
-          echo COUNSEL_WEBHOOK_SECRET=${COUNSEL_WEBHOOK_SECRET} >> .env
-          printf 'ACCESS_CODE_CONFIGS=%s\n' "${ACCESS_CODE_CONFIGS}" >> .env
-          cat .env
+        run: bun run ci:write-env
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           COUNSEL_WEBHOOK_SECRET: ${{ secrets.COUNSEL_WEBHOOK_SECRET }}
           ACCESS_CODE_CONFIGS: ${{ secrets.ACCESS_CODE_CONFIGS }}
+          COUNSEL_PRIVATE_KEY_PEM: ${{ secrets.COUNSEL_PRIVATE_KEY_PEM }}
 
       - name: Lint
         run: bun run lint

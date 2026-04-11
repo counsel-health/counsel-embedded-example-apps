@@ -1,5 +1,6 @@
 import { Database } from "bun:sqlite";
 import { seedUsers } from "./seeds/users";
+import { dbLogger } from "@/lib/logger";
 
 let dbInstance: Database | null = null;
 
@@ -17,7 +18,7 @@ export async function getDb(): Promise<Database> {
     // 2. Seed the tables if we're in development mode
     if (process.env.NODE_ENV === "development") {
       await seedUsers(dbInstance);
-      console.log("Database seeded");
+      dbLogger.info("Database seeded");
     }
   }
   return dbInstance;

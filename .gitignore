@@ -51,6 +51,9 @@ yarn-error.log*
 
 tmp/
 
+# load testing results
+load-testing/results/
+
 ## Xcode user settings
 xcuserdata/
 
@@ -61,4 +64,8 @@ xcuserdata/
 
 # JetBrains
 .idea/
+
+# Claude worktrees
+.claude/worktrees/
+.gstack/
 .gstack/

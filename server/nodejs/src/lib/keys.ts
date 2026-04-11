@@ -1,5 +1,5 @@
-import { createPrivateKey, createPublicKey } from "crypto";
-import { exportJWK, importPKCS8, SignJWT } from "jose";
+import { createPrivateKey, createPublicKey, KeyObject } from "crypto";
+import { exportJWK, SignJWT } from "jose";
 import { env } from "@/envConfig";
 
 const JWT_ALG = "RS256";
@@ -8,7 +8,7 @@ const JWT_EXPIRY = "1h";
 const JWT_KID = "rsa-256-key-1";
 
 let _publicJwk: Record<string, unknown> | null = null;
-let _privateKey: Awaited<ReturnType<typeof importPKCS8>> | null = null;
+let _privateKey: KeyObject | null = null;
 
 export async function getPublicJwk() {
   if (_publicJwk) return _publicJwk;
@@ -21,14 +21,17 @@ export async function getPublicJwk() {
   return _publicJwk;
 }
 
-async function getPrivateKey() {
+function getPrivateKey(): KeyObject {
   if (_privateKey) return _privateKey;
   const pem = env.COUNSEL_PRIVATE_KEY_PEM;
   if (!pem)
     throw new Error(
       "COUNSEL_PRIVATE_KEY_PEM is required for issuer-based auth"
     );
-  _privateKey = await importPKCS8(pem, JWT_ALG);
+  // Use Node.js crypto directly — jose's importPKCS8 uses Uint8Array.fromBase64
+  // internally on Bun and fails on multi-line PEM (no whitespace tolerance).
+  // createPrivateKey handles standard multi-line PEM natively.
+  _privateKey = createPrivateKey(pem);
   return _privateKey;
 }
 
@@ -36,7 +39,7 @@ export async function signCounselJwt(
   subject: string,
   issuer: string
 ): Promise<string> {
-  const privateKey = await getPrivateKey();
+  const privateKey = getPrivateKey();
   return new SignJWT({ sub: subject })
     .setProtectedHeader({ alg: JWT_ALG, kid: JWT_KID })
     .setIssuedAt()

@@ -1,6 +1,7 @@
 "use client";
 
 import { signOut } from "@/actions/signOut";
+import { clientLogger } from "@/lib/clientLogger";
 import {
   useCounselSignedUrl,
   useCounselThreads,
@@ -135,7 +136,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
           : await getSignedUrl({ action: "open_thread", thread_id: threadId });
         setCounselSessionUrl(url);
       } catch (error) {
-        console.error("Failed to load Counsel thread:", error);
+        clientLogger.error({ error }, "Failed to load Counsel thread");
       }
     },
     [isLoading, getSignedUrl, counselSessionUrl],
@@ -222,7 +223,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
         setActiveCounselThreadId(null);
         invalidateThreads();
       } catch (error) {
-        console.error("Failed to connect to Counsel:", error);
+        clientLogger.error({ error }, "Failed to connect to Counsel");
       }
     },
     [isLoading, getSignedUrl, addThread, invalidateThreads, hostThreads],

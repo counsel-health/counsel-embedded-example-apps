@@ -1,11 +1,17 @@
-import { NextFunction, Request, Response } from "express";
 import { getUser } from "@/db/actions/getUser";
 import { DBRowNotFoundError } from "@/db/lib/dbErrors";
 import { getCounselSignedAppUrl } from "@/lib/counsel";
 import { safePromise } from "@/lib/promise";
 import { createUser } from "@/db/actions/createUser";
-import { isAuthenticatedRequest } from "@/lib/user-session";
+import type { User } from "@/lib/user-session";
 import { getAccessCodeConfig } from "@/envConfig";
+import { z } from "zod";
+
+// Optional session data forwarded as-is to the Counsel signed app URL request.
+// Accepts any JSON object; unknown values pass through to Counsel unchanged.
+export const SessionDataSchema = z.record(z.string(), z.unknown());
+
+export const SignedAppUrlResponseSchema = z.object({ url: z.string() });
 
 export async function getOrCreateUser(userId: string, accessCode: string) {
   const [user, error] = await safePromise(getUser(userId));
@@ -28,28 +34,24 @@ export async function getOrCreateUser(userId: string, accessCode: string) {
  * @description Get the signed app url for the user
  * @route POST /user/signedAppUrl
  */
-export default async function index(
-  req: Request,
-  res: Response,
-  _next: NextFunction
-) {
-  if (!isAuthenticatedRequest(req)) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-  const { userId, accessCode } = req.user;
-
+export async function signedAppUrlHandler({
+  user,
+  body,
+}: {
+  user: User;
+  body: z.infer<typeof SessionDataSchema>;
+}) {
   // 1. Check the user exists - if not, create them (this is an edge case bc we don't persist the user across server restarts)
   // Don't use this as an example in your logic, instead just get the user from the database
-  const user = await getOrCreateUser(userId, accessCode);
+  const u = await getOrCreateUser(user.userId, user.accessCode);
 
   // 2. Call the Counsel API to get the signed app url
   // Forward any session data (e.g. view.navigation) from the request body
   const { url } = await getCounselSignedAppUrl({
-    userId: user.counsel_user_id,
-    accessCode,
-    sessionData: req.body,
+    userId: u.counsel_user_id,
+    accessCode: user.accessCode,
+    sessionData: body,
   });
 
-  res.status(200).json({ url });
+  return { url };
 }

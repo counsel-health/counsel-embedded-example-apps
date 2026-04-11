@@ -1,34 +1,16 @@
-import { NextFunction, Request, Response } from "express";
 import { getOrCreateUser } from "../signedAppUrl";
 import { getCounselUserThreads } from "@/lib/counsel";
-import { isAuthenticatedRequest } from "@/lib/user-session";
+import type { User } from "@/lib/user-session";
 
 /**
  * @description Get the user's chat threads from the Counsel API
  * @route GET /user/threads
  */
-export default async function index(
-  req: Request,
-  res: Response,
-  _next: NextFunction
-) {
-  if (!isAuthenticatedRequest(req)) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
-  const { userId, accessCode } = req.user;
-
-  try {
-    const user = await getOrCreateUser(userId, accessCode);
-
-    const threads = await getCounselUserThreads({
-      userId: user.counsel_user_id,
-      accessCode,
-    });
-
-    res.status(200).json(threads);
-  } catch (error) {
-    console.error("Failed to fetch Counsel threads:", error);
-    res.status(500).json({ error: "Failed to fetch threads" });
-  }
+export async function threadsHandler({ user }: { user: User }) {
+  const u = await getOrCreateUser(user.userId, user.accessCode);
+  const threads = await getCounselUserThreads({
+    userId: u.counsel_user_id,
+    accessCode: user.accessCode,
+  });
+  return threads;
 }
