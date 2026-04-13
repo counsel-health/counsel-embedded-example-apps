@@ -58,7 +58,7 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
           onKeyDown={handleKeyDown}
           disabled={disabled}
           placeholder={placeholder}
-          className="flex-1 resize-none bg-transparent text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none min-h-[28px] max-h-[200px] leading-relaxed disabled:opacity-50"
+          className="flex-1 resize-none bg-transparent text-[16px] sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none min-h-[28px] max-h-[200px] leading-relaxed disabled:opacity-50"
           style={{ height: "28px" }}
         />
         <button

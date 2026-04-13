@@ -1,19 +1,19 @@
 "use client";
 
 import { signOut } from "@/actions/signOut";
-import { clientLogger } from "@/lib/clientLogger";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { counselQueryKeys } from "@/hooks/counselQueryKeys";
 import {
+  pollUntilNewCounselThread,
   useCounselSignedUrl,
   useCounselThreads,
   type CounselApiConfig,
 } from "@/hooks/useCounselApi";
-import { useCallback, useState } from "react";
+import { clientLogger } from "@/lib/clientLogger";
+import { handlePromiseRejection } from "@/lib/handlePromiseRejection";
+import { useQueryClient } from "@tanstack/react-query";
 import { PanelLeftOpen } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ChatList from "./integrated/ChatList";
 import ChatThread from "./integrated/ChatThread";
 import CounselChatThread from "./integrated/CounselChatThread";
@@ -92,6 +92,8 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
     type: "host",
     id: defaultThread.id,
   });
+  const activeThreadRef = useRef<ActiveThread>(activeThread);
+  activeThreadRef.current = activeThread;
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   // The signed URL currently loaded in the Counsel iframe. Kept stable so the
   // iframe is not reloaded unnecessarily — switching threads uses switch_thread.
@@ -99,6 +101,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
   // When set, triggers a counsel:switchThread postMessage to the live iframe.
   const [activeCounselThreadId, setActiveCounselThreadId] = useState<string | null>(null);
 
+  const queryClient = useQueryClient();
   const {
     threads: counselThreads,
     isLoading: isThreadsLoading,
@@ -106,6 +109,13 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
     invalidateThreads,
   } = useCounselThreads(counselApiConfig);
   const { getSignedUrl, isPending: isLoading } = useCounselSignedUrl(counselApiConfig);
+
+  const threadPollAbortRef = useRef<AbortController | null>(null);
+  useEffect(() => {
+    return () => {
+      threadPollAbortRef.current?.abort();
+    };
+  }, []);
 
   // ---- Handlers -----------------------------------------------------------
 
@@ -136,7 +146,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
           : await getSignedUrl({ action: "open_thread", thread_id: threadId });
         setCounselSessionUrl(url);
       } catch (error) {
-        clientLogger.error({ error }, "Failed to load Counsel thread");
+        clientLogger.error({ err: error }, "Failed to load Counsel thread");
       }
     },
     [isLoading, getSignedUrl, counselSessionUrl],
@@ -207,6 +217,8 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
           agent_context: { reason_for_handoff },
         });
 
+        const baselineThreadIds = new Set(counselThreads.map((t) => t.id));
+
         setHostThreads((prev) =>
           prev.map((t) => (t.id === hostThreadId ? { ...t, showCounselCard: false } : t)),
         );
@@ -221,12 +233,60 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
         setActiveThread({ type: "counsel", id: placeholderId });
         setCounselSessionUrl(url);
         setActiveCounselThreadId(null);
-        invalidateThreads();
+
+        threadPollAbortRef.current?.abort();
+        threadPollAbortRef.current = new AbortController();
+        const signal = threadPollAbortRef.current.signal;
+
+        // TODO(cleanup): Drop this block when `pollUntilNewCounselThread` is removed (server create or embed message).
+        handlePromiseRejection(
+          async () => {
+            const result = await pollUntilNewCounselThread(
+              counselApiConfig,
+              baselineThreadIds,
+              signal,
+            );
+            if (signal.aborted) return;
+            if (!result) {
+              clientLogger.warn(
+                "Timed out waiting for new Counsel thread; sidebar may be stale until refresh",
+              );
+              await invalidateThreads();
+              return;
+            }
+            queryClient.setQueryData(
+              counselQueryKeys.threads(counselApiConfig.counselUserId),
+              result.threads,
+            );
+            const stillOnPlaceholder =
+              activeThreadRef.current.type === "counsel" &&
+              activeThreadRef.current.id === placeholderId;
+            setActiveThread((at) =>
+              at.type === "counsel" && at.id === placeholderId
+                ? { type: "counsel", id: result.newThread.id }
+                : at,
+            );
+            if (stillOnPlaceholder) {
+              setActiveCounselThreadId(result.newThread.id);
+            }
+          },
+          (err) =>
+            clientLogger.error({ err }, "Counsel thread list sync after iframe create failed"),
+        );
       } catch (error) {
-        clientLogger.error({ error }, "Failed to connect to Counsel");
+        clientLogger.error({ err: error }, "Failed to connect to Counsel");
       }
     },
-    [isLoading, getSignedUrl, addThread, invalidateThreads, hostThreads],
+    [
+      isLoading,
+      getSignedUrl,
+      addThread,
+      invalidateThreads,
+      hostThreads,
+      counselThreads,
+      counselApiConfig,
+      queryClient,
+    ],
   );
 
   // ---- Shared sidebar props -----------------------------------------------

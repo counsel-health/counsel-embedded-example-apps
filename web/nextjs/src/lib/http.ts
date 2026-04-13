@@ -13,7 +13,7 @@ export async function fetchWithRetry(
     try {
       return await fetch(url, options);
     } catch (error) {
-      httpLogger.warn({ url, delay, error }, "Request failed, retrying");
+      httpLogger.warn({ url, delay, err: error }, "Request failed, retrying");
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }

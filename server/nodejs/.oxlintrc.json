@@ -1,7 +1,9 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
   "plugins": ["typescript", "import"],
+  "jsPlugins": ["./.oxlint/logger-err-plugin.cjs"],
   "rules": {
-    "no-unused-vars": "error"
+    "no-unused-vars": "error",
+    "logger-err/use-err-for-error-instances": "error"
   }
 }

@@ -1,6 +1,6 @@
 import app from "@/app";
-import { env, loadEnvConfig } from "@/envConfig";
 import { getDb } from "@/db/db";
+import { env, loadEnvConfig } from "@/envConfig";
 import { serverLogger } from "@/lib/logger";
 
 loadEnvConfig();
@@ -12,7 +12,7 @@ app.listen(env.PORT, () => {
       serverLogger.info("Database initialized");
     })
     .catch((error) => {
-      serverLogger.error({ error }, "Critical error initializing the database");
+      serverLogger.error({ err: error }, "Critical error initializing the database");
       process.exit(1);
     });
 
