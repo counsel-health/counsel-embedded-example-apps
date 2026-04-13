@@ -108,9 +108,20 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
   } = useCounselThreads(counselApiConfig);
   const { getSignedUrl, isPending: isLoading } = useCounselSignedUrl(counselApiConfig);
 
-  // Sync state when Counsel iframe emits thread events
+  // Sync state when Counsel iframe emits thread events (same origin check as outbound postMessage)
   useEffect(() => {
+    if (!counselSessionUrl) return;
+
+    let expectedOrigin: string;
+    try {
+      expectedOrigin = new URL(counselSessionUrl).origin;
+    } catch {
+      return;
+    }
+
     const handleMessage = (event: MessageEvent<CounselInboundMessage>) => {
+      if (event.origin !== expectedOrigin) return;
+
       const data = event.data;
       if (!data || typeof data !== "object") return;
 
@@ -127,7 +138,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [invalidateThreads]);
+  }, [counselSessionUrl, invalidateThreads]);
 
   // ---- Handlers -----------------------------------------------------------
 
