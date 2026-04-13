@@ -49,8 +49,8 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-950 px-3 py-3">
-      <div className="relative flex min-h-[120px] w-full flex-col gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 shadow-[0_6px_10px_0_rgba(0,0,0,0.06)] focus-within:border-zinc-400 dark:focus-within:border-zinc-500 transition-colors">
+    <div className="bg-white dark:bg-zinc-950 px-4 py-3">
+      <div className="relative mx-auto flex min-h-[120px] w-full max-w-3xl flex-col gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 shadow-[0_6px_10px_0_rgba(0,0,0,0.06)] focus-within:border-zinc-400 dark:focus-within:border-zinc-500 transition-colors">
         <textarea
           ref={textareaRef}
           rows={1}
@@ -66,13 +66,14 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
             disabled={disabled}
             aria-label="Send message"
             className={cn(
-              "flex shrink-0 items-center justify-center size-8 rounded-full transition-colors",
+              "flex shrink-0 items-center justify-center size-6 rounded-full transition-colors",
+              "bg-[#243866] text-white dark:bg-[#FFFEFC] dark:text-[#040A1F]",
               disabled
-                ? "bg-[#243866]/50 text-white cursor-not-allowed dark:bg-[#FFFEFC]/50 dark:text-[#040A1F]"
-                : "bg-[#243866] text-white hover:bg-[#1a2a4d] dark:bg-[#FFFEFC] dark:text-[#040A1F] dark:hover:bg-white",
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:opacity-90",
             )}
           >
-            <ArrowRight className="size-4" strokeWidth={2.5} />
+            <ArrowRight className="size-4" strokeWidth={2} />
           </button>
         </div>
       </div>
