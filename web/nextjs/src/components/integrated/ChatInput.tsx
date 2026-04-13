@@ -50,7 +50,7 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
 
   return (
     <div className="bg-white dark:bg-zinc-950 px-3 py-3">
-      <div className="flex items-end gap-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 shadow-sm focus-within:border-zinc-400 dark:focus-within:border-zinc-500 transition-colors">
+      <div className="flex items-end gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 shadow-sm focus-within:border-zinc-400 dark:focus-within:border-zinc-500 transition-colors">
         <textarea
           ref={textareaRef}
           rows={1}
@@ -58,8 +58,8 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
           onKeyDown={handleKeyDown}
           disabled={disabled}
           placeholder={placeholder}
-          className="flex-1 resize-none bg-transparent text-[16px] sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none min-h-[28px] max-h-[200px] leading-relaxed disabled:opacity-50"
-          style={{ height: "28px" }}
+          className="flex-1 resize-none bg-transparent text-base font-[450] leading-[1.3] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none min-h-[24px] max-h-[200px] disabled:opacity-50"
+          style={{ height: "24px" }}
         />
         <button
           onClick={handleSubmit}

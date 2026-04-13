@@ -13,10 +13,10 @@ export default function MessageBubble({ msg }: MessageBubbleProps) {
     <div className={cn("flex", isUser ? "flex-row-reverse" : "flex-row")}>
       <div
         className={cn(
-          "max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap",
+          "max-w-[80%] rounded-lg px-4 py-3 text-base font-[450] leading-[1.3] whitespace-pre-wrap",
           isUser
-            ? "bg-blue-600 text-white"
-            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100",
+            ? "rounded-br-none bg-blue-600 text-white"
+            : "rounded-bl-none bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100",
         )}
       >
         {msg.text}
