@@ -41,7 +41,7 @@ export function useCounselAppMessageHandler({ iframeRef, iframeOrigin }: Options
 
   const switchThread = useCallback(
     (threadId: string) => {
-      sendMessage({ type: "switch_thread", threadId });
+      sendMessage({ type: "switch_thread", thread_id: threadId });
     },
     [sendMessage],
   );
