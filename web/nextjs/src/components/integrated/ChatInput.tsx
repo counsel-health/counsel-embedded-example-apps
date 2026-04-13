@@ -49,8 +49,8 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-950 px-4 py-3">
-      <div className="relative mx-auto flex min-h-[120px] w-full max-w-3xl flex-col gap-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-4 shadow-[0_6px_10px_0_rgba(0,0,0,0.06)] focus-within:border-zinc-400 dark:focus-within:border-zinc-500 transition-colors">
+    <div className="bg-[#F3F1EB] dark:bg-[#090D1C] px-4 py-3">
+      <div className="relative mx-auto flex min-h-[120px] w-full max-w-3xl flex-col gap-2 rounded-lg border border-[#DEDBD4] dark:border-[#050917] bg-[#FFFEFC] dark:bg-[#343A53] p-4 shadow-[0_6px_10px_0_rgba(0,0,0,0.06)] focus-within:border-[#C1C7B1] dark:focus-within:border-[#3F4560] transition-colors">
         <textarea
           ref={textareaRef}
           rows={1}
@@ -58,7 +58,7 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
           onKeyDown={handleKeyDown}
           disabled={disabled}
           placeholder={placeholder}
-          className="w-full flex-1 resize-none bg-transparent text-base font-[450] leading-[1.3] text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none min-h-6 max-h-[30dvh] disabled:opacity-50"
+          className="w-full flex-1 resize-none bg-transparent text-base font-[450] leading-[1.3] text-[#1C1304] dark:text-[#FAFBFF] placeholder:text-[#9D998F] dark:placeholder:text-[#8D95B0] outline-none min-h-6 max-h-[30dvh] disabled:opacity-50"
         />
         <div className="flex w-full items-center justify-end">
           <button
