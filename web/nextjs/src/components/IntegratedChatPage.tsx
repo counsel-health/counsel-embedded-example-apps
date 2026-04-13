@@ -1,19 +1,15 @@
 "use client";
 
 import { signOut } from "@/actions/signOut";
-import { clientLogger } from "@/lib/clientLogger";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import {
   useCounselSignedUrl,
   useCounselThreads,
   type CounselApiConfig,
 } from "@/hooks/useCounselApi";
-import { useCallback, useEffect, useState } from "react";
+import { clientLogger } from "@/lib/clientLogger";
 import { PanelLeftOpen } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { useCallback, useEffect, useState } from "react";
 import ChatList from "./integrated/ChatList";
 import ChatThread from "./integrated/ChatThread";
 import CounselChatThread from "./integrated/CounselChatThread";
@@ -169,7 +165,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
           : await getSignedUrl({ action: "open_thread", thread_id: threadId });
         setCounselSessionUrl(url);
       } catch (error) {
-        clientLogger.error({ error }, "Failed to load Counsel thread");
+        clientLogger.error({ err: error }, "Failed to load Counsel thread");
       }
     },
     [isLoading, getSignedUrl, counselSessionUrl],
@@ -255,7 +251,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
         setCounselSessionUrl(url);
         setActiveCounselThreadId(null);
       } catch (error) {
-        clientLogger.error({ error }, "Failed to connect to Counsel");
+        clientLogger.error({ err: error }, "Failed to connect to Counsel");
       }
     },
     [isLoading, getSignedUrl, addThread, hostThreads],

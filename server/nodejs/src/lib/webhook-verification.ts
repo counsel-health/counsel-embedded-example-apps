@@ -12,7 +12,7 @@ export function verifyWebhook(
     wh.verify(JSON.stringify(body), headers as Record<string, string>);
     return true;
   } catch (error) {
-    webhookLogger.error({ error }, "Webhook verification failed");
+    webhookLogger.error({ err: error }, "Webhook verification failed");
     // Return 400 if the webhook verification fails
     throw new HttpError("Invalid webhook signature or timestamp", 400);
   }
