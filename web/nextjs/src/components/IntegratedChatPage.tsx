@@ -174,17 +174,19 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
   const handleNewChat = useCallback(() => {
     if (isLoading) return;
 
-    // First find if there's an existing empty host thread
-    const emptyThread = hostThreads.find((t) => t.messages.every((m) => m.role === "bot"));
-
-    if (emptyThread) {
-      setActiveThread({ type: "host", id: emptyThread.id });
-    } else {
+    // Use the functional updater so rapid "New Chat" clicks always see the latest
+    // thread list; a closure over `hostThreads` can be stale before the next render.
+    setHostThreads((prev) => {
+      const empty = prev.find((t) => t.messages.every((m) => m.role === "bot"));
+      if (empty) {
+        setActiveThread({ type: "host", id: empty.id });
+        return prev;
+      }
       const newThread = createNewHostThread();
-      setHostThreads((prev) => [newThread, ...prev]);
       setActiveThread({ type: "host", id: newThread.id });
-    }
-  }, [isLoading, hostThreads]);
+      return [newThread, ...prev];
+    });
+  }, [isLoading]);
 
   const handleSendMessage = useCallback((threadId: string, text: string) => {
     const isTrigger = text.toLowerCase().includes(COUNSEL_TRIGGER);
