@@ -25,6 +25,7 @@ export default function CounselAppClient({
 }: CounselAppClientProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const isFirstRender = useRef(true);
+  const prevUrlRef = useRef(signedAppUrl);
 
   const iframeOrigin = (() => {
     try {
@@ -35,6 +36,19 @@ export default function CounselAppClient({
   })();
 
   const { switchThread } = useCounselAppMessageHandler({ iframeRef, iframeOrigin });
+
+  // When signedAppUrl changes after mount, imperatively navigate the existing
+  // iframe rather than relying on React reconciliation (which does not reliably
+  // re-navigate an already-mounted iframe). The new URL already encodes which
+  // thread to open, so suppress the next switch_thread postMessage.
+  useEffect(() => {
+    if (prevUrlRef.current === signedAppUrl) return;
+    prevUrlRef.current = signedAppUrl;
+    if (iframeRef.current) {
+      iframeRef.current.src = signedAppUrl;
+    }
+    isFirstRender.current = true;
+  }, [signedAppUrl]);
 
   useEffect(() => {
     if (isFirstRender.current) {

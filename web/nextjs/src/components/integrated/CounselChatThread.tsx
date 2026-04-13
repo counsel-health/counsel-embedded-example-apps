@@ -20,7 +20,6 @@ export default function CounselChatThread({
   return (
     <div className={cn("relative h-full w-full", hidden ? "hidden" : "")}>
       <CounselApp
-        key={signedAppUrl}
         signedAppUrl={signedAppUrl}
         className="h-full w-full"
         currentThreadId={currentThreadId}
