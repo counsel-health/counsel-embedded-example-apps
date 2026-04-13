@@ -6,7 +6,7 @@ import { useCallback, type RefObject } from "react";
  */
 type SwitchThreadMessage = {
   type: "switch_thread";
-  threadId: string;
+  thread_id: string;
 };
 
 type CounselOutboundMessage = SwitchThreadMessage;
@@ -32,7 +32,7 @@ export function useCounselAppMessageHandler({ iframeRef, iframeOrigin }: Options
 
   const switchThread = useCallback(
     (threadId: string) => {
-      sendMessage({ type: "switch_thread", threadId });
+      sendMessage({ type: "switch_thread", thread_id: threadId });
     },
     [sendMessage],
   );

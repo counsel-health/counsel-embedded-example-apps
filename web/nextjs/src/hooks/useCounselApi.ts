@@ -57,6 +57,88 @@ async function fetchThreadsFromServer(config: CounselApiConfig): Promise<ThreadI
   return data.threads ?? [];
 }
 
+/**
+ * TODO(cleanup): Remove this polling path once Counsel supports either (1) creating a thread via HTTP
+ * before opening the iframe, or (2) a postMessage from the embed with the real `thread_id` after
+ * `create_thread` completes. Then replace callers with a single refetch or cache update from that source.
+ *
+ * Polls GET /threads until a row appears that was not in `baselineThreadIds` (iframe create_thread is async).
+ */
+const POLL_INITIAL_DELAY_MS = 250;
+const POLL_MAX_DELAY_MS = 4000;
+const POLL_DEADLINE_MS = 45_000;
+
+function sleep(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new DOMException("Aborted", "AbortError"));
+      return;
+    }
+    const t = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(t);
+      signal.removeEventListener("abort", onAbort);
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+    signal.addEventListener("abort", onAbort);
+  });
+}
+
+function pickNewestByActivity(threads: ThreadItem[]): ThreadItem {
+  return threads.reduce((best, t) =>
+    new Date(t.last_activity_time).getTime() > new Date(best.last_activity_time).getTime() ? t : best,
+  );
+}
+
+/**
+ * Refetches threads until the server returns at least one id not in `baselineThreadIds`, or deadline/abort.
+ * Delete this export and its private helpers once Counsel offers create-via-API or embed `thread_id` messaging
+ * (see TODO on the poll constants block in this file).
+ */
+export async function pollUntilNewCounselThread(
+  config: CounselApiConfig,
+  baselineThreadIds: ReadonlySet<string>,
+  signal: AbortSignal,
+): Promise<{ threads: ThreadItem[]; newThread: ThreadItem } | null> {
+  const started = Date.now();
+  let delay = POLL_INITIAL_DELAY_MS;
+  let firstAttempt = true;
+
+  while (Date.now() - started < POLL_DEADLINE_MS) {
+    if (signal.aborted) return null;
+
+    if (!firstAttempt) {
+      try {
+        await sleep(delay, signal);
+      } catch {
+        return null;
+      }
+      delay = Math.min(delay * 2, POLL_MAX_DELAY_MS);
+    }
+    firstAttempt = false;
+
+    if (signal.aborted) return null;
+
+    let threads: ThreadItem[];
+    try {
+      threads = await fetchThreadsFromServer(config);
+    } catch {
+      continue;
+    }
+
+    const newcomers = threads.filter((t) => !baselineThreadIds.has(t.id));
+    if (newcomers.length > 0) {
+      const newThread = pickNewestByActivity(newcomers);
+      return { threads, newThread };
+    }
+  }
+
+  return null;
+}
+
 async function fetchSignedUrlFromServer(
   config: CounselApiConfig,
   action?: SignedUrlAction,

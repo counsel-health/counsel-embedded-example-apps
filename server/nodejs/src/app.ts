@@ -87,7 +87,7 @@ const app = new Elysia()
     set.status = httpStatus;
 
     if (httpStatus >= 500) {
-      httpLogger.error({ method, path, status: httpStatus, error: err }, "Server error");
+      httpLogger.error({ method, path, status: httpStatus, err }, "Server error");
     } else {
       // 4xx from HttpError (e.g. 404 catch-all) — not a server fault
       httpLogger.warn({ method, path, status: httpStatus, error: err.message }, "Client error");
