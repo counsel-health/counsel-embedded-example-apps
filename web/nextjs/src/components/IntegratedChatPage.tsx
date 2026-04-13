@@ -247,7 +247,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
         clientLogger.error({ error }, "Failed to connect to Counsel");
       }
     },
-    [isLoading, getSignedUrl, addThread, invalidateThreads, hostThreads],
+    [isLoading, getSignedUrl, addThread, hostThreads],
   );
 
   // ---- Shared sidebar props -----------------------------------------------
