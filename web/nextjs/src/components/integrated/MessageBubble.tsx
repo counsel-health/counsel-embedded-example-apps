@@ -15,8 +15,8 @@ export default function MessageBubble({ msg }: MessageBubbleProps) {
         className={cn(
           "max-w-[80%] rounded-lg px-4 py-3 text-base font-[450] leading-[1.3] whitespace-pre-wrap",
           isUser
-            ? "rounded-br-none bg-blue-600 text-white"
-            : "rounded-bl-none bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100",
+            ? "rounded-br-none bg-[#243866] text-white dark:bg-[#FFFEFC] dark:text-[#040A1F]"
+            : "rounded-bl-none bg-[#FFFEFC] text-[#1C1304] dark:bg-[#292E46] dark:text-[#FAFBFF]",
         )}
       >
         {msg.text}
