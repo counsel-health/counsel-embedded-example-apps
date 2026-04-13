@@ -54,7 +54,7 @@ export default function ChatThread({
   );
 
   return (
-    <div className="flex flex-col h-full bg-[#F3F1EB] dark:bg-[#090D1C]">
+    <div className="flex flex-col h-full bg-white dark:bg-[#090D1C]">
       {/* Messages */}
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         <div className="flex flex-col gap-3 px-4 py-6 max-w-3xl mx-auto w-full">

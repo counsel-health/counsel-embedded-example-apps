@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,8 @@ type ChatInputProps = {
  */
 export default function ChatInput({ onSend, disabled, placeholder = "Type a message…" }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [hasContent, setHasContent] = useState(false);
+  const sendDisabled = disabled || !hasContent;
 
   // Auto-focus on mount
   useEffect(() => {
@@ -28,6 +30,7 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
     if (!el) return;
     el.style.height = "auto";
     el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+    setHasContent(el.value.trim().length > 0);
   }
 
   function handleSubmit() {
@@ -38,6 +41,7 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
     onSend(text);
     el.value = "";
     el.style.height = "auto";
+    setHasContent(false);
     el.focus();
   }
 
@@ -49,7 +53,7 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
   }
 
   return (
-    <div className="bg-[#F3F1EB] dark:bg-[#090D1C] px-4 py-3">
+    <div className="bg-white dark:bg-[#090D1C] px-4 py-3">
       <div className="relative mx-auto flex min-h-[120px] w-full max-w-3xl flex-col gap-2 rounded-lg border border-[#DEDBD4] dark:border-[#050917] bg-[#FFFEFC] dark:bg-[#343A53] p-4 shadow-[0_6px_10px_0_rgba(0,0,0,0.06)] focus-within:border-[#C1C7B1] dark:focus-within:border-[#3F4560] transition-colors">
         <textarea
           ref={textareaRef}
@@ -63,14 +67,13 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
         <div className="flex w-full items-center justify-end">
           <button
             onClick={handleSubmit}
-            disabled={disabled}
+            disabled={sendDisabled}
             aria-label="Send message"
             className={cn(
-              "flex shrink-0 items-center justify-center size-6 rounded-full transition-colors",
-              "bg-[#243866] text-white dark:bg-[#FFFEFC] dark:text-[#040A1F]",
-              disabled
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:opacity-90",
+              "flex shrink-0 items-center justify-center size-8 rounded-full transition-colors text-white dark:text-[#040A1F]",
+              sendDisabled
+                ? "bg-[#243866]/50 dark:bg-[#FFFEFC]/50 cursor-not-allowed"
+                : "bg-[#243866] dark:bg-[#FFFEFC] hover:opacity-90",
             )}
           >
             <ArrowRight className="size-4" strokeWidth={2} />
