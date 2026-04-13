@@ -31,14 +31,14 @@ bun run test:e2e:api   # or test:e2e:ui / test:e2e
 
 ## Environment
 
-| Variable          | Role                                   | Default                 |
-| ----------------- | -------------------------------------- | ----------------------- |
-| `API_BASE_URL`    | Express API (must already be running)  | `http://127.0.0.1:4003` |
-| `WEB_BASE_URL`    | Next.js (must already be running)      | `http://127.0.0.1:3001` |
-| `CI`              | Set by CI (workers, retries, headless) | —                       |
-| `HEADLESS`        | `true` → headless browser (local UI)   | —                       |
-| `E2E_ACCESS_CODE` | Required for embedded-flow login test  | —                       |
-| `E2E_ACCESS_CODE_INTEGRATED` | Optional; access code with `navMode: integrated` for [integrated-handoff](ui/integrated-handoff.spec.ts). If unset, falls back to `E2E_ACCESS_CODE` (CI) then `AICHAT` | — |
+| Variable                     | Role                                                                                                                                                                   | Default                 |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `API_BASE_URL`               | Express API (must already be running)                                                                                                                                  | `http://127.0.0.1:4003` |
+| `WEB_BASE_URL`               | Next.js (must already be running)                                                                                                                                      | `http://127.0.0.1:3001` |
+| `CI`                         | Set by CI (workers, retries, headless)                                                                                                                                 | —                       |
+| `HEADLESS`                   | `true` → headless browser (local UI)                                                                                                                                   | —                       |
+| `E2E_ACCESS_CODE`            | Required for embedded-flow login test                                                                                                                                  | —                       |
+| `E2E_ACCESS_CODE_INTEGRATED` | Optional; access code with `navMode: integrated` for [integrated-handoff](ui/integrated-handoff.spec.ts). If unset, falls back to `E2E_ACCESS_CODE` (CI) then `AICHAT` | —                       |
 
 ## CI
 
