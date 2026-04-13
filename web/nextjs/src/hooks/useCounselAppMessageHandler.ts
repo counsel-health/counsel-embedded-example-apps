@@ -6,10 +6,19 @@ import { useCallback, type RefObject } from "react";
  */
 type SwitchThreadMessage = {
   type: "switch_thread";
-  threadId: string;
+  thread_id: string;
 };
 
 type CounselOutboundMessage = SwitchThreadMessage;
+
+/**
+ * Inbound message types emitted by the Counsel iframe.
+ */
+export type CounselInboundMessage =
+  | { type: "counsel:thread_created"; threadId: string }
+  | { type: "counsel:thread_updated"; threadId: string }
+  | { type: "counsel:thread_selected"; threadId: string };
+
 
 type Options = {
   iframeRef: RefObject<HTMLIFrameElement | null>;

@@ -7,7 +7,7 @@ import {
   useCounselThreads,
   type CounselApiConfig,
 } from "@/hooks/useCounselApi";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PanelLeftOpen } from "lucide-react";
 import {
   Sheet,
@@ -18,6 +18,7 @@ import ChatList from "./integrated/ChatList";
 import ChatThread from "./integrated/ChatThread";
 import CounselChatThread from "./integrated/CounselChatThread";
 import type { HostThread } from "./integrated/types";
+import type { CounselInboundMessage } from "@/hooks/useCounselAppMessageHandler";
 
 // ---------------------------------------------------------------------------
 // Trigger phrase — any message containing this (case-insensitive) will show
@@ -107,6 +108,27 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
   } = useCounselThreads(counselApiConfig);
   const { getSignedUrl, isPending: isLoading } = useCounselSignedUrl(counselApiConfig);
 
+  // Sync state when Counsel iframe emits thread events
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent<CounselInboundMessage>) => {
+      const data = event.data;
+      if (!data || typeof data !== "object") return;
+
+      if (data.type === "counsel:thread_created" || data.type === "counsel:thread_updated") {
+        invalidateThreads();
+      } else if (data.type === "counsel:thread_selected" && "threadId" in data) {
+        const threadId = data.threadId;
+        setActiveThread({ type: "counsel", id: threadId });
+        setActiveCounselThreadId(threadId);
+        // Refresh sidebar metadata if it was a new internal thread
+        invalidateThreads();
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [invalidateThreads]);
+
   // ---- Handlers -----------------------------------------------------------
 
   const handleHostThreadClick = useCallback(
@@ -144,18 +166,18 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
 
   const handleNewChat = useCallback(() => {
     if (isLoading) return;
-    // Reuse an existing empty host thread (only the initial bot message, no user messages)
-    setHostThreads((prev) => {
-      const empty = prev.find((t) => t.messages.every((m) => m.role === "bot"));
-      if (empty) {
-        setActiveThread({ type: "host", id: empty.id });
-        return prev;
-      }
+
+    // First find if there's an existing empty host thread
+    const emptyThread = hostThreads.find((t) => t.messages.every((m) => m.role === "bot"));
+
+    if (emptyThread) {
+      setActiveThread({ type: "host", id: emptyThread.id });
+    } else {
       const newThread = createNewHostThread();
+      setHostThreads((prev) => [newThread, ...prev]);
       setActiveThread({ type: "host", id: newThread.id });
-      return [newThread, ...prev];
-    });
-  }, [isLoading]);
+    }
+  }, [isLoading, hostThreads]);
 
   const handleSendMessage = useCallback((threadId: string, text: string) => {
     const isTrigger = text.toLowerCase().includes(COUNSEL_TRIGGER);
@@ -221,7 +243,6 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
         setActiveThread({ type: "counsel", id: placeholderId });
         setCounselSessionUrl(url);
         setActiveCounselThreadId(null);
-        invalidateThreads();
       } catch (error) {
         clientLogger.error({ error }, "Failed to connect to Counsel");
       }
