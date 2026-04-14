@@ -1,11 +1,11 @@
 import { Instrument_Sans, Inter } from "next/font/google";
 
-export const interBody = Instrument_Sans({
+export const fontBody = Instrument_Sans({
   subsets: ["latin"],
   variable: "--font-body",
 });
-export const interTitle = Instrument_Sans({
+export const fontTitle = Instrument_Sans({
   subsets: ["latin"],
   variable: "--font-title",
 });
-export const interMono = Inter({ subsets: ["latin"], variable: "--font-mono" });
+export const fontMono = Inter({ subsets: ["latin"], variable: "--font-mono" });
