@@ -96,6 +96,49 @@ export async function getCounselUserThreads({
   return await response.json();
 }
 
+const CreateThreadResponse = z.object({
+  thread_id: z.string(),
+  created_at: z.string(),
+});
+
+export async function createCounselThread({
+  userId,
+  accessCode,
+  body,
+}: {
+  userId: string;
+  accessCode: string;
+  body: {
+    module?: string;
+    initial_messages?: Array<{ body: string; role?: "patient" | "model" }>;
+    agent_context?: Record<string, unknown>;
+  };
+}) {
+  const apiUrl = getApiUrl(accessCode);
+  const response = await fetchWithRetry(
+    getRequestUrl(apiUrl, `/v1/user/${userId}/threads`),
+    {
+      method: "POST",
+      headers: await getRequestHeaders(accessCode),
+      body: JSON.stringify(body),
+    }
+  );
+  if (!response.ok) {
+    const detail = await readHttpErrorDetail(response);
+    counselLogger.error(
+      { status: response.status, detail },
+      "Counsel API create thread failed"
+    );
+    throw new Error(
+      `Request to create thread failed: ${response.status} ${
+        response.statusText
+      }${detail ? ` ${detail}` : ""}`
+    );
+  }
+  const data = await response.json();
+  return CreateThreadResponse.parse(data);
+}
+
 export async function getCounselSignedAppUrl({
   userId,
   accessCode,

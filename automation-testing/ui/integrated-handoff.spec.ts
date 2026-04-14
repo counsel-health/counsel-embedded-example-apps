@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Response } from "@playwright/test";
 
 // Prefer a code with navMode: integrated; otherwise use the same JWT code as embedded-flow (CI sets E2E_ACCESS_CODE).
 const accessCode =
@@ -34,14 +34,27 @@ test.describe("integrated chat - connect to care handoff", () => {
       page.getByRole("button", { name: "Connect to Counsel" })
     ).toBeVisible();
 
+    // The handoff flow now creates a thread via API first, then opens it via signedAppUrl.
+    const createThreadResponse = page.waitForResponse(
+      (resp: Response) =>
+        resp.url().includes("/threads") &&
+        resp.request().method() === "POST" &&
+        resp.request().resourceType() === "fetch"
+    );
     const signedUrlResponse = page.waitForResponse(
-      (resp) =>
+      (resp: Response) =>
         resp.url().includes("/signedAppUrl") &&
         resp.request().method() === "POST" &&
         resp.request().resourceType() === "fetch"
     );
 
     await page.getByRole("button", { name: "Connect to Counsel" }).click();
+
+    const threadResponse = await createThreadResponse;
+    expect(
+      threadResponse.ok(),
+      `POST /threads failed: ${threadResponse.status()}`
+    ).toBe(true);
 
     const response = await signedUrlResponse;
     expect(response.ok(), `signedAppUrl failed: ${response.status()}`).toBe(
