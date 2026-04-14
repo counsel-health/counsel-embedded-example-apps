@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
-import { Noto_Sans } from "next/font/google";
 import "./globals.css";
 import React from "react";
-
-const notoSans = Noto_Sans({
-  variable: "--font-noto-sans",
-  subsets: ["latin"],
-});
+import { fontBody } from "./fonts";
 
 export const metadata: Metadata = {
   title: "Embedded Corp Wellness",
@@ -19,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={notoSans.className}>{children}</body>
+    <html lang="en" className={`${fontBody.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }
