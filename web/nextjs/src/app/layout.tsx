@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import React from "react";
-import { fontBody, fontMono, fontTitle } from "./fonts";
+import { fontBody } from "./fonts";
 
 export const metadata: Metadata = {
   title: "Embedded Corp Wellness",
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${fontBody.variable} ${fontMono.variable} ${fontTitle.variable}`}>
+    <html lang="en" className={`${fontBody.variable}`}>
       <body>{children}</body>
     </html>
   );
