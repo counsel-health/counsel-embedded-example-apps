@@ -7,9 +7,19 @@ const accessCode =
   "AICHAT";
 
 test.describe("integrated chat - connect to care handoff", () => {
-  test("real Counsel API: signedAppUrl succeeds and Counsel iframe loads", async ({
+  test("real Counsel API: signedAppUrl preloads on page load and Counsel iframe loads after handoff", async ({
     page,
   }) => {
+    // signedAppUrl is now preloaded on page load rather than during the handoff.
+    // Set up the listener before navigation so we don't miss it.
+    const signedUrlResponsePromise = page.waitForResponse(
+      (resp: Response) =>
+        resp.url().includes("/signedAppUrl") &&
+        resp.request().method() === "POST" &&
+        resp.request().resourceType() === "fetch",
+      { timeout: 30_000 }
+    );
+
     await page.goto("/login");
     await page.getByLabel("Access Code").fill(accessCode!);
     await page.getByRole("button", { name: "Login" }).click();
@@ -21,6 +31,13 @@ test.describe("integrated chat - connect to care handoff", () => {
       await page.goto("/integrated/chat");
     }
     await page.waitForLoadState("domcontentloaded");
+
+    // Preload must succeed before the user interacts with the page.
+    const preloadResponse = await signedUrlResponsePromise;
+    expect(
+      preloadResponse.ok(),
+      `preload signedAppUrl failed: ${preloadResponse.status()}`
+    ).toBe(true);
 
     const chatInput = page.getByPlaceholder("Type a message…");
     await expect(chatInput).toBeVisible({ timeout: 10_000 });
@@ -34,32 +51,22 @@ test.describe("integrated chat - connect to care handoff", () => {
       page.getByRole("button", { name: "Connect to Counsel" })
     ).toBeVisible();
 
-    // The handoff flow now creates a thread via API first, then opens it via signedAppUrl.
-    const createThreadResponse = page.waitForResponse(
+    // During handoff only POST /threads is called — signedAppUrl is NOT
+    // re-fetched because the preloaded URL (with ?threadId= appended) is reused.
+    const createThreadResponsePromise = page.waitForResponse(
       (resp: Response) =>
         resp.url().includes("/threads") &&
-        resp.request().method() === "POST" &&
-        resp.request().resourceType() === "fetch"
-    );
-    const signedUrlResponse = page.waitForResponse(
-      (resp: Response) =>
-        resp.url().includes("/signedAppUrl") &&
         resp.request().method() === "POST" &&
         resp.request().resourceType() === "fetch"
     );
 
     await page.getByRole("button", { name: "Connect to Counsel" }).click();
 
-    const threadResponse = await createThreadResponse;
+    const threadResponse = await createThreadResponsePromise;
     expect(
       threadResponse.ok(),
       `POST /threads failed: ${threadResponse.status()}`
     ).toBe(true);
-
-    const response = await signedUrlResponse;
-    expect(response.ok(), `signedAppUrl failed: ${response.status()}`).toBe(
-      true
-    );
 
     await expect(
       page.getByRole("button", { name: /Counsel chat/ })
@@ -70,5 +77,8 @@ test.describe("integrated chat - connect to care handoff", () => {
     const src = await iframe.getAttribute("src");
     expect(src).toBeTruthy();
     expect(src).toMatch(/^https?:\/\//);
+    // The preloaded URL is reused with ?threadId= appended so the Counsel app
+    // opens directly into the new thread without a separate signedAppUrl call.
+    expect(src).toContain("threadId=");
   });
 });

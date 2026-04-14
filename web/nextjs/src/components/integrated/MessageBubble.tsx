@@ -11,7 +11,7 @@ export default function MessageBubble({ msg }: MessageBubbleProps) {
   if (!isUser) {
     return (
       <div className="flex flex-row">
-        <div className="max-w-[80%] text-base font-[450] leading-[1.3] whitespace-pre-wrap text-[#1C1304] dark:text-[#FAFBFF]">
+        <div className="max-w-[80%] text-base font-[450] leading-[1.3] whitespace-pre-wrap text-[#0D0D0D] dark:text-[#FAFBFF]">
           {msg.text}
         </div>
       </div>
