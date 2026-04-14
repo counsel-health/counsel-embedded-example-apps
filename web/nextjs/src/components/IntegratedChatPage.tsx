@@ -9,7 +9,7 @@ import {
 } from "@/hooks/useCounselApi";
 import { clientLogger } from "@/lib/clientLogger";
 import { PanelLeftOpen } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ChatList from "./integrated/ChatList";
 import ChatThread from "./integrated/ChatThread";
 import CounselChatThread from "./integrated/CounselChatThread";
@@ -89,6 +89,8 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
     type: "host",
     id: defaultThread.id,
   });
+  const activeThreadRef = useRef<ActiveThread>(activeThread);
+  activeThreadRef.current = activeThread;
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   // The signed URL currently loaded in the Counsel iframe. Kept stable so the
   // iframe is not reloaded unnecessarily — switching threads uses switch_thread.
@@ -122,7 +124,19 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
       if (!data || typeof data !== "object") return;
 
       if (data.type === "counsel:thread_created") {
+        const realId =
+          typeof data.threadId === "string" && data.threadId.length > 0 ? data.threadId : null;
         invalidateThreads();
+
+        const at = activeThreadRef.current;
+        if (
+          realId &&
+          at.type === "counsel" &&
+          at.id.startsWith("counsel-new-")
+        ) {
+          setActiveThread({ type: "counsel", id: realId });
+          setActiveCounselThreadId(realId);
+        }
       }
     };
 
