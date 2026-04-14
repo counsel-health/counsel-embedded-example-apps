@@ -16,8 +16,6 @@ type CounselOutboundMessage = SwitchThreadMessage;
  */
 export type CounselInboundMessage =
   | { type: "counsel:thread_created"; threadId: string }
-  | { type: "counsel:thread_updated"; threadId: string }
-  | { type: "counsel:thread_selected"; threadId: string };
 
 
 type Options = {
