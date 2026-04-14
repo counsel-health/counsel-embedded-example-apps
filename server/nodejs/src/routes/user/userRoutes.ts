@@ -3,8 +3,17 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { signOutHandler } from "./signOut";
 import { SignUpBodySchema, signUpHandler, SignUpResponseSchema } from "./signUp";
-import { SessionDataSchema, signedAppUrlHandler, SignedAppUrlResponseSchema } from "./signedAppUrl";
-import { threadsHandler } from "./threads";
+import {
+  SessionDataSchema,
+  signedAppUrlHandler,
+  SignedAppUrlResponseSchema,
+} from "./signedAppUrl";
+import {
+  CreateThreadBodySchema,
+  createThreadHandler,
+  CreateThreadResponseSchema,
+  threadsHandler,
+} from "./threads";
 
 export const UserPlugin = new Elysia({ prefix: "/user" })
   // public — no auth required; body validated by Elysia before handler runs
@@ -17,8 +26,14 @@ export const UserPlugin = new Elysia({ prefix: "/user" })
   .post("/signOut", ({ user }) => signOutHandler({ user }), {
     response: z.object({ status: z.literal("ok") }),
   })
-  .post("/signedAppUrl", ({ user, body }) => signedAppUrlHandler({ user, body }), {
-    body: SessionDataSchema,
-    response: SignedAppUrlResponseSchema,
-  })
-  .get("/threads", ({ user }) => threadsHandler({ user }));
+  .post(
+    "/signedAppUrl",
+    ({ user, body }) => signedAppUrlHandler({ user, body }),
+    { body: SessionDataSchema, response: SignedAppUrlResponseSchema }
+  )
+  .get("/threads", ({ user }) => threadsHandler({ user }))
+  .post(
+    "/threads",
+    ({ user, body }) => createThreadHandler({ user, body }),
+    { body: CreateThreadBodySchema, response: CreateThreadResponseSchema }
+  );
