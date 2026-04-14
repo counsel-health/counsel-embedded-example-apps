@@ -35,9 +35,7 @@ type SignedUrlAction =
 
 async function fetchThreadsFromServer(config: CounselApiConfig): Promise<ThreadItem[]> {
   const direct = config.counselJwt.length > 0;
-  const url = direct
-    ? `${config.counselDirectApiBase}/threads`
-    : "/api/counsel/threads";
+  const url = direct ? `${config.counselDirectApiBase}/threads` : "/api/counsel/threads";
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     "Idempotency-Key": crypto.randomUUID(),
@@ -89,7 +87,9 @@ function sleep(ms: number, signal: AbortSignal): Promise<void> {
 
 function pickNewestByActivity(threads: ThreadItem[]): ThreadItem {
   return threads.reduce((best, t) =>
-    new Date(t.last_activity_time).getTime() > new Date(best.last_activity_time).getTime() ? t : best,
+    new Date(t.last_activity_time).getTime() > new Date(best.last_activity_time).getTime()
+      ? t
+      : best,
   );
 }
 

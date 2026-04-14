@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useEffect } from "react";
-import { ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ArrowUp } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 type ChatInputProps = {
   onSend: (text: string) => void;
@@ -14,7 +14,11 @@ type ChatInputProps = {
  * Auto-expanding textarea chat input.
  * Enter to submit, Shift+Enter for newline.
  */
-export default function ChatInput({ onSend, disabled, placeholder = "Type a message…" }: ChatInputProps) {
+export default function ChatInput({
+  onSend,
+  disabled,
+  placeholder = "Type a message…",
+}: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-focus on mount

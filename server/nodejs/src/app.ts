@@ -1,9 +1,9 @@
 import { HttpError, UserFacingError, isHttpError } from "@/lib/http";
+import { httpLogger } from "@/lib/logger";
 import { observabilityPlugin } from "@/lib/observability";
 import { MainPlugin } from "@/routes";
 import { cors } from "@elysiajs/cors";
 import { Elysia, ValidationError } from "elysia";
-import { httpLogger } from "@/lib/logger";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
@@ -46,27 +46,38 @@ const app = new Elysia()
     };
 
     const logCompletion = (statusCode: number) => {
-      const duration = requestStart ? `${(performance.now() - requestStart).toFixed(2)}ms` : "unknown";
-      httpLogger.info({ method, path, statusCode, duration, requestId: requestId ?? "no-id" }, "Request finished");
+      const duration = requestStart
+        ? `${(performance.now() - requestStart).toFixed(2)}ms`
+        : "unknown";
+      httpLogger.info(
+        { method, path, statusCode, duration, requestId: requestId ?? "no-id" },
+        "Request finished",
+      );
     };
 
     if (code === "VALIDATION") {
-      const isResponseFailure =
-        error instanceof ValidationError && error.type === "response";
+      const isResponseFailure = error instanceof ValidationError && error.type === "response";
 
       if (!(error instanceof ValidationError) || isResponseFailure) {
         set.status = 500;
         httpLogger.error(
-          { method, path, requestId: requestId ?? "no-id", error: error instanceof Error ? error.message : error },
+          {
+            method,
+            path,
+            requestId: requestId ?? "no-id",
+            error: error instanceof Error ? error.message : error,
+          },
           "Response or unknown validation failure",
         );
         logCompletion(500);
         return { errors: { message: "Internal Server Error" } };
       }
 
-      const clientMessage =
-        error.type === "body" ? "Invalid request body" : "Invalid request";
-      httpLogger.warn({ method, path, validationType: error.type, error: error.message }, "Validation error");
+      const clientMessage = error.type === "body" ? "Invalid request body" : "Invalid request";
+      httpLogger.warn(
+        { method, path, validationType: error.type, error: error.message },
+        "Validation error",
+      );
       set.status = 422;
       logCompletion(422);
       return { errors: { message: clientMessage } };

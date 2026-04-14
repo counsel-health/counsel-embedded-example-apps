@@ -54,7 +54,8 @@ export async function signUpHandler({
     userType,
     client,
     counselUserId: user.counsel_user_id,
-    authType: config.apiKey ? "apiKey" : "jwt",
+    // apiKey is always configured for server→Counsel; issuer selects browser-direct JWT flow.
+    authType: config.issuer ? "jwt" : "apiKey",
     navMode: config.navMode ?? "standalone",
     counselApiUrl: config.apiUrl,
   };

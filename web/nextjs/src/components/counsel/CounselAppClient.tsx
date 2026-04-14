@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useCounselAppMessageHandler } from "@/hooks/useCounselAppMessageHandler";
+import { useEffect, useRef } from "react";
 
 export type CounselAppClientProps = {
   signedAppUrl: string;
@@ -34,7 +34,10 @@ export default function CounselAppClient({
     }
   })();
 
-  const { switchThread } = useCounselAppMessageHandler({ iframeRef, iframeOrigin });
+  const { switchThread } = useCounselAppMessageHandler({
+    iframeRef,
+    iframeOrigin,
+  });
 
   useEffect(() => {
     if (isFirstRender.current) {

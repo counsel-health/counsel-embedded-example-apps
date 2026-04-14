@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useEffect, useCallback, useState } from "react";
-import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { HostThread } from "./types";
-import MessageBubble from "./MessageBubble";
-import CounselCard from "./CounselCard";
+import { ChevronDown } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ChatInput from "./ChatInput";
+import CounselCard from "./CounselCard";
+import MessageBubble from "./MessageBubble";
+import type { HostThread } from "./types";
 
 type ChatThreadProps = {
   thread: HostThread;
@@ -28,10 +28,9 @@ export default function ChatThread({
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsAtBottom(entry.isIntersecting),
-      { threshold: 0.1 },
-    );
+    const observer = new IntersectionObserver(([entry]) => setIsAtBottom(entry.isIntersecting), {
+      threshold: 0.1,
+    });
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, []);

@@ -4,25 +4,22 @@ import { z } from "zod";
 // Supports two auth modes:
 // - apiKey: API key auth (Bearer apiKey). Use when you have a Counsel API key.
 // - issuer: JWT auth only. Use with COUNSEL_PRIVATE_KEY_PEM for RSA-signed JWTs.
-// At least one of apiKey or issuer must be present.
-export const AccessCodeConfigSchema = z
-  .object({
-    client: z.string(),
-    apiUrl: z.string().url(),
-    userType: z.enum(["main", "onboarding"]).default("main"),
-    // Navigation mode for the embedded chat experience.
-    // "standalone" (default): full Counsel iframe with built-in sidebar
-    // "integrated": host-managed sidebar with Counsel integrated view (no Counsel sidebar)
-    navMode: z.enum(["standalone", "integrated"]).default("standalone"),
-    // API key for API key auth. When present, used as Bearer token.
-    apiKey: z.string().optional(),
-    // The iss claim put in JWTs for this access code's org.
-    // Required when apiKey is not present. Counsel maps this to the org in orgByIssuer.
-    issuer: z.string().url().optional(),
-  })
-  .refine((config) => config.apiKey ?? config.issuer, {
-    message: "Each access code config must have either apiKey or issuer",
-  });
+// At least one of apiKey or issuer must be present for Browser direct calls to the Counsel API.
+export const AccessCodeConfigSchema = z.object({
+  client: z.string(),
+  apiUrl: z.url(),
+  userType: z.enum(["main", "onboarding"]).default("main"),
+  // Navigation mode for the embedded chat experience.
+  // "standalone" (default): full Counsel iframe with built-in sidebar
+  // "integrated": host-managed sidebar with Counsel integrated view (no Counsel sidebar)
+  navMode: z.enum(["standalone", "integrated"]).default("standalone"),
+  // API key for API key auth. Needed for server→Counsel calls.
+  apiKey: z.string(),
+  // The iss claim put in JWTs for this access code's org.
+  // Required for Browser direct calls to the Counsel API.
+  // If skipped, all requests will be proxied through the demo server.
+  issuer: z.url().optional(),
+});
 
 // Environment configuration schema
 export const envConfig = z
@@ -45,11 +42,8 @@ export const envConfig = z
         try {
           return JSON.parse(val);
         } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-          throw new Error(
-            `ACCESS_CODE_CONFIGS must be valid JSON: ${errorMessage}`
-          );
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          throw new Error(`ACCESS_CODE_CONFIGS must be valid JSON: ${errorMessage}`);
         }
       })
       .pipe(
@@ -57,13 +51,11 @@ export const envConfig = z
           .record(z.string().length(6), AccessCodeConfigSchema)
           .refine((configs) => Object.keys(configs).length > 0, {
             message: "At least one access code configuration is required",
-          })
+          }),
       ),
   })
   .superRefine((data, ctx) => {
-    const hasIssuerConfig = Object.values(data.ACCESS_CODE_CONFIGS).some(
-      (c) => c.issuer
-    );
+    const hasIssuerConfig = Object.values(data.ACCESS_CODE_CONFIGS).some((c) => c.issuer);
     if (hasIssuerConfig && !data.COUNSEL_PRIVATE_KEY_PEM) {
       ctx.addIssue({
         code: "custom",
