@@ -87,55 +87,15 @@ export async function prewarmSessionJwt(session: IronSession<SessionData>): Prom
 /**
  * @description Get the signed app url for a user.
  *
- * Two flows depending on authType:
- * - "apiKey": proxied through the demo server (demo server calls Counsel API with API key)
- * - "jwt": calls Counsel API directly with a Counsel JWT
- *
- * JWT caching strategy for the "jwt" flow:
- * - At login, handleLogin pre-warms the JWT into session.counselJwt (saved via Server Action).
- * - On the chat page, if the cached JWT is still valid it's used directly (fast, no extra call).
- * - If the cached JWT is expired, a fresh one is fetched from /token and used in-memory only.
- * Cached in NextJS so the same URL is reused across navigations until invalidated.
+ * Always proxied through the demo server (demo server calls Counsel with the access code API key).
+ * Issuer/JWT browser-direct traffic uses session.counselJwt from {@link getValidCounselJwt}, not this helper.
  */
 export async function getCounselSignedAppUrl(
   session: IronSession<SessionData>,
   sessionData?: Record<string, unknown>,
 ) {
-  const { token, counselUserId, authType, counselJwt } = session;
+  const { token, counselUserId } = session;
 
-  if (authType === "jwt") {
-    const jwt =
-      counselJwt && isCounselJwtValid(counselJwt) ? counselJwt : await fetchCounselJwt(token);
-
-    // jwt auth flow: calls the Counsel API directly (no demo server proxy)
-    const resp = await fetchWithRetry(
-      `${session.counselApiUrl}/v1/user/${counselUserId}/signedAppUrl`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthorizationHeader(jwt),
-        },
-        body: JSON.stringify(sessionData ?? {}),
-        cache: "default",
-        next: {
-          revalidate: 3600,
-          tags: [getChatSignedAppUrlCacheKey(counselUserId)],
-        },
-      },
-    );
-    if (!resp.ok) {
-      const detail = await readHttpErrorDetail(resp);
-      throw new Error(
-        `Failed to get signed app url: ${resp.status} ${resp.statusText}${
-          detail ? ` ${detail}` : ""
-        }`,
-      );
-    }
-    return SignedAppUrlResponseSchema.parse(await resp.json()).url;
-  }
-
-  // apiKey flow: demo server proxies the request using the API key
   const resp = await fetchWithRetry(`${serverEnv.SERVER_HOST}/user/signedAppUrl`, {
     method: "POST",
     headers: {
@@ -250,7 +210,11 @@ async function fetchFromCounselServer<T>(
   if (!response.ok) {
     const detail = await readHttpErrorDetail(response);
     serverLogger.error(
-      { responseStatus: response.status, responseStatusText: response.statusText, detail },
+      {
+        responseStatus: response.status,
+        responseStatusText: response.statusText,
+        detail,
+      },
       "Failed to fetch from counsel server",
     );
     throw new Error(

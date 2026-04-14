@@ -41,18 +41,21 @@ C5BbuQIDjQMF9oegNdwn/V5/
         client: "main",
         apiUrl: "https://test-api.counselhealth.com",
         userType: "main",
+        apiKey: "sk_test_main01_key",
         issuer: "https://local-test-partner.example.com/main",
       },
       CODE23: {
         client: "main",
         apiUrl: "https://test-api.counselhealth.com",
         userType: "main",
+        apiKey: "sk_test_code23_key",
         issuer: "https://local-test-partner.example.com/main",
       },
       ONBR01: {
         client: "onboarding",
         apiUrl: "https://test-api.counselhealth.com",
         userType: "onboarding",
+        apiKey: "sk_test_onbr01_key",
         issuer: "https://local-test-partner.example.com/onboarding",
       },
       APIK01: {

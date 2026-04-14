@@ -1,10 +1,10 @@
 "use server";
 
+import { authLogger } from "@/lib/logger";
 import { getChatSignedAppUrlCacheKey, signOutCounselUser } from "@/lib/server";
 import { getSession } from "@/lib/session";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { authLogger } from "@/lib/logger";
 
 export async function signOut() {
   const session = await getSession();

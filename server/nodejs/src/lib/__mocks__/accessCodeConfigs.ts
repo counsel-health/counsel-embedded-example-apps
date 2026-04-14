@@ -7,6 +7,7 @@ export const mockAccessCodeConfigs = {
     client: "main",
     apiUrl: "https://test-api.counselhealth.com",
     userType: "main" as const,
+    apiKey: "sk_test_main01_key",
     issuer: "https://local-test-partner.example.com/main",
   },
   APIK01: {
@@ -19,30 +20,35 @@ export const mockAccessCodeConfigs = {
     client: "onboarding",
     apiUrl: "https://test-api.counselhealth.com",
     userType: "onboarding" as const,
+    apiKey: "sk_test_onbr01_key",
     issuer: "https://local-test-partner.example.com/onboarding",
   },
   CLNT02: {
     client: "client2",
     apiUrl: "https://test-api.counselhealth.com",
     userType: "main" as const,
+    apiKey: "sk_test_clnt02_key",
     issuer: "https://local-test-partner.example.com/client2",
   },
   MAIN02: {
     client: "main",
     apiUrl: "https://test-api.counselhealth.com",
     userType: "main" as const,
+    apiKey: "sk_test_main02_key",
     issuer: "https://local-test-partner.example.com/main",
   },
   ONBR02: {
     client: "onboarding",
     apiUrl: "https://local-api.counselhealth.com",
     userType: "onboarding" as const,
+    apiKey: "sk_test_onbr02_key",
     issuer: "https://local-test-partner.example.com/onboarding",
   },
   CLNT01: {
     client: "client1",
     apiUrl: "https://local.counselhealth.com",
     userType: "onboarding" as const,
+    apiKey: "sk_test_clnt01_key",
     issuer: "https://local-test-partner.example.com/client1",
   },
 } as const;
