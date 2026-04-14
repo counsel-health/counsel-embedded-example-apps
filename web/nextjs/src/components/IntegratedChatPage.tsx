@@ -121,13 +121,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
       const data = event.data;
       if (!data || typeof data !== "object") return;
 
-      if (data.type === "counsel:thread_created" || data.type === "counsel:thread_updated") {
-        invalidateThreads();
-      } else if (data.type === "counsel:thread_selected" && "threadId" in data) {
-        const threadId = data.threadId;
-        setActiveThread({ type: "counsel", id: threadId });
-        setActiveCounselThreadId(threadId);
-        // Refresh sidebar metadata if it was a new internal thread
+      if (data.type === "counsel:thread_created") {
         invalidateThreads();
       }
     };
