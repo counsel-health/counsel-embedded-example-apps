@@ -3,8 +3,6 @@
 import { useRef, useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ArrowUp } from "lucide-react";
-import { useEffect, useRef } from "react";
 
 type ChatInputProps = {
   onSend: (text: string) => void;
