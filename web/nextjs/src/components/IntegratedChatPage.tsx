@@ -3,10 +3,12 @@
 import { signOut } from "@/actions/signOut";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import {
+  useCounselCreateThread,
   useCounselSignedUrl,
   useCounselThreads,
   type CounselApiConfig,
 } from "@/hooks/useCounselApi";
+import type { CounselInboundMessage } from "@/hooks/useCounselAppMessageHandler";
 import { clientLogger } from "@/lib/clientLogger";
 import { PanelLeftOpen } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -14,7 +16,6 @@ import ChatList from "./integrated/ChatList";
 import ChatThread from "./integrated/ChatThread";
 import CounselChatThread from "./integrated/CounselChatThread";
 import type { HostThread } from "./integrated/types";
-import type { CounselInboundMessage } from "@/hooks/useCounselAppMessageHandler";
 
 // ---------------------------------------------------------------------------
 // Trigger phrase — any message containing this (case-insensitive) will show
@@ -104,9 +105,11 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
     addThread,
     invalidateThreads,
   } = useCounselThreads(counselApiConfig);
-  const { getSignedUrl, isPending: isLoading } = useCounselSignedUrl(counselApiConfig);
+  const { getSignedUrl, isPending: isSignedUrlPending } = useCounselSignedUrl(counselApiConfig);
+  const { createThread, isPending: isCreateThreadPending } = useCounselCreateThread(counselApiConfig);
+  const isLoading = isSignedUrlPending || isCreateThreadPending;
 
-  // Sync state when Counsel iframe emits thread events (same origin check as outbound postMessage)
+  // Sync state when Counsel iframe emits thread events
   useEffect(() => {
     if (!counselSessionUrl) return;
 
@@ -124,19 +127,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
       if (!data || typeof data !== "object") return;
 
       if (data.type === "counsel:thread_created") {
-        const realId =
-          typeof data.threadId === "string" && data.threadId.length > 0 ? data.threadId : null;
         invalidateThreads();
-
-        const at = activeThreadRef.current;
-        if (
-          realId &&
-          at.type === "counsel" &&
-          at.id.startsWith("counsel-new-")
-        ) {
-          setActiveThread({ type: "counsel", id: realId });
-          setActiveCounselThreadId(realId);
-        }
       }
     };
 
@@ -159,18 +150,15 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
       if (isLoading) return;
       setActiveThread({ type: "counsel", id: threadId });
 
+      // If the iframe is already loaded, switch threads via postMessage (no reload)
       if (counselSessionUrl) {
-        if (!threadId.startsWith("counsel-new-")) {
-          setActiveCounselThreadId(threadId);
-        }
+        setActiveCounselThreadId(threadId);
         return;
       }
 
+      // First Counsel thread click — get a signed URL with open_thread
       try {
-        const isPlaceholder = threadId.startsWith("counsel-new-");
-        const url = isPlaceholder
-          ? await getSignedUrl({ action: "create_thread" })
-          : await getSignedUrl({ action: "open_thread", thread_id: threadId });
+        const url = await getSignedUrl({ action: "open_thread", thread_id: threadId });
         setCounselSessionUrl(url);
       } catch (error) {
         clientLogger.error({ err: error }, "Failed to load Counsel thread");
@@ -181,19 +169,20 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
 
   const handleNewChat = useCallback(() => {
     if (isLoading) return;
-
-    // Use the functional updater so rapid "New Chat" clicks always see the latest
-    // thread list; a closure over `hostThreads` can be stale before the next render.
+    let targetId: string | undefined;
     setHostThreads((prev) => {
-      const empty = prev.find((t) => t.messages.every((m) => m.role === "bot"));
-      if (empty) {
-        setActiveThread({ type: "host", id: empty.id });
+      const existing = prev.find((t) => t.messages.every((m) => m.role === "bot"));
+      if (existing) {
+        targetId = existing.id;
         return prev;
       }
       const newThread = createNewHostThread();
-      setActiveThread({ type: "host", id: newThread.id });
+      targetId = newThread.id;
       return [newThread, ...prev];
     });
+    if (targetId) {
+      setActiveThread({ type: "host", id: targetId });
+    }
   }, [isLoading]);
 
   const handleSendMessage = useCallback((threadId: string, text: string) => {
@@ -240,31 +229,53 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
         const reason_for_handoff =
           lastUserMessage?.text ?? "Agent detected a need for medical assistance";
 
-        const url = await getSignedUrl({
-          action: "create_thread",
+        // Show loading state while keeping the host thread in state until success.
+        setActiveCounselThreadId(null);
+        setActiveThread({ type: "counsel", id: `counsel-loading-${Date.now()}` });
+
+        // 1. Create the thread via API — returns immediately with thread_id
+        const { thread_id } = await createThread({
           initial_messages,
           agent_context: { reason_for_handoff },
         });
+
+        // 2. If the iframe is already loaded, switch to the new thread via postMessage.
+        //    Otherwise get a signed URL to bootstrap the iframe.
+        if (!counselSessionUrl) {
+          const url = await getSignedUrl({
+            action: "open_thread",
+            thread_id,
+          });
+          setCounselSessionUrl(url);
+        }
 
         setHostThreads((prev) =>
           prev.map((t) => (t.id === hostThreadId ? { ...t, showCounselCard: false } : t)),
         );
 
-        const placeholderId = `counsel-new-${Date.now()}`;
+        // Add the real thread to the sidebar immediately
         addThread({
-          id: placeholderId,
+          id: thread_id,
           display_name: "Counsel chat",
           last_activity_time: new Date().toISOString(),
           mode: "ai",
         });
-        setActiveThread({ type: "counsel", id: placeholderId });
-        setCounselSessionUrl(url);
-        setActiveCounselThreadId(null);
+        setActiveThread({ type: "counsel", id: thread_id });
+        setActiveCounselThreadId(thread_id);
       } catch (error) {
         clientLogger.error({ err: error }, "Failed to connect to Counsel");
+        // Restore the host thread view so the user's conversation isn't lost
+        setActiveThread({ type: "host", id: hostThreadId });
       }
     },
-    [isLoading, getSignedUrl, addThread, hostThreads],
+    [
+      isLoading,
+      createThread,
+      getSignedUrl,
+      addThread,
+      hostThreads,
+      counselSessionUrl,
+    ],
   );
 
   // ---- Shared sidebar props -----------------------------------------------
@@ -329,9 +340,15 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
             />
           )}
 
+          {activeThread.type === "counsel" && isLoading && (
+            <div className="flex items-center justify-center h-full">
+              <div className="size-8 border-2 border-zinc-300 border-t-blue-500 rounded-full animate-spin" />
+            </div>
+          )}
+
           {counselSessionUrl && (
             <CounselChatThread
-              hidden={activeThread.type !== "counsel"}
+              hidden={activeThread.type !== "counsel" || isLoading}
               signedAppUrl={counselSessionUrl}
               currentThreadId={activeCounselThreadId ?? undefined}
             />
