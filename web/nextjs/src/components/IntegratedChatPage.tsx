@@ -176,20 +176,16 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
 
   const handleNewChat = useCallback(() => {
     if (isLoading) return;
-    let targetId: string | undefined;
     setHostThreads((prev) => {
       const existing = prev.find((t) => t.messages.every((m) => m.role === "bot"));
       if (existing) {
-        targetId = existing.id;
+        setActiveThread({ type: "host", id: existing.id });
         return prev;
       }
       const newThread = createNewHostThread();
-      targetId = newThread.id;
+      setActiveThread({ type: "host", id: newThread.id });
       return [newThread, ...prev];
     });
-    if (targetId) {
-      setActiveThread({ type: "host", id: targetId });
-    }
   }, [isLoading]);
 
   const handleSendMessage = useCallback((threadId: string, text: string) => {
