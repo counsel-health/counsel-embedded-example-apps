@@ -184,7 +184,7 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
                   ? [
                       {
                         role: "bot" as const,
-                        text: "Thanks for your message! This is a demo response.",
+                        text: "Thanks for your message! Request to talk to a doctor to proceed with the demo.",
                       },
                     ]
                   : []),

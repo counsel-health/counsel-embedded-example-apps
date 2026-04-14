@@ -126,39 +126,42 @@ export default function ChatList({
         {!isThreadsLoading && allThreads.length === 0 && (
           <p className="px-4 py-3 text-sm text-zinc-400">No conversations yet</p>
         )}
-        {allThreads.map((item) => {
-          const isActive = activeThreadId === item.thread.id && activeThreadType === item.type;
-          const displayName =
-            item.thread.display_name || (item.type === "counsel" ? "Counsel chat" : "New chat");
+        {/* Wait until all threads are loaded before rendering */}
+        {!isThreadsLoading &&
+          allThreads.length > 0 &&
+          allThreads.map((item) => {
+            const isActive = activeThreadId === item.thread.id && activeThreadType === item.type;
+            const displayName =
+              item.thread.display_name || (item.type === "counsel" ? "Counsel chat" : "New chat");
 
-          return (
-            <button
-              key={`${item.type}-${item.thread.id}`}
-              onClick={() => handleSelectThread(item)}
-              disabled={isPending}
-              className={cn(
-                "group w-full text-left px-4 py-2.5 rounded-lg mx-1 transition-colors",
-                "w-[calc(100%-8px)]",
-                isActive
-                  ? "bg-zinc-100 dark:bg-zinc-800"
-                  : "hover:bg-zinc-50 dark:hover:bg-zinc-900",
-                isPending && "opacity-50 cursor-wait",
-              )}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                {item.type === "counsel" && (
-                  <Stethoscope className="size-3.5 text-blue-500 shrink-0" />
+            return (
+              <button
+                key={`${item.type}-${item.thread.id}`}
+                onClick={() => handleSelectThread(item)}
+                disabled={isPending}
+                className={cn(
+                  "group w-full text-left px-4 py-2.5 rounded-lg mx-1 transition-colors",
+                  "w-[calc(100%-8px)]",
+                  isActive
+                    ? "bg-zinc-100 dark:bg-zinc-800"
+                    : "hover:bg-zinc-50 dark:hover:bg-zinc-900",
+                  isPending && "opacity-50 cursor-wait",
                 )}
-                <span className="text-sm text-zinc-800 dark:text-zinc-200 truncate font-normal leading-snug">
-                  {displayName}
-                </span>
-              </div>
-              <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 truncate">
-                {formatRelativeTime(item.thread.last_activity_time)}
-              </p>
-            </button>
-          );
-        })}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  {item.type === "counsel" && (
+                    <Stethoscope className="size-3.5 text-blue-500 shrink-0" />
+                  )}
+                  <span className="text-sm text-zinc-800 dark:text-zinc-200 truncate font-normal leading-snug">
+                    {displayName}
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5 truncate">
+                  {formatRelativeTime(item.thread.last_activity_time)}
+                </p>
+              </button>
+            );
+          })}
       </div>
 
       {/* Footer */}
