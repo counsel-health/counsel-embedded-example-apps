@@ -15,7 +15,7 @@ export type CounselApiConfig = {
    * When empty, calls same-origin `/api/counsel/…` with session cookies (API key flow via demo server proxy).
    */
   counselJwt: string;
-  /** `${COUNSEL_API_URL}/v1/user/${counselUserId}` — used only when counselJwt is set */
+  /** `${COUNSEL_API_URL}/v1/user` — used only when counselJwt is set */
   counselDirectApiBase: string;
 };
 

@@ -14,7 +14,7 @@ export default async function IntegratedChat() {
   return (
     <IntegratedChatPage
       counselApiConfig={{
-        counselDirectApiBase: `${session.counselApiUrl}/v1/user/${session.counselUserId}`,
+        counselDirectApiBase: `${session.counselApiUrl}/v1/user`,
         counselJwt: counselJwt ?? "",
         counselUserId: session.counselUserId,
       }}
