@@ -59,7 +59,7 @@ export default function ChatThread({
     // an 85%/60vw column), so the ChatInput sits in the same place whether the
     // host or the Counsel iframe is rendered.
     <div className="relative flex h-full min-h-0 w-full flex-col items-center justify-center bg-white dark:bg-[#090D1C]">
-      <div className="relative flex h-full min-h-0 w-full flex-grow flex-col sm:w-[85%] sm:max-w-[60vw]">
+      <div className="relative flex h-full min-h-0 w-full flex-grow flex-col sm:w-[60%]">
         {/* Messages — flex-col with mt-auto on the list so messages anchor to the
             bottom of the scroll area when they don't fill it. */}
         <div
