@@ -1,13 +1,9 @@
+import { withAuth } from "@/lib/user-session";
 import { Elysia } from "elysia";
 import { z } from "zod";
-import { withAuth } from "@/lib/user-session";
-import { signUpHandler, SignUpBodySchema, SignUpResponseSchema } from "./signUp";
 import { signOutHandler } from "./signOut";
-import {
-  signedAppUrlHandler,
-  SessionDataSchema,
-  SignedAppUrlResponseSchema,
-} from "./signedAppUrl";
+import { SignUpBodySchema, signUpHandler, SignUpResponseSchema } from "./signUp";
+import { SessionDataSchema, signedAppUrlHandler, SignedAppUrlResponseSchema } from "./signedAppUrl";
 import { threadsHandler } from "./threads";
 
 export const UserPlugin = new Elysia({ prefix: "/user" })
@@ -21,9 +17,8 @@ export const UserPlugin = new Elysia({ prefix: "/user" })
   .post("/signOut", ({ user }) => signOutHandler({ user }), {
     response: z.object({ status: z.literal("ok") }),
   })
-  .post(
-    "/signedAppUrl",
-    ({ user, body }) => signedAppUrlHandler({ user, body }),
-    { body: SessionDataSchema, response: SignedAppUrlResponseSchema }
-  )
+  .post("/signedAppUrl", ({ user, body }) => signedAppUrlHandler({ user, body }), {
+    body: SessionDataSchema,
+    response: SignedAppUrlResponseSchema,
+  })
   .get("/threads", ({ user }) => threadsHandler({ user }));

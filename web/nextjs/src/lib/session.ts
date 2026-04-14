@@ -9,8 +9,8 @@ export interface SessionData {
   // The type of user, used to determine which user to get the signed app url for
   userType: UserType;
   counselUserId: string;
-  // "apiKey" = demo server handles Counsel API calls with an API key
-  // "jwt"    = Next.js calls Counsel API directly with a signed JWT
+  // "apiKey" = browser uses same-origin `/api/counsel/*` (demo server proxies with API key).
+  // "jwt"    = browser may call Counsel directly with a Counsel JWT (issuer configs); Not every API on Counsel is available via the JWT flow.
   authType: "apiKey" | "jwt";
   // Counsel JWT pre-warmed at login for the "jwt" flow. Used as a cache — if present and not
   // expired it avoids a /token round-trip on chat page load. Never refreshed into the session
