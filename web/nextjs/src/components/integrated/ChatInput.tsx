@@ -53,8 +53,8 @@ export default function ChatInput({ onSend, disabled, placeholder = "Type a mess
   }
 
   return (
-    <div className="bg-white dark:bg-[#090D1C] px-4 py-3">
-      <div className="relative mx-auto flex min-h-[120px] w-full max-w-3xl flex-col gap-2 rounded-lg border border-[#DEDBD4] dark:border-[#050917] bg-[#FFFEFC] dark:bg-[#343A53] p-4 shadow-[0_6px_10px_0_rgba(0,0,0,0.06)] focus-within:border-[#C1C7B1] dark:focus-within:border-[#3F4560] transition-colors">
+    <div className="bg-white dark:bg-[#090D1C] px-5 pb-5">
+      <div className="relative flex min-h-[120px] w-full flex-col gap-2 rounded-lg border border-[#DEDBD4] dark:border-[#050917] bg-[#FFFEFC] dark:bg-[#343A53] p-4 shadow-[0_6px_10px_0_rgba(0,0,0,0.06)] focus-within:border-[#C1C7B1] dark:focus-within:border-[#3F4560] transition-colors">
         <textarea
           ref={textareaRef}
           rows={1}
