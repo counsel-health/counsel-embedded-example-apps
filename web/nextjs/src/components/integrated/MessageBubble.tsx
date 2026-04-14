@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import type { ChatMessage } from "./types";
 
 type MessageBubbleProps = {
@@ -9,16 +8,18 @@ type MessageBubbleProps = {
 
 export default function MessageBubble({ msg }: MessageBubbleProps) {
   const isUser = msg.role === "user";
+  if (!isUser) {
+    return (
+      <div className="flex flex-row">
+        <div className="max-w-[80%] text-base font-[450] leading-[1.3] whitespace-pre-wrap text-[#1C1304] dark:text-[#FAFBFF]">
+          {msg.text}
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className={cn("flex", isUser ? "flex-row-reverse" : "flex-row")}>
-      <div
-        className={cn(
-          "max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap",
-          isUser
-            ? "bg-blue-600 text-white"
-            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100",
-        )}
-      >
+    <div className="flex flex-row-reverse">
+      <div className="max-w-[80%] rounded-lg rounded-br-none px-4 py-3 text-base font-[450] leading-[1.3] whitespace-pre-wrap bg-[#243866] text-white dark:bg-[#FFFEFC] dark:text-[#040A1F]">
         {msg.text}
       </div>
     </div>
