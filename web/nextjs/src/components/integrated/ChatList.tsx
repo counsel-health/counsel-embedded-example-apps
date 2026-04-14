@@ -1,8 +1,9 @@
-import { useCallback, useMemo } from "react";
-import { Stethoscope, SquarePen, X, LogOut } from "lucide-react";
 import { Logo } from "@/components/logo";
-import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { ThreadItem } from "@/lib/schemas";
+import { cn } from "@/lib/utils";
+import { LogOut, SquarePen, Stethoscope, X } from "lucide-react";
+import { useCallback, useMemo } from "react";
 import type { HostThread } from "./types";
 
 function formatRelativeTime(dateStr: string): string {
@@ -20,9 +21,7 @@ function formatRelativeTime(dateStr: string): string {
   return date.toLocaleDateString();
 }
 
-type UnifiedThread =
-  | { type: "host"; thread: HostThread }
-  | { type: "counsel"; thread: ThreadItem };
+type UnifiedThread = { type: "host"; thread: HostThread } | { type: "counsel"; thread: ThreadItem };
 
 type ChatListProps = {
   hostThreads: HostThread[];
@@ -79,11 +78,16 @@ export default function ChatList({
       <div className="flex items-center justify-between px-4 h-16 shrink-0 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center gap-3">
           <Logo className="size-5 text-zinc-900 dark:text-zinc-100" />
-          <span className="text-base font-semibold text-zinc-900 dark:text-zinc-100">Embedded Demo</span>
+          <span className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+            Embedded Demo
+          </span>
         </div>
         <div className="flex items-center gap-1">
           <button
-            onClick={() => { onNewChat(); onClose?.(); }}
+            onClick={() => {
+              onNewChat();
+              onClose?.();
+            }}
             disabled={isPending}
             aria-label="New chat"
             className="flex items-center justify-center size-9 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 disabled:opacity-40 transition-colors"
@@ -105,17 +109,27 @@ export default function ChatList({
       {/* Thread list */}
       <div className="flex-1 overflow-y-auto py-2">
         {isThreadsLoading && (
-          <p className="px-4 py-3 text-sm text-zinc-400">Loading…</p>
+          <div
+            className="space-y-0 px-1"
+            role="status"
+            aria-busy="true"
+            aria-label="Loading conversations"
+          >
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="w-[calc(100%-8px)] mx-1 px-4 py-2.5 rounded-lg">
+                <Skeleton className="h-[18px] w-[min(85%,14rem)] mb-2 rounded-md animate-pulse dark:from-zinc-800 dark:to-zinc-700" />
+                <Skeleton className="h-3 w-14 rounded-md animate-pulse dark:from-zinc-800 dark:to-zinc-700" />
+              </div>
+            ))}
+          </div>
         )}
         {!isThreadsLoading && allThreads.length === 0 && (
           <p className="px-4 py-3 text-sm text-zinc-400">No conversations yet</p>
         )}
         {allThreads.map((item) => {
-          const isActive =
-            activeThreadId === item.thread.id && activeThreadType === item.type;
+          const isActive = activeThreadId === item.thread.id && activeThreadType === item.type;
           const displayName =
-            item.thread.display_name ||
-            (item.type === "counsel" ? "Counsel chat" : "New chat");
+            item.thread.display_name || (item.type === "counsel" ? "Counsel chat" : "New chat");
 
           return (
             <button

@@ -12,12 +12,14 @@ describe("envConfig", () => {
           client: "main",
           apiUrl: "https://test-api.counselhealth.com",
           userType: "main",
+          apiKey: "sk_test_main01_key",
           issuer: "https://local-test-partner.example.com/main",
         },
         ONBR01: {
           client: "onboarding",
           apiUrl: "https://test-api.counselhealth.com",
           userType: "onboarding",
+          apiKey: "sk_test_onbr01_key",
           issuer: "https://local-test-partner.example.com/onboarding",
         },
       });
@@ -43,6 +45,7 @@ describe("envConfig", () => {
         MAIN01: {
           client: "main",
           apiUrl: "https://test-api.counselhealth.com",
+          apiKey: "sk_test_main01_key",
           issuer: "https://local-test-partner.example.com/main",
         },
       });
@@ -95,7 +98,7 @@ describe("envConfig", () => {
 
       expect(() =>
         envConfig.shape.ACCESS_CODE_CONFIGS.parse(invalidConfig)
-      ).toThrow(/apiKey or issuer/);
+      ).toThrow(/apiKey/);
     });
 
     test("should reject empty ACCESS_CODE_CONFIGS", () => {
@@ -112,18 +115,21 @@ describe("envConfig", () => {
           client: "main",
           apiUrl: "https://test-api.counselhealth.com",
           userType: "main",
+          apiKey: "sk_test_main01_key",
           issuer: "https://local-test-partner.example.com/main",
         },
         CLNT01: {
           client: "client1",
           apiUrl: "https://test-api.counselhealth.com",
           userType: "main",
+          apiKey: "sk_test_clnt01_key",
           issuer: "https://local-test-partner.example.com/client1",
         },
         CLNT02: {
           client: "client2",
           apiUrl: "https://test-api.counselhealth.com",
           userType: "onboarding",
+          apiKey: "sk_test_clnt02_key",
           issuer: "https://local-test-partner.example.com/client2",
         },
       });
@@ -159,12 +165,14 @@ describe("envConfig", () => {
           client: "main",
           apiUrl: "https://test-api.counselhealth.com",
           userType: "main",
+          apiKey: "sk_test_main01_key",
           issuer: "https://local-test-partner.example.com/main",
         },
         ONBR01: {
           client: "onboarding",
           apiUrl: "https://test-api.counselhealth.com",
           userType: "onboarding",
+          apiKey: "sk_test_onbr01_key",
           issuer: "https://local-test-partner.example.com/onboarding",
         },
       };

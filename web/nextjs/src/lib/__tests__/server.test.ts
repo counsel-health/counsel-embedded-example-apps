@@ -1,12 +1,7 @@
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  test,
-} from "vitest";
-import { getCounselSignedAppUrl, getChatSignedAppUrlCacheKey } from "../server";
-import { SignJWT } from "jose";
+import type { IronSession } from "iron-session";
+import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { getChatSignedAppUrlCacheKey, getCounselSignedAppUrl } from "../server";
+import type { SessionData } from "../session";
 
 const originalFetch = globalThis.fetch;
 
@@ -18,27 +13,24 @@ function getUrlString(input: RequestInfo | URL): string {
       : input.url;
 }
 
-async function makeJwt(expiresInSeconds: number): Promise<string> {
-  const secret = new TextEncoder().encode("test-secret");
-  return new SignJWT({})
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime(Math.floor(Date.now() / 1000) + expiresInSeconds)
-    .sign(secret);
-}
-
 function makeSession(
-  overrides: Partial<{ authType: "apiKey" | "jwt"; counselJwt: string }> = {}
-) {
-  return {
+  overrides: Partial<SessionData> = {}
+): IronSession<SessionData> {
+  const session: SessionData = {
     token: "session-token",
-    userType: "main" as const,
+    userType: "main",
     counselUserId: "counsel-user-456",
-    authType: "apiKey" as const,
+    authType: "apiKey",
+    navMode: "standalone",
+    counselApiUrl: "https://test-api.example.com",
+    ...overrides,
+  };
+  return {
+    ...session,
     save: async () => {},
     destroy: async () => {},
     updateConfig: () => {},
-    ...overrides,
-  };
+  } as IronSession<SessionData>;
 }
 
 describe("getCounselSignedAppUrl", () => {
@@ -78,47 +70,8 @@ describe("getCounselSignedAppUrl", () => {
     expect(url).toBe("https://embed.counsel.test/signed");
   });
 
-  test("jwt flow: uses cached counselJwt if still valid (no /token call)", async () => {
-    const validJwt = await makeJwt(3600);
-    let tokenCalled = false;
-    globalThis.fetch = async (input: RequestInfo | URL) => {
-      const urlStr = getUrlString(input);
-      if (urlStr.includes("/token")) {
-        tokenCalled = true;
-        return new Response(JSON.stringify({ token: "should-not-be-called" }), {
-          status: 200,
-        });
-      }
-      if (urlStr.includes("/signedAppUrl")) {
-        return new Response(
-          JSON.stringify({ url: "https://embed.counsel.test/signed" }),
-          {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-      }
-      return new Response("Not found", { status: 404 });
-    };
-    const url = await getCounselSignedAppUrl(
-      makeSession({ authType: "jwt", counselJwt: validJwt })
-    );
-    expect(url).toBe("https://embed.counsel.test/signed");
-    expect(tokenCalled, "should not call /token when cached JWT is valid").toBe(
-      false
-    );
-  });
-
-  test("jwt flow: fetches fresh JWT from /token when session has no counselJwt", async () => {
+  test("jwt authType: signed app url still goes via demo server", async () => {
     const url = await getCounselSignedAppUrl(makeSession({ authType: "jwt" }));
-    expect(url).toBe("https://embed.counsel.test/signed");
-  });
-
-  test("jwt flow: fetches fresh JWT from /token when cached counselJwt is expired", async () => {
-    const expiredJwt = await makeJwt(-60);
-    const url = await getCounselSignedAppUrl(
-      makeSession({ authType: "jwt", counselJwt: expiredJwt })
-    );
     expect(url).toBe("https://embed.counsel.test/signed");
   });
 

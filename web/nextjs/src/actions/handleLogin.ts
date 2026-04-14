@@ -1,11 +1,11 @@
 "use server";
 
+import { authLogger } from "@/lib/logger";
+import { prewarmSessionJwt, signUpCounselUser } from "@/lib/server";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
-import { signUpCounselUser, prewarmSessionJwt } from "@/lib/server";
-import { authLogger } from "@/lib/logger";
+import { z } from "zod";
 
 const FormDataSchema = z.object({
   accessCode: z.string().length(6),

@@ -1,6 +1,6 @@
+import { httpLogger } from "@/lib/logger";
 import { Elysia } from "elysia";
 import { v4 as uuidv4 } from "uuid";
-import { httpLogger } from "@/lib/logger";
 
 /**
  * Elysia plugin that logs all incoming requests and their responses.
