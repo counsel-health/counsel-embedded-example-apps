@@ -15,7 +15,7 @@ type CounselOutboundMessage = SwitchThreadMessage;
  * Inbound message types emitted by the Counsel iframe.
  */
 export type CounselInboundMessage =
-  | { type: "counsel:thread_created"; threadId: string }
+  | { type: "counsel:thread_created"; thread_id: string }
 
 
 type Options = {
