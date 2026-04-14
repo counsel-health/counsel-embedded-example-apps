@@ -59,9 +59,7 @@ async function fetchSignedUrlFromServer(
   config: CounselApiConfig,
   action?: SignedUrlAction,
 ): Promise<string> {
-  const sessionData: Record<string, unknown> = {
-    view: { navigation: "integrated" },
-  };
+  const sessionData: Record<string, unknown> = { view: { navigation: "integrated" } };
   if (action) {
     // Counsel signedAppUrl expects a single `action` object. For create_thread,
     // initial_messages and agent_context must live on that object (not on sessionData).
@@ -115,9 +113,7 @@ async function createThreadOnServer(
   params: CreateThreadParams,
 ): Promise<CreateThreadResponse> {
   const direct = config.counselJwt.length > 0;
-  const url = direct
-    ? `${config.counselDirectApiBase}/threads`
-    : "/api/counsel/threads";
+  const url = direct ? `${config.counselDirectApiBase}/threads` : "/api/counsel/threads";
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     "Idempotency-Key": crypto.randomUUID(),
@@ -197,4 +193,28 @@ export function useCounselCreateThread(config: CounselApiConfig) {
   });
 
   return { createThread: mutateAsync, isPending };
+}
+
+/**
+ * Eagerly fetches a base signed URL on mount (no action) so the Counsel iframe
+ * can be pre-warmed before the user triggers a Counsel interaction. Uses
+ * `useQuery` so the fetch is fire-and-forget — it does NOT contribute to any
+ * `isPending` flag that would disable the sidebar or show a loading state.
+ */
+export function useCounselPreloadSignedUrl(config: CounselApiConfig) {
+  const { data } = useQuery({
+    queryKey: counselQueryKeys.preloadedSignedUrl(config.counselUserId),
+    queryFn: () => fetchSignedUrlFromServer(config),
+    enabled: !!config.counselUserId,
+    // Signed URLs are valid for ~1 hour; treat as fresh for 50 min
+    staleTime: 50 * 60 * 1000,
+    // Never refetch in the background — a new URL would change effectiveSignedUrl,
+    // remounting the iframe via key={signedAppUrl} and interrupting an active session.
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    // Don't retry — a failed preload is non-blocking; the user flow will fetch when needed
+    retry: false,
+  });
+
+  return data ?? null;
 }
