@@ -62,6 +62,17 @@ xcuserdata/
 *.dSYM.zip
 *.dSYM
 
+# Android app packaging
+*.apk
+*.aab
+*.apks
+*.aar
+*.apk
+*.aab
+*.apks
+*.aar
+*.kotlin
+
 # JetBrains
 .idea/
 

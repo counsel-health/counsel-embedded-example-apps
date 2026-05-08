@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand colors mirror mobile/ios/.../Assets.xcassets/Brand*.colorset.
+         Kept here only for resource-XML use (e.g. adaptive icon background).
+         Compose code reads them from ui/theme/Theme.kt. -->
+    <color name="brand_dark_blue">#FF002243</color>
+    <color name="brand_light_blue">#FF95BDDC</color>
+    <color name="brand_mid_green">#FF274651</color>
+    <color name="ic_launcher_background">#FFFFFFFF</color>
+</resources>
