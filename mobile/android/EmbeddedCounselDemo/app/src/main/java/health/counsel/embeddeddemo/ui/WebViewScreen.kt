@@ -3,6 +3,7 @@ package health.counsel.embeddeddemo.ui
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.net.Uri
+import android.view.ViewGroup
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -234,7 +235,21 @@ private fun EmbeddedWebView(
     Box(modifier = modifier) {
         AndroidView(
             factory = { ctx ->
+                if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true)
                 WebView(ctx).apply {
+                    // Force MATCH_PARENT × MATCH_PARENT explicitly. Compose's AndroidView
+                    // defaults hosted Views to WRAP_CONTENT
+                    // The Counsel WebView is designed to be full screen, so we need to set the layout params to MATCH_PARENT.
+                    // Otherwise, it will collapse to 0.
+                    // CSS viewport units (`100dvh`, `100vh`) circular: the viewport depends
+                    // on the content, the content depends on the viewport, and calc(100dvh)
+                    // collapses to 0. We want Compose to drive the WebView's size and the
+                    // WebView to size its document viewport from its View bounds.
+                    // See: https://issues.chromium.org/issues/40191237 for inspiration on the fix.
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                    )
                     settings.javaScriptEnabled = true
                     settings.domStorageEnabled = true
                     settings.mediaPlaybackRequiresUserGesture = false
