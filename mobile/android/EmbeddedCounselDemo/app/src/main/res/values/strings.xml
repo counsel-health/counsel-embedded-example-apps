@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Embedded Counsel Demo</string>
+
+    <string name="access_code_title">Embedded Corp Demo App</string>
+    <string name="access_code_subtitle">Ask the Counsel Team for an access code to play with the demo</string>
+    <string name="access_code_placeholder">Enter access code</string>
+    <string name="access_code_label">Access code</string>
+    <string name="login">Login</string>
+    <string name="error_title">Error</string>
+    <string name="error_invalid_code">Either the access code was invalid or the network failed. Please try again.</string>
+    <string name="error_network">Network error. Check your connection and try again.</string>
+    <string name="error_server">Something went wrong on our end. Try again in a moment.</string>
+    <string name="retry">Retry</string>
+    <string name="ok">OK</string>
+    <string name="loading">Loading…</string>
+    <string name="logout_title">Log out?</string>
+    <string name="logout_message">You\'ll need to enter your access code again to continue.</string>
+    <string name="logout_confirm">Log out</string>
+    <string name="cancel">Cancel</string>
+</resources>
