@@ -71,6 +71,24 @@ adb reverse tcp:3000 tcp:3000
 ./gradlew :app:test
 ```
 
+## Lint / format
+
+Static analysis + Kotlin formatting are handled by [detekt](https://detekt.dev/)
+with the `detekt-formatting` extension (ktlint rule set). Config in `detekt.yml`.
+
+```bash
+./gradlew :app:detekt        # locally: auto-corrects formatting; fails on real findings
+CI=true ./gradlew :app:detekt # simulates CI: never modifies source, fails on any finding
+```
+
+Android Lint (AGP) still runs separately for Android-specific issues:
+
+```bash
+./gradlew :app:lint
+```
+
+CI runs all three: `:app:detekt`, `:app:lint`, `:app:test`, then `:app:assembleDebug`.
+
 ## File map
 
 ```

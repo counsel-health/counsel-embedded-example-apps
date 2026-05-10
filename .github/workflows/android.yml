@@ -35,6 +35,9 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
+      - name: Detekt (static analysis + ktlint formatting)
+        run: ./gradlew :app:detekt --no-daemon --stacktrace
+
       - name: Lint
         run: ./gradlew :app:lint --no-daemon --stacktrace
 
@@ -43,6 +46,15 @@ jobs:
 
       - name: Assemble debug APK
         run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Upload detekt report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: detekt-report
+          path: mobile/android/EmbeddedCounselDemo/app/build/reports/detekt/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Upload debug APK
         if: success()

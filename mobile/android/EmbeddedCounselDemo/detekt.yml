@@ -1,0 +1,124 @@
+# detekt config — overrides on top of buildUponDefaultConfig = true.
+# Default ruleset reference: https://detekt.dev/docs/rules/
+
+build:
+  maxIssues: 0
+  weights:
+    complexity: 2
+    LongParameterList: 1
+    style: 1
+    comments: 0
+
+# Console output is enough — additional reports controlled in build.gradle.kts.
+console-reports:
+  active: true
+
+# Formatting rules come from detekt-formatting (wraps ktlint).
+# Override only the ones that conflict with idiomatic Android / Compose.
+formatting:
+  active: true
+  android: true
+  autoCorrect: true
+  MaximumLineLength:
+    active: true
+    maxLineLength: 120
+  NoUnusedImports:
+    active: true
+  NoWildcardImports:
+    active: true
+  TrailingCommaOnCallSite:
+    active: true
+    useTrailingCommaOnCallSite: true
+  TrailingCommaOnDeclarationSite:
+    active: true
+    useTrailingCommaOnDeclarationSite: true
+  Filename:
+    # Compose convention allows multiple top-level @Composable funs per file; the
+    # filename doesn't need to match a single class. Keep it warn-only.
+    active: false
+  ArgumentListWrapping:
+    active: true
+    maxLineLength: 120
+
+# Compose @Composable functions legitimately have higher complexity, more
+# parameters, and PascalCase names — relax the rules that fight that.
+complexity:
+  LongParameterList:
+    functionThreshold: 7
+    constructorThreshold: 8
+    ignoreAnnotated:
+      - "Composable"
+      - "Preview"
+  LongMethod:
+    threshold: 80
+    ignoreAnnotated:
+      - "Composable"
+      - "Preview"
+  CyclomaticComplexMethod:
+    threshold: 18
+    ignoreAnnotated:
+      - "Composable"
+      - "Preview"
+  TooManyFunctions:
+    thresholdInFiles: 14
+    thresholdInClasses: 14
+    thresholdInInterfaces: 14
+    thresholdInObjects: 14
+    thresholdInEnums: 14
+    ignoreAnnotatedFunctions:
+      - "Composable"
+      - "Preview"
+
+naming:
+  FunctionNaming:
+    # @Composable functions are PascalCase by convention.
+    ignoreAnnotated:
+      - "Composable"
+  TopLevelPropertyNaming:
+    constantPattern: "[A-Z][_A-Z0-9]*"
+
+style:
+  MagicNumber:
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotation: true
+    ignoreEnums: true
+    ignoreNumbers:
+      - "-1"
+      - "0"
+      - "1"
+      - "2"
+      - "100"
+    ignoreAnnotated:
+      - "Composable"
+      - "Preview"
+  UnusedPrivateMember:
+    ignoreAnnotated:
+      - "Preview"
+  MaxLineLength:
+    maxLineLength: 120
+    excludeCommentStatements: true
+  WildcardImport:
+    active: true
+  ReturnCount:
+    max: 4
+  ThrowsCount:
+    # API call sites legitimately throw at multiple layers (network catch,
+    # status validation, parse catch). 4 covers the current pattern.
+    max: 4
+  ForbiddenComment:
+    # Demo app; allow TODO/FIXME without failing the build.
+    active: false
+
+exceptions:
+  TooGenericExceptionCaught:
+    # Ktor / WebView call sites legitimately catch Throwable to surface ApiError.
+    active: false
+  SwallowedException:
+    # CancellationException rethrow patterns trip this; manually reviewed.
+    active: false
+
+empty-blocks:
+  EmptyFunctionBlock:
+    active: true
+    ignoreOverridden: true
