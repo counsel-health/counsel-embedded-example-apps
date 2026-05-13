@@ -22,6 +22,7 @@ enum API {
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: [:])
             
             let bearerToken = "Bearer \(token)"
             request.setValue(bearerToken, forHTTPHeaderField: "Authorization")

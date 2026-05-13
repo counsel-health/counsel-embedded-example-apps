@@ -39,6 +39,7 @@ struct WebView: UIViewRepresentable {
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
         webView.uiDelegate = context.coordinator
+        webView.scrollView.bounces = false
         webView.translatesAutoresizingMaskIntoConstraints = false
         return webView
     }
