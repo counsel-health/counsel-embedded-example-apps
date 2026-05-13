@@ -23,6 +23,7 @@ import kotlinx.serialization.json.Json
 
 private const val SIGN_UP_ENDPOINT = "user/signUp"
 private const val SIGNED_APP_URL_ENDPOINT = "user/signedAppUrl"
+private const val HTTP_SERVER_ERROR_THRESHOLD = 500
 
 class Api(
     engine: HttpClientEngine? = null,
@@ -122,7 +123,7 @@ class Api(
             HttpStatusCode.OK -> null
             HttpStatusCode.BadRequest -> ApiError.TokenExpired
             HttpStatusCode.Unauthorized -> ApiError.Unauthorized
-            else -> if (status.value >= 500) {
+            else -> if (status.value >= HTTP_SERVER_ERROR_THRESHOLD) {
                 ApiError.Server(status.value)
             } else {
                 ApiError.BadStatus(status.value)

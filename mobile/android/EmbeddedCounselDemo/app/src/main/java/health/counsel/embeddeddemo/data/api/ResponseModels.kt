@@ -5,8 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class UserType {
-    @SerialName("main") MAIN,
-    @SerialName("onboarding") ONBOARDING,
+    @SerialName("main")
+    MAIN,
+
+    @SerialName("onboarding")
+    ONBOARDING,
 }
 
 @Serializable
