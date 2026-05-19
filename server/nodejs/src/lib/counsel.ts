@@ -226,7 +226,7 @@ function convertUserToCounselUser(user: User) {
     id: user.id,
     first_name: firstName,
     last_name: lastName,
-    phone: user.info.phone,
+    ...(user.info.phone !== undefined ? { phone: user.info.phone } : {}),
     dob: user.info.dob,
     email: user.email,
     sex_assigned_at_birth: user.info.sex,
