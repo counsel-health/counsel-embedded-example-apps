@@ -236,6 +236,40 @@ describe("counsel API functions", () => {
           zip: "94101",
         },
       ]);
+      expect(body.phone).toBe("+18007006000");
+    });
+
+    test("should omit phone when user has no phone", async () => {
+      let capturedBody: unknown = null;
+      vi.stubGlobal(
+        "fetch",
+        vi
+          .fn()
+          .mockImplementation(
+            async (_: RequestInfo | URL, init?: RequestInit) => {
+              capturedBody = init?.body
+                ? JSON.parse(init.body as string)
+                : null;
+              return new Response(JSON.stringify({ id: "test-user-id" }), {
+                status: 200,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
+          )
+      );
+
+      const { createCounselUser } = await import("../counsel");
+      const userWithoutPhone = {
+        ...mockUser,
+        info: {
+          ...mockUser.info,
+          phone: undefined,
+        },
+      };
+      await createCounselUser(userWithoutPhone, "MAIN01");
+
+      const body = capturedBody as Record<string, unknown>;
+      expect(body.phone).toBeUndefined();
     });
   });
 

@@ -1,10 +1,11 @@
 import { Database } from "bun:sqlite";
 import { createCounselDraftUser, createCounselUser } from "@/lib/counsel";
+import { getAccessCodeConfig } from "@/envConfig";
 import { getDb } from "../db";
 import { UserDBSchema } from "../schemas/user";
 import { dbLogger } from "@/lib/logger";
 
-const demoUser = (id: string) => ({
+const demoUser = (id: string, includePhone: boolean) => ({
   id,
   name: "John Doe",
   email: "john.doe@example.com",
@@ -18,7 +19,7 @@ const demoUser = (id: string) => ({
       state: "CA",
       zip: "94101",
     },
-    phone: "+18007006000",
+    ...(includePhone ? { phone: "+18007006000" } : {}),
     medicalProfile: {
       conditions: ["diabetes", "hypertension"],
       medications: ["metformin", "atenolol"],
@@ -38,7 +39,9 @@ export async function createUser({
   dbProvider?: Database;
 }) {
   const db = dbProvider ?? (await getDb());
-  const newUser = demoUser(userId);
+  const config = getAccessCodeConfig(accessCode);
+  const includePhone = config?.appContextMode !== "AI";
+  const newUser = demoUser(userId, includePhone);
   // Determine if this is a draft user based on userType
   const isDraftUser = userType === "onboarding";
   const user = isDraftUser

@@ -10,7 +10,7 @@ export const UserInfoSchema = z.object({
     state: z.string(),
     zip: z.string(),
   }),
-  phone: z.string(),
+  phone: z.string().optional(),
   medicalProfile: z.object({
     conditions: z.array(z.string()),
     medications: z.array(z.string()),
