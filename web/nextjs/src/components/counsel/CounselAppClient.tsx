@@ -54,8 +54,8 @@ export default function CounselAppClient({
       title="Counsel App"
       src={signedAppUrl}
       className={className}
-      // If you want to sandbox the iFrame, add:
-      // sandbox="allow-storage-access-by-user-activation allow-same-origin allow-scripts allow-forms"
+      sandbox="allow-storage-access-by-user-activation allow-same-origin allow-scripts allow-forms allow-downloads"
+      allow="clipboard-read; clipboard-write"
     />
   );
 }

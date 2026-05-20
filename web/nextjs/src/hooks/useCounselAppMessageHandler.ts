@@ -1,4 +1,4 @@
-import { useCallback, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 
 /**
  * Outbound message types accepted by the Counsel iframe.
@@ -14,11 +14,9 @@ type CounselOutboundMessage = SwitchThreadMessage;
 /**
  * Inbound message types emitted by the Counsel iframe.
  */
-export type CounselInboundMessage =
-  | { type: "counsel:thread_created"; thread_id: string }
+export type CounselInboundMessage = { type: "counsel:thread_created"; thread_id: string };
 
-
-type Options = {
+type SendOptions = {
   iframeRef: RefObject<HTMLIFrameElement | null>;
   iframeOrigin: string | null;
 };
@@ -27,8 +25,11 @@ type Options = {
  * Returns stable send-helpers for communicating with the Counsel iframe
  * via postMessage. Add new methods here as the Counsel embedded message
  * interface expands.
+ *
+ * `iframeOrigin` is passed to `postMessage` as the `targetOrigin` argument so
+ * messages are never broadcast with `"*"`.
  */
-export function useCounselAppMessageHandler({ iframeRef, iframeOrigin }: Options) {
+export function useCounselAppMessageHandler({ iframeRef, iframeOrigin }: SendOptions) {
   const sendMessage = useCallback(
     (message: CounselOutboundMessage) => {
       if (!iframeRef.current?.contentWindow || !iframeOrigin) return;
@@ -45,4 +46,41 @@ export function useCounselAppMessageHandler({ iframeRef, iframeOrigin }: Options
   );
 
   return { switchThread };
+}
+
+type InboundOptions = {
+  /**
+   * The origin Counsel signed the URL for (e.g. `https://app.counselhealth.com`).
+   * Inbound messages from any other origin are dropped.
+   */
+  iframeOrigin: string | null;
+  onMessage: (message: CounselInboundMessage) => void;
+};
+
+/**
+ * Subscribes to `message` events from the Counsel iframe with origin validation.
+ *
+ * Any host page that renders the Counsel iframe SHOULD use this hook (or
+ * replicate the same `event.origin === iframeOrigin` check) before reading
+ * `event.data`. Without that check, any other iframe on the page can spoof
+ * Counsel events.
+ */
+export function useCounselInboundMessages({ iframeOrigin, onMessage }: InboundOptions) {
+  const onMessageRef = useRef(onMessage);
+  onMessageRef.current = onMessage;
+
+  useEffect(() => {
+    if (!iframeOrigin) return;
+
+    const handler = (event: MessageEvent) => {
+      if (event.origin !== iframeOrigin) return;
+      const data = event.data;
+      if (!data || typeof data !== "object") return;
+      if (typeof (data as { type?: unknown }).type !== "string") return;
+      onMessageRef.current(data as CounselInboundMessage);
+    };
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [iframeOrigin]);
 }

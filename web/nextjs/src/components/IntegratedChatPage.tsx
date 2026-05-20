@@ -9,10 +9,10 @@ import {
   useCounselThreads,
   type CounselApiConfig,
 } from "@/hooks/useCounselApi";
-import type { CounselInboundMessage } from "@/hooks/useCounselAppMessageHandler";
+import { useCounselInboundMessages } from "@/hooks/useCounselAppMessageHandler";
 import { clientLogger } from "@/lib/clientLogger";
 import { PanelLeftOpen } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import ChatList from "./integrated/ChatList";
 import ChatThread from "./integrated/ChatThread";
 import CounselChatThread from "./integrated/CounselChatThread";
@@ -112,31 +112,23 @@ export default function IntegratedChatPage({ counselApiConfig }: IntegratedChatP
   const preloadedSignedUrl = useCounselPreloadSignedUrl(counselApiConfig);
   const isLoading = isSignedUrlPending || isCreateThreadPending;
 
-  // Sync state when Counsel iframe emits thread events
-  useEffect(() => {
-    if (!counselSessionUrl) return;
-
-    let expectedOrigin: string;
+  const counselIframeOrigin = useMemo(() => {
+    if (!counselSessionUrl) return null;
     try {
-      expectedOrigin = new URL(counselSessionUrl).origin;
+      return new URL(counselSessionUrl).origin;
     } catch {
-      return;
+      return null;
     }
+  }, [counselSessionUrl]);
 
-    const handleMessage = (event: MessageEvent<CounselInboundMessage>) => {
-      if (event.origin !== expectedOrigin) return;
-
-      const data = event.data;
-      if (!data || typeof data !== "object") return;
-
-      if (data.type === "counsel:thread_created") {
+  useCounselInboundMessages({
+    iframeOrigin: counselIframeOrigin,
+    onMessage: (message) => {
+      if (message.type === "counsel:thread_created") {
         invalidateThreads();
       }
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [counselSessionUrl, invalidateThreads]);
+    },
+  });
 
   // User-navigated URLs take precedence; fall back to the preloaded URL so the
   // iframe warms in the background without any user action required.
