@@ -54,7 +54,7 @@ export default function CounselAppClient({
       title="Counsel App"
       src={signedAppUrl}
       className={className}
-      sandbox="allow-storage-access-by-user-activation allow-same-origin allow-scripts allow-forms allow-downloads"
+      sandbox="allow-storage-access-by-user-activation allow-same-origin allow-scripts allow-forms allow-downloads allow-popups"
       allow="clipboard-read; clipboard-write"
     />
   );
