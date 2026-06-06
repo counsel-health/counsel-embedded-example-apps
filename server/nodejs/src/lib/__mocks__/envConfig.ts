@@ -1,6 +1,9 @@
 /**
  * Mock environment configuration for testing
  * Sets up test environment variables before envConfig.ts is imported
+ *
+ * !!IMPORTANT!!
+ * DO NOT USE THIS FILE IN PRODUCTION, this is for TESTING ONLY.
  */
 
 export function setupTestEnv() {
