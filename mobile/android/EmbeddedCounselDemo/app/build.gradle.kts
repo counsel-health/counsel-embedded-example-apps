@@ -26,10 +26,14 @@ android {
 
     buildTypes {
         debug {
+            // Reach the host Node server over the adb-reverse tunnel (`adb reverse
+            // tcp:4003 tcp:4003`) rather than the emulator's 10.0.2.2 host alias. A host
+            // VPN (utun* interfaces) breaks the emulator's 10.0.2.2 NAT route, so the
+            // tunnel — same mechanism the WebView uses for localhost:3000 — is reliable.
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"http://10.0.2.2:4003\""
+                "\"http://localhost:4003\""
             )
         }
         release {
