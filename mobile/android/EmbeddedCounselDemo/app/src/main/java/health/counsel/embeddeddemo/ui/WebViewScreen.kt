@@ -1,21 +1,26 @@
 package health.counsel.embeddeddemo.ui
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.view.ViewGroup
+import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -232,7 +237,29 @@ private fun EmbeddedWebView(
     // double-loading and (for single-use signed URLs) breaking subsequent loads.
     var lastLoadedUrl by remember { mutableStateOf<String?>(null) }
 
-    Box(modifier = modifier) {
+    // Holds the pending file-input callback from onShowFileChooser until the system
+    // picker returns. Android's WebView does not open a file chooser on its own, so
+    // without this override the page's <input type="file"> (the chat upload button)
+    // silently does nothing.
+    val filePathCallbackRef = remember { mutableStateOf<ValueCallback<Array<Uri>>?>(null) }
+
+    val fileChooserLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val callback = filePathCallbackRef.value
+        filePathCallbackRef.value = null
+        // parseResult returns the selected URIs, or null when the user cancels.
+        // Always invoke the callback — skipping it (e.g. on cancel) wedges every
+        // subsequent upload attempt.
+        callback?.onReceiveValue(
+            WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data),
+        )
+    }
+
+    // imePadding() shrinks the WebView by the keyboard height when the IME opens (paired with
+    // ADJUST_RESIZE set in MainActivity). The WebView resizes its document viewport from its
+    // View bounds, so the focused input stays visible — matching iOS's resizes-visual behavior.
+    Box(modifier = modifier.imePadding()) {
         AndroidView(
             factory = { ctx ->
                 if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true)
@@ -315,7 +342,39 @@ private fun EmbeddedWebView(
                             return handled
                         }
                     }
-                    webChromeClient = WebChromeClient()
+                    webChromeClient = object : WebChromeClient() {
+                        // Android's WebView delegates <input type="file"> handling to the host
+                        // app. Without this override the chat upload button does nothing.
+                        override fun onShowFileChooser(
+                            webView: WebView,
+                            filePathCallback: ValueCallback<Array<Uri>>,
+                            fileChooserParams: FileChooserParams,
+                        ): Boolean {
+                            // Cancel any previous pending request so its callback isn't leaked
+                            // or left wedging the next upload.
+                            filePathCallbackRef.value?.onReceiveValue(null)
+                            filePathCallbackRef.value = filePathCallback
+
+                            // createIntent() honors the input's `accept` types and multiple flag.
+                            val intent: Intent = fileChooserParams.createIntent()
+                            return try {
+                                fileChooserLauncher.launch(intent)
+                                true
+                            } catch (e: Exception) {
+                                // Release the pending callback before returning false. Android
+                                // WebView has no default file chooser when the host returns false,
+                                // so if we skip onReceiveValue the page's <input type="file"> stays
+                                // wedged and every later chat upload silently does nothing.
+                                filePathCallback.onReceiveValue(null)
+                                filePathCallbackRef.value = null
+                                AppLogger.warn(
+                                    AppLogger.WEB_VIEW_TAG,
+                                    "fileChooser launch failed error=${e.javaClass.simpleName}",
+                                )
+                                false
+                            }
+                        }
+                    }
 
                     AppLogger.info(AppLogger.WEB_VIEW_TAG, "loadUrl initial url=${safeUrlLabel(url)}")
                     loadUrl(url)
