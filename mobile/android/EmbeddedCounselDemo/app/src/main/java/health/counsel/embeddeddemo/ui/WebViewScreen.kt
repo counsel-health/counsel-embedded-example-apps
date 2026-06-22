@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -61,7 +62,7 @@ private const val VIEWPORT_SCRIPT = """
         if (!document.querySelector('meta[name="viewport"]')) {
             var meta = document.createElement('meta');
             meta.setAttribute('name', 'viewport');
-            meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, interactive-widget=resizes-visual');
+            meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, interactive-widget=resizes-visual, viewport-fit=cover');
             document.head.appendChild(meta);
         }
     })();
@@ -192,6 +193,7 @@ fun WebViewScreen(
                     fetchReason = "retry"
                     attempt++
                 },
+                onSignOut = onLogout,
                 modifier = Modifier.fillMaxSize().padding(32.dp),
             )
         }
@@ -199,7 +201,12 @@ fun WebViewScreen(
 }
 
 @Composable
-private fun ErrorRetry(error: ApiError, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+private fun ErrorRetry(
+    error: ApiError,
+    onRetry: () -> Unit,
+    onSignOut: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val message = when (error) {
         is ApiError.Network, is ApiError.WebViewLoad -> stringResource(R.string.error_network)
         is ApiError.Server -> stringResource(R.string.error_server)
@@ -220,10 +227,12 @@ private fun ErrorRetry(error: ApiError, onRetry: () -> Unit, modifier: Modifier 
         }
         Spacer(Modifier.height(16.dp))
         Button(onClick = onRetry) { Text(stringResource(R.string.retry)) }
+        Spacer(Modifier.height(8.dp))
+        TextButton(onClick = onSignOut) { Text(stringResource(R.string.logout_confirm)) }
     }
 }
 
-@SuppressLint("SetJavaScriptEnabled")
+@SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
 @Composable
 private fun EmbeddedWebView(
     url: String,
@@ -256,9 +265,10 @@ private fun EmbeddedWebView(
         )
     }
 
-    // imePadding() shrinks the WebView by the keyboard height when the IME opens (paired with
-    // ADJUST_RESIZE set in MainActivity). The WebView resizes its document viewport from its
-    // View bounds, so the focused input stays visible — matching iOS's resizes-visual behavior.
+    // Standard edge-to-edge keyboard handling: imePadding() shrinks the WebView to sit above
+    // the keyboard when the IME opens (paired with ADJUST_RESIZE in MainActivity, which makes
+    // the IME report as a WindowInsets.ime inset). The WebView sizes its document viewport from
+    // its View bounds, so the focused input stays visible.
     Box(modifier = modifier.imePadding()) {
         AndroidView(
             factory = { ctx ->

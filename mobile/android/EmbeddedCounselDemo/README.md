@@ -23,8 +23,11 @@ Open in Android Studio (Hedgehog or newer): "Open" this directory.
 
 ## Running locally against the Node server
 
-The debug variant points at `http://10.0.2.2:4003`, which maps to your host
-machine's `localhost` from the Android emulator. Start the local Node server first:
+The debug variant points at `http://localhost:4003` and reaches the host Node server
+through an `adb reverse` tunnel (see below). We use the tunnel instead of the emulator's
+`10.0.2.2` host alias because a host VPN (common on work machines — look for `utun*`
+interfaces) breaks the emulator's `10.0.2.2` NAT route, while the tunnel keeps working.
+Start the local Node server first:
 
 ```bash
 cd ../../..
@@ -33,13 +36,51 @@ cd ../../..
 
 Then Run the `app` configuration in Android Studio (or `./gradlew installDebug`).
 
-`network_security_config.xml` permits cleartext only for `10.0.2.2` and `localhost`
-in the debug build. Release builds connect to the production Cloud Run URL over HTTPS.
+`network_security_config.xml` permits cleartext only for `localhost`, `127.0.0.1`, and
+`10.0.2.2` in the debug build. Release builds connect to the production Cloud Run URL over HTTPS.
 
-NOTE: you need to run these commands to allow the Android emulator to connect to the local server & web app:
+### Letting the emulator reach your host (`adb reverse`)
+
+Both the Node server (`:4003`) and the signed web-app URL the server returns
+(`http://localhost:<port>`) are reached over `localhost` from inside the emulator — but
+`localhost` inside the emulator means the emulator itself, not your Mac. Without
+forwarding, API calls fail with `error=Network` and the WebView fails with
+`net::ERR_CONNECTION_REFUSED` (logcat `pageError code=-6`). `adb reverse` tunnels the
+emulator's `localhost:<port>` back to the same port on your host:
 
 ```bash
-adb reverse tcp:3000 tcp:3000
+adb reverse tcp:4003 tcp:4003   # Node API server (BASE_URL)
+adb reverse tcp:3000 tcp:3000   # Counsel web app (signed app URL); add any other port it uses
+```
+
+This is per-session adb state — it's cleared whenever the emulator reboots/cold-boots or
+the adb server restarts, so re-run both if the app stops connecting. List active rules
+with `adb reverse --list`.
+
+#### If `adb` isn't installed yet
+
+`adb` ships with the **Android SDK Platform-Tools**. If you have Android Studio it's
+already on disk (macOS default: `~/Library/Android/sdk/platform-tools/adb`); you just
+need it on your `PATH`:
+
+```bash
+# zsh: add platform-tools to PATH permanently
+echo 'export PATH="$HOME/Library/Android/sdk/platform-tools:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+No Android Studio? Install the standalone tools:
+
+```bash
+brew install --cask android-platform-tools
+```
+
+Verify it's working and the emulator is attached (start the emulator from Android
+Studio's Device Manager first):
+
+```bash
+adb version            # confirms adb is on PATH
+adb devices            # should list e.g. "emulator-5554   device"
 ```
 
 ## Flow

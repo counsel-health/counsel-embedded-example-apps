@@ -12,11 +12,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // ADJUST_RESIZE is what makes the IME report as a window inset so Compose's
-        // WindowInsets.ime / imePadding() can shrink the WebView when the keyboard opens.
-        // Under edge-to-edge (decorFitsSystemWindows=false) the window itself isn't resized,
-        // so we drive the resize from Compose insets — mirroring how iOS resizes the
-        // visual viewport on keyboard events.
+        // ADJUST_RESIZE is what makes the IME report (and animate) as a WindowInsets.ime inset
+        // that Compose can read. Under edge-to-edge (decorFitsSystemWindows=false) the window
+        // itself is never resized or panned by the system, so WebViewScreen consumes that inset
+        // to pan the WebView up by the keyboard height when the keyboard opens.
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         val api = Api()
         val tokenStore = TokenStore(applicationContext)

@@ -16,6 +16,20 @@ export const logger = pino(
   {
     name: "server",
     level: process.env.NODE_ENV === "development" ? "debug" : "info",
+    // Keep access codes and bearer tokens out of the logs. These show up in request
+    // bodies (signUp) and headers (signedAppUrl); pino redacts them wherever they land.
+    redact: {
+      paths: [
+        "accessCode",
+        "body.accessCode",
+        "*.accessCode",
+        "headers.authorization",
+        "headers.accessCode",
+        "*.headers.authorization",
+        "*.headers.accessCode",
+      ],
+      censor: "[redacted]",
+    },
   },
   prettyStream,
 );

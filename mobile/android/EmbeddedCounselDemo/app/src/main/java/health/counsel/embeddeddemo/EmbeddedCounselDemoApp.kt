@@ -47,20 +47,24 @@ fun EmbeddedCounselDemoApp(
     val scope = rememberCoroutineScope()
 
     EmbeddedCounselDemoTheme {
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.safeDrawing),
-        ) {
+        // No safeDrawing padding on the Surface itself: the WebView is meant to render
+        // edge-to-edge (under the status/nav bars), matching iOS and relying on the web
+        // app's CSS env(safe-area-inset-*) — enabled via viewport-fit=cover in WebViewScreen.
+        // The native screens (access-code form, loading spinner) opt back into safe-area
+        // insets individually so their controls stay clear of the system bars.
+        Surface(modifier = Modifier.fillMaxSize()) {
             when (val s = authState) {
                 AuthState.Unloaded -> Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .windowInsetsPadding(WindowInsets.safeDrawing),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
 
                 AuthState.SignedOut -> AccessCodeScreen(
+                    modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing),
                     onLogin = { code -> api.fetchToken(code) },
                     onAuthenticated = { resp ->
                         // Preload the signed URL BEFORE persisting the token. Saving the
