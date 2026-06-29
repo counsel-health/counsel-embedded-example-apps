@@ -12,6 +12,7 @@ import SwiftUI
 struct ChatViewUserTypeMain: View {
     let chatUrl: URL?
     @Binding var isLoading: Bool
+    var onClose: () -> Void = {}
     @State private var showOnboarding: Bool = true
 
     
@@ -26,7 +27,7 @@ struct ChatViewUserTypeMain: View {
                         .transition(.opacity)
                 } else if let chatUrl = chatUrl {
                     VStack {
-                        WebView(url: chatUrl, showLoadingScreen: $isLoading).ignoresSafeArea(.keyboard)
+                        WebView(url: chatUrl, showLoadingScreen: $isLoading, onClose: onClose).ignoresSafeArea(.keyboard)
                     }
                 }
                 if isLoading && !showOnboarding {

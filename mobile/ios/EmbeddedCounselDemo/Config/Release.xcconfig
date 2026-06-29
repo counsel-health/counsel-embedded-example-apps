@@ -1,0 +1,4 @@
+// Remote/production — points the app at the deployed embedded-demo server on Cloud Run.
+// xcconfig treats // as a comment, so we build the slashes from a single-slash variable.
+SLASH = /
+BASE_URL = https:$(SLASH)$(SLASH)embedded-demo-nodejs-server-2l27waanva-ue.a.run.app

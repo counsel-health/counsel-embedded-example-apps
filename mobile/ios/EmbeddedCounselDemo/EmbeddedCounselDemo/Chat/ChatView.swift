@@ -9,19 +9,20 @@ import SwiftUI
 
 struct ChatView: View {
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.dismiss) private var dismiss
     @State private var chatUrl: URL?
     @State private var showErrorModal = false
     @State private var isLoading = false
     @AppStorage("token") private var token: String?
     @AppStorage("userType") private var userType: UserType?
 
-    
+
     var body: some View {
         NavigationStack {
             if userType == .onboarding {
-                ChatViewUserTypeOnboarding(chatUrl: chatUrl, isLoading: $isLoading)
+                ChatViewUserTypeOnboarding(chatUrl: chatUrl, isLoading: $isLoading, onClose: { dismiss() })
             } else {
-                ChatViewUserTypeMain(chatUrl: chatUrl, isLoading: $isLoading)
+                ChatViewUserTypeMain(chatUrl: chatUrl, isLoading: $isLoading, onClose: { dismiss() })
             }
         }
         .task {

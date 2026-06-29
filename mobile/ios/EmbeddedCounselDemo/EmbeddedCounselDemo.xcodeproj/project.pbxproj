@@ -8,6 +8,8 @@
 
 /* Begin PBXFileReference section */
 		EC4B2CD12DC4131700DBF1C1 /* EmbeddedCounselDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmbeddedCounselDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC4B2CE42DC4131900DBF1C1 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		EC4B2CE52DC4131900DBF1C1 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -45,9 +47,19 @@
 		EC4B2CC82DC4131700DBF1C1 = {
 			isa = PBXGroup;
 			children = (
+				EC4B2CE32DC4131900DBF1C1 /* Config */,
 				EC4B2CD32DC4131700DBF1C1 /* EmbeddedCounselDemo */,
 				EC4B2CD22DC4131700DBF1C1 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		EC4B2CE32DC4131900DBF1C1 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				EC4B2CE42DC4131900DBF1C1 /* Debug.xcconfig */,
+				EC4B2CE52DC4131900DBF1C1 /* Release.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 		EC4B2CD22DC4131700DBF1C1 /* Products */ = {
@@ -140,6 +152,7 @@
 /* Begin XCBuildConfiguration section */
 		EC4B2CDE2DC4131900DBF1C1 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EC4B2CE42DC4131900DBF1C1 /* Debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -201,6 +214,7 @@
 		};
 		EC4B2CDF2DC4131900DBF1C1 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EC4B2CE52DC4131900DBF1C1 /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
