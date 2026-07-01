@@ -12,14 +12,15 @@ import SwiftUI
 struct ChatViewUserTypeOnboarding: View {
     let chatUrl: URL?
     @Binding var isLoading: Bool
+    var onClose: () -> Void = {}
 
-    
+
     var body: some View {
         NavigationStack {
             ZStack {
                if let chatUrl = chatUrl {
                     VStack {
-                        WebView(url: chatUrl, showLoadingScreen: $isLoading).ignoresSafeArea(.keyboard)
+                        WebView(url: chatUrl, showLoadingScreen: $isLoading, onClose: onClose).ignoresSafeArea(.keyboard)
                     }
                 }
                 if isLoading {

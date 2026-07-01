@@ -1,0 +1,4 @@
+// Local development — points the app at your locally running embedded-demo server.
+// xcconfig treats // as a comment, so we build the slashes from a single-slash variable.
+SLASH = /
+BASE_URL = http:$(SLASH)$(SLASH)localhost:4003
